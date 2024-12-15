@@ -1,6 +1,6 @@
 [package]
 version = "0.1.0"
-name = "rsp"
+name = "openvm-reth-benchmark"
 edition = "2021"
 
 [dependencies]
@@ -8,28 +8,40 @@ tokio.workspace = true
 eyre.workspace = true
 url.workspace = true
 tracing-subscriber = "0.3.18"
+tracing.workspace = true
 dotenv = "0.15.0"
 clap = { version = "4.5.7", features = ["derive", "env"] }
-serde_json.workspace = true
 serde.workspace = true
-bincode = "1.3.3"
-csv = "1.1"
+bincode = { workspace = true, features = ["std"] }
+metrics = "0.23.0"
 # workspace
-rsp-host-executor.workspace = true
-rsp-client-executor.workspace = true
+openvm-host-executor.workspace = true
+openvm-client-executor.workspace = true
 
 # alloy
 alloy-provider.workspace = true
 
-# reth 
+# reth
 reth-primitives.workspace = true
 
-# sp1
-sp1-sdk = "3.0.0"
-
-[build-dependencies]
-sp1-helper = "3.0.0"
+# openvm
+openvm-build = { workspace = true }
+openvm-transpiler = { workspace = true }
+openvm-rv32im-circuit = { workspace = true }
+openvm-algebra-circuit = { workspace = true }
+openvm-bigint-circuit = { workspace = true }
+openvm-ecc-circuit = { workspace = true }
+openvm-circuit = { workspace = true }
+openvm-native-recursion = { workspace = true, features = ["static-verifier"] }
+openvm-benchmarks = { workspace = true, features = ["parallel"] }
+openvm-stark-sdk = { workspace = true }
+openvm-sdk = { workspace = true }
+openvm-native-compiler = { workspace = true }
+derive_more = "1.0.0"
 
 [features]
-default = []
-cuda = ["sp1-sdk/cuda"]
+default = ["mimalloc", "bench-metrics"]
+bench-metrics = ["openvm-benchmarks/bench-metrics"]
+profiling = ["bench-metrics", "openvm-circuit/function-span"]
+mimalloc = ["openvm-benchmarks/mimalloc"]
+jemalloc = ["openvm-benchmarks/jemalloc"]

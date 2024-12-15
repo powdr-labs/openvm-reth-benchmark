@@ -1,34 +1,61 @@
 use alloy_provider::ReqwestProvider;
-use clap::Parser;
-use reth_primitives::B256;
-use rsp_client_executor::{
+use clap::{ArgGroup, Parser};
+use openvm_algebra_circuit::ModularExtension;
+use openvm_benchmarks::utils::BenchmarkCli;
+use openvm_bigint_circuit::Int256;
+use openvm_circuit::arch::{instructions::exe::VmExe, SystemConfig, VmConfig, VmExecutor};
+use openvm_client_executor::{
     io::ClientExecutorInput, ChainVariant, CHAIN_ID_ETH_MAINNET, CHAIN_ID_LINEA_MAINNET,
     CHAIN_ID_OP_MAINNET,
 };
-use rsp_host_executor::HostExecutor;
-use sp1_sdk::{include_elf, ProverClient, SP1Stdin};
-use std::path::PathBuf;
-use tracing_subscriber::{
-    filter::EnvFilter, fmt, prelude::__tracing_subscriber_SubscriberExt, util::SubscriberInitExt,
+use openvm_ecc_circuit::{WeierstrassExtension, SECP256K1_CONFIG};
+use openvm_host_executor::HostExecutor;
+use openvm_native_compiler::conversion::CompilerOptions;
+use openvm_native_recursion::halo2::utils::CacheHalo2ParamsReader;
+use openvm_rv32im_circuit::Rv32M;
+use openvm_sdk::{
+    commit::commit_app_exe,
+    config::{AggConfig, AggStarkConfig, AppConfig, Halo2Config, SdkVmConfig},
+    prover::{AppProver, ContinuationProver},
+    Sdk, StdIn,
 };
+use openvm_stark_sdk::{
+    bench::run_with_metric_collection, config::FriParameters, p3_baby_bear::BabyBear,
+};
+use openvm_transpiler::{elf::Elf, openvm_platform::memory::MEM_SIZE, FromElf};
+use std::{path::PathBuf, sync::Arc};
+
+pub use reth_primitives;
 
 mod execute;
-use execute::process_execution_report;
 
 mod cli;
 use cli::ProviderArgs;
 
 /// The arguments for the host executable.
-#[derive(Debug, Clone, Parser)]
+#[derive(Debug, Parser)]
+#[clap(group(
+    ArgGroup::new("mode")
+        .required(true)
+        .args(&["prove", "execute", "prove_e2e"]),
+))]
 struct HostArgs {
     /// The block number of the block to execute.
     #[clap(long)]
     block_number: u64,
     #[clap(flatten)]
     provider: ProviderArgs,
-    /// Whether to generate a proof or just execute the block.
-    #[clap(long)]
+
+    #[clap(long, group = "mode")]
+    execute: bool,
+    #[clap(long, group = "mode")]
     prove: bool,
+    #[clap(long, group = "mode")]
+    prove_e2e: bool,
+
+    #[clap(long)]
+    collect_metrics: bool,
+
     /// Optional path to the directory containing cached client input. A new cache file will be
     /// created from RPC data if it doesn't already exist.
     #[clap(long)]
@@ -36,6 +63,42 @@ struct HostArgs {
     /// The path to the CSV file containing the execution data.
     #[clap(long, default_value = "report.csv")]
     report_path: PathBuf,
+
+    #[clap(flatten)]
+    benchmark: BenchmarkCli,
+}
+
+const OPENVM_CLIENT_ETH_ELF: &[u8] = include_bytes!("../elf/openvm-client-eth");
+
+fn reth_vm_config(
+    app_log_blowup: usize,
+    max_segment_length: usize,
+    collect_metrics: bool,
+) -> SdkVmConfig {
+    let mut system_config = SystemConfig::default()
+        .with_continuations()
+        .with_max_constraint_degree((1 << app_log_blowup) + 1)
+        .with_public_values(32)
+        .with_max_segment_len(max_segment_length);
+    if collect_metrics {
+        system_config.collect_metrics = true;
+    }
+    let int256 = Int256::default();
+    // The builder will do this automatically, but we set it just in case.
+    let rv32m = Rv32M { range_tuple_checker_sizes: int256.range_tuple_checker_sizes };
+    SdkVmConfig::builder()
+        .system(system_config.into())
+        .rv32i(Default::default())
+        .rv32m(rv32m)
+        .io(Default::default())
+        .keccak(Default::default())
+        .bigint(int256)
+        .modular(ModularExtension::new(vec![
+            SECP256K1_CONFIG.modulus.clone(),
+            SECP256K1_CONFIG.scalar.clone(),
+        ]))
+        .ecc(WeierstrassExtension::new(vec![SECP256K1_CONFIG.clone()]))
+        .build()
 }
 
 #[tokio::main]
@@ -46,9 +109,6 @@ async fn main() -> eyre::Result<()> {
     if std::env::var("RUST_LOG").is_err() {
         std::env::set_var("RUST_LOG", "info");
     }
-
-    // Initialize the logger.
-    tracing_subscriber::registry().with(fmt::layer()).with(EnvFilter::from_default_env()).init();
 
     // Parse the command line arguments.
     let args = HostArgs::parse();
@@ -94,7 +154,11 @@ async fn main() -> eyre::Result<()> {
                 let input_path = input_folder.join(format!("{}.bin", args.block_number));
                 let mut cache_file = std::fs::File::create(input_path)?;
 
-                bincode::serialize_into(&mut cache_file, &client_input)?;
+                bincode::serde::encode_into_std_write(
+                    &client_input,
+                    &mut cache_file,
+                    bincode::config::standard(),
+                )?;
             }
 
             client_input
@@ -104,42 +168,92 @@ async fn main() -> eyre::Result<()> {
         }
     };
 
-    // Generate the proof.
-    let client = ProverClient::new();
+    let mut stdin = StdIn::default();
+    stdin.write(&client_input);
 
-    // Setup the proving key and verification key.
-    let (pk, vk) = client.setup(match variant {
-        ChainVariant::Ethereum => include_elf!("rsp-client-eth"),
-        ChainVariant::Optimism => include_elf!("rsp-client-op"),
-        ChainVariant::Linea => include_elf!("rsp-client-linea"),
-    });
+    let app_log_blowup = args.benchmark.app_log_blowup.unwrap_or(2);
+    let agg_log_blowup = args.benchmark.agg_log_blowup.unwrap_or(2);
+    let internal_log_blowup = args.benchmark.internal_log_blowup.unwrap_or(2);
+    let root_log_blowup = args.benchmark.root_log_blowup.unwrap_or(3);
+    let max_segment_length = args.benchmark.max_segment_length.unwrap_or((1 << 23) - 100);
 
-    // Execute the block inside the zkVM.
-    let mut stdin = SP1Stdin::new();
-    let buffer = bincode::serialize(&client_input).unwrap();
-    stdin.write_vec(buffer);
+    let vm_config = reth_vm_config(app_log_blowup, max_segment_length, args.collect_metrics);
+    let sdk = Sdk;
+    let elf = Elf::decode(OPENVM_CLIENT_ETH_ELF, MEM_SIZE as u32)?;
+    let exe = VmExe::from_elf(elf, vm_config.transpiler()).unwrap();
 
-    // Only execute the program.
-    let (mut public_values, execution_report) =
-        client.execute(&pk.elf, stdin.clone()).run().unwrap();
-
-    // Read the block hash.
-    let block_hash = public_values.read::<B256>();
-    println!("success: block_hash={block_hash}");
-
-    // Process the execute report, print it out, and save data to a CSV specified by
-    // report_path.
-    process_execution_report(variant, client_input, execution_report, args.report_path)?;
-
-    if args.prove {
-        // Actually generate the proof. It is strongly recommended you use the network prover
-        // given the size of these programs.
-        println!("Starting proof generation.");
-        let proof = client.prove(&pk, stdin).compressed().run().expect("Proving should work.");
-        println!("Proof generation finished.");
-
-        client.verify(&proof, &vk).expect("proof verification should succeed");
+    let mut compiler_options = CompilerOptions::default();
+    if args.collect_metrics {
+        compiler_options.enable_cycle_tracker = true;
     }
+    let app_fri_params = FriParameters::standard_with_100_bits_conjectured_security(app_log_blowup);
+    let leaf_fri_params =
+        FriParameters::standard_with_100_bits_conjectured_security(agg_log_blowup);
+
+    let program_name = "reth_block";
+    let app_config = AppConfig {
+        app_vm_config: vm_config.clone(),
+        app_fri_params,
+        leaf_fri_params: leaf_fri_params.into(),
+        compiler_options,
+    };
+
+    run_with_metric_collection("OUTPUT_PATH", || {
+        tracing::info_span!("reth-block", block_number = args.block_number).in_scope(
+            || -> eyre::Result<()> {
+                if args.execute {
+                    let executor = VmExecutor::<_, _>::new(vm_config);
+                    executor.execute(exe, stdin)?;
+                } else if args.prove {
+                    let app_pk = sdk.app_keygen(app_config)?;
+                    let app_committed_exe = sdk.commit_app_exe(app_fri_params, exe)?;
+
+                    let mut app_prover =
+                        AppProver::new(app_pk.app_vm_pk.clone(), app_committed_exe)
+                            .with_program_name(program_name);
+                    app_prover.set_profile(args.collect_metrics);
+                    let proof = app_prover.generate_app_proof(stdin);
+                    let app_vk = app_pk.get_vk();
+                    sdk.verify_app_proof(&app_vk, &proof)?;
+                } else {
+                    let halo2_params_reader = CacheHalo2ParamsReader::new_with_default_params_dir();
+                    let full_agg_config = AggConfig {
+                        agg_stark_config: AggStarkConfig {
+                            max_num_user_public_values: VmConfig::<BabyBear>::system(&vm_config)
+                                .num_public_values,
+                            leaf_fri_params,
+                            internal_fri_params:
+                                FriParameters::standard_with_100_bits_conjectured_security(
+                                    internal_log_blowup,
+                                ),
+                            root_fri_params:
+                                FriParameters::standard_with_100_bits_conjectured_security(
+                                    root_log_blowup,
+                                ),
+                            compiler_options,
+                        },
+                        halo2_config: Halo2Config { verifier_k: 24, wrapper_k: None },
+                    };
+
+                    let app_pk = sdk.app_keygen(app_config)?;
+                    let full_agg_pk = sdk.agg_keygen(full_agg_config, &halo2_params_reader)?;
+                    let app_committed_exe = commit_app_exe(app_fri_params, exe);
+
+                    let mut prover = ContinuationProver::new(
+                        &halo2_params_reader,
+                        Arc::new(app_pk),
+                        app_committed_exe,
+                        full_agg_pk,
+                    );
+                    prover.set_program_name("reth_block");
+                    prover.set_profile(args.collect_metrics);
+                    let _evm_proof = prover.generate_proof_for_evm(stdin);
+                }
+
+                Ok(())
+            },
+        )
+    })?;
 
     Ok(())
 }
@@ -155,7 +269,8 @@ fn try_load_input_from_cache(
         if cache_path.exists() {
             // TODO: prune the cache if invalid instead
             let mut cache_file = std::fs::File::open(cache_path)?;
-            let client_input: ClientExecutorInput = bincode::deserialize_from(&mut cache_file)?;
+            let client_input: ClientExecutorInput =
+                bincode::serde::decode_from_std_read(&mut cache_file, bincode::config::standard())?;
 
             Some(client_input)
         } else {

@@ -1,9 +1,8 @@
 [package]
-name = "rsp-mpt"
+name = "openvm-mpt"
 description = ""
 version.workspace = true
 edition.workspace = true
-license.workspace = true
 homepage.workspace = true
 repository.workspace = true
 
@@ -17,9 +16,11 @@ rlp.workspace = true
 serde.workspace = true
 thiserror.workspace = true
 itertools = "0.13.0"
+bincode.workspace = true
+rustc-hash.workspace = true
 
 # workspace
-rsp-primitives.workspace = true
+openvm-primitives.workspace = true
 
 # reth
 reth-primitives.workspace = true
@@ -40,7 +41,7 @@ alloy-trie.workspace = true
 hex-literal.workspace = true
 tracing-subscriber = "0.3.18"
 
-rsp-mpt = { path = ".", features = ["preimage_context"] }
+openvm-mpt = { path = ".", features = ["preimage_context"] }
 
 [features]
 default = []

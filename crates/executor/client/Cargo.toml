@@ -1,9 +1,8 @@
 [package]
-name = "rsp-client-executor"
+name = "openvm-client-executor"
 description = ""
 version.workspace = true
 edition.workspace = true
-license.workspace = true
 homepage.workspace = true
 repository.workspace = true
 
@@ -15,11 +14,14 @@ eyre.workspace = true
 serde_json.workspace = true
 serde.workspace = true
 tokio.workspace = true
+bincode.workspace = true
+rustc-hash.workspace = true
+hashbrown = { version = "0.14", features = ["rayon"] }
 
 # workspace
-rsp-witness-db.workspace = true
-rsp-primitives.workspace = true
-rsp-mpt.workspace = true
+openvm-witness-db.workspace = true
+openvm-primitives.workspace = true
+openvm-mpt.workspace = true
 
 # reth
 reth-ethereum-consensus.workspace = true
@@ -33,6 +35,7 @@ reth-evm-ethereum.workspace = true
 reth-evm-optimism.workspace = true
 reth-errors.workspace = true
 reth-chainspec.workspace = true
+reth-optimism-chainspec.workspace = true
 reth-revm.workspace = true
 
 # revm
@@ -45,5 +48,9 @@ alloy-rlp.workspace = true
 itertools = "0.13.0"
 url.workspace = true
 futures.workspace = true
+
+[target.'cfg(target_os = "zkvm")'.dependencies]
+revm-primitives = { workspace = true, features = ["hashbrown"] }
+alloy-primitives = { workspace = true, features = ["native-keccak"] }
 
 [dev-dependencies]

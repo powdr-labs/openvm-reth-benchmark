@@ -10,6 +10,10 @@ use std::{borrow::BorrowMut, fmt::Display};
 use custom::CustomEvmConfig;
 use eyre::eyre;
 use io::ClientExecutorInput;
+#[allow(unused_imports)]
+pub use openvm_mpt;
+use openvm_mpt::state::HashedPostState;
+use openvm_primitives::chain_spec;
 use reth_chainspec::ChainSpec;
 use reth_errors::ProviderError;
 use reth_ethereum_consensus::validate_block_post_execution as validate_block_post_execution_ethereum;
@@ -18,6 +22,8 @@ use reth_evm_ethereum::execute::EthExecutorProvider;
 use reth_evm_optimism::OpExecutorProvider;
 use reth_execution_types::ExecutionOutcome;
 use reth_optimism_consensus::validate_block_post_execution as validate_block_post_execution_optimism;
+#[allow(unused_imports)]
+pub use reth_primitives;
 use reth_primitives::{proofs, Block, BlockWithSenders, Bloom, Header, Receipt, Receipts, Request};
 use revm::{db::CacheDB, Database};
 use revm_primitives::{address, U256};
@@ -92,6 +98,14 @@ impl ChainVariant {
             ChainVariant::Linea => CHAIN_ID_LINEA_MAINNET,
         }
     }
+
+    pub fn chain_spec(&self) -> ChainSpec {
+        match self {
+            ChainVariant::Ethereum => chain_spec::mainnet(),
+            ChainVariant::Optimism => chain_spec::op_mainnet(),
+            ChainVariant::Linea => chain_spec::linea_mainnet(),
+        }
+    }
 }
 
 impl ClientExecutor {
@@ -145,7 +159,10 @@ impl ClientExecutor {
 
         // Verify the state root.
         let state_root = profile!("compute state root", {
-            input.parent_state.update(&executor_outcome.hash_state_slow());
+            let post_state = HashedPostState::from_bundle_state(&executor_outcome.bundle.state);
+            // executor_outcome.hash_state_slow());
+            println!("post state from bundle state: done");
+            input.parent_state.update(&post_state);
             input.parent_state.state_root()
         });
 
@@ -177,7 +194,7 @@ impl ClientExecutor {
 
 impl Variant for EthereumVariant {
     fn spec() -> ChainSpec {
-        rsp_primitives::chain_spec::mainnet()
+        openvm_primitives::chain_spec::mainnet()
     }
 
     fn execute<DB>(
@@ -208,7 +225,7 @@ impl Variant for EthereumVariant {
 
 impl Variant for OptimismVariant {
     fn spec() -> ChainSpec {
-        rsp_primitives::chain_spec::op_mainnet()
+        openvm_primitives::chain_spec::op_mainnet()
     }
 
     fn execute<DB>(
@@ -239,7 +256,7 @@ impl Variant for OptimismVariant {
 
 impl Variant for LineaVariant {
     fn spec() -> ChainSpec {
-        rsp_primitives::chain_spec::linea_mainnet()
+        openvm_primitives::chain_spec::linea_mainnet()
     }
 
     fn execute<DB>(
