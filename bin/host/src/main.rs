@@ -1,6 +1,6 @@
 use alloy_provider::ReqwestProvider;
 use clap::{ArgGroup, Parser};
-use openvm_algebra_circuit::ModularExtension;
+use openvm_algebra_circuit::{Fp2Extension, ModularExtension};
 use openvm_benchmarks::utils::BenchmarkCli;
 use openvm_bigint_circuit::Int256;
 use openvm_circuit::arch::{instructions::exe::VmExe, SystemConfig, VmConfig, VmExecutor};
@@ -12,6 +12,7 @@ use openvm_ecc_circuit::{WeierstrassExtension, SECP256K1_CONFIG};
 use openvm_host_executor::HostExecutor;
 use openvm_native_compiler::conversion::CompilerOptions;
 use openvm_native_recursion::halo2::utils::CacheHalo2ParamsReader;
+use openvm_pairing_circuit::{PairingCurve, PairingExtension};
 use openvm_rv32im_circuit::Rv32M;
 use openvm_sdk::{
     commit::commit_app_exe,
@@ -84,6 +85,7 @@ fn reth_vm_config(
         system_config.collect_metrics = true;
     }
     let int256 = Int256::default();
+    let bn_config = PairingCurve::Bn254.curve_config();
     // The builder will do this automatically, but we set it just in case.
     let rv32m = Rv32M { range_tuple_checker_sizes: int256.range_tuple_checker_sizes };
     SdkVmConfig::builder()
@@ -94,10 +96,14 @@ fn reth_vm_config(
         .keccak(Default::default())
         .bigint(int256)
         .modular(ModularExtension::new(vec![
+            bn_config.modulus.clone(),
+            bn_config.scalar.clone(),
             SECP256K1_CONFIG.modulus.clone(),
             SECP256K1_CONFIG.scalar.clone(),
         ]))
-        .ecc(WeierstrassExtension::new(vec![SECP256K1_CONFIG.clone()]))
+        .fp2(Fp2Extension::new(vec![bn_config.modulus.clone()]))
+        .ecc(WeierstrassExtension::new(vec![SECP256K1_CONFIG.clone(), bn_config.clone()]))
+        .pairing(PairingExtension::new(vec![PairingCurve::Bn254]))
         .build()
 }
 
