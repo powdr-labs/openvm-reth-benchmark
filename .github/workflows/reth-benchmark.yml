@@ -120,6 +120,8 @@ on:
         required: true
       RPC_URL_1:
         required: true
+      BENCHER_API_TOKEN:
+        required: true
 
 env:
   S3_PATH: s3://axiom-public-data-sandbox-us-east-1/benchmark/github/results
@@ -198,7 +200,7 @@ jobs:
         working-directory: bin/client-eth
         run: |
           PROFILE="release"
-          if [[ "${{ inputs.collect_metrics }}" == "true" ]]; then
+          if [[ "${{ github.event.inputs.collect_metrics || inputs.collect_metrics }}" == "true" ]]; then
             PROFILE="profiling"
           fi
           cargo openvm build --no-transpile --profile=$PROFILE
@@ -215,7 +217,7 @@ jobs:
           OPTIONAL_ARGS=""
           PROFILE="release"
           FEATURES="bench-metrics,${{ inputs.memory_allocator || github.event.inputs.memory_allocator }}"
-          RUST_LOG="p3_=warn"
+          RUST_LOG="info,p3_=warn"
           if [[ "${{ inputs.collect_metrics || github.event.inputs.collect_metrics }}" == "true" ]]; then
             OPTIONAL_ARGS="--profiling --kzg-params-dir $PARAMS_DIR"
             PROFILE="profiling"
@@ -257,12 +259,22 @@ jobs:
           echo "MD_PATH=${MD_PATH}" >> $GITHUB_ENV
           echo "BENCHER_METRIC_PATH=${BENCHER_METRIC_PATH}" >> $GITHUB_ENV
 
+      - uses: bencherdev/bencher@main
+      - name: Upload bencher metrics
+        run: |
+          bencher run \
+            --project ${{ env.BENCHER_PROJECT }} \
+            --token '${{ secrets.BENCHER_API_TOKEN }}' \
+            --testbed ${{ inputs.instance_family || github.event.inputs.instance_family }} \
+            --adapter json \
+            --file $BENCHER_METRIC_PATH
+
       - name: Install inferno-flamegraph
-        if: ${{ inputs.collect_metrics || github.event.inputs.collect_metrics }}
+        if: ${{ inputs.collect_metrics == true || github.event.inputs.collect_metrics == true }}
         run: cargo install inferno
 
       - name: Generate flamegraphs
-        if: ${{ inputs.collect_metrics || github.event.inputs.collect_metrics }}
+        if: ${{ inputs.collect_metrics == true || github.event.inputs.collect_metrics == true }}
         run: |
           python3 openvm/ci/scripts/metric_unify/flamegraph.py $METRIC_PATH
           s5cmd cp '.bench_metrics/flamegraphs/*.svg' "${{ env.S3_FLAMEGRAPHS_PATH }}/${current_sha}/"
@@ -342,12 +354,3 @@ jobs:
       - name: Path to result
         run: |
           echo "https://github.com/axiom-crypto/openvm-reth-benchmark/blob/gh-pages/${GH_PAGES_PATH}/${METRIC_NAME}.md"
-
-      - uses: bencherdev/bencher@main
-      - name: Upload bencher metrics
-        run: |
-          bencher run \
-            --project ${{ env.BENCHER_PROJECT }} \
-            --testbed ${{ inputs.instance_family || github.event.inputs.instance_family }} \
-            --adapter json \
-            --file $BENCHER_METRIC_PATH
