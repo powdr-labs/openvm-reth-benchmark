@@ -7,7 +7,10 @@ use openvm_circuit::{
     arch::{
         instructions::exe::VmExe, DefaultSegmentationStrategy, SystemConfig, VmConfig, VmExecutor,
     },
-    openvm_stark_sdk::config::baby_bear_poseidon2::BabyBearPoseidon2Config,
+    openvm_stark_sdk::{
+        bench::run_with_metric_collection, config::baby_bear_poseidon2::BabyBearPoseidon2Config,
+        openvm_stark_backend::p3_field::PrimeField32, p3_baby_bear::BabyBear,
+    },
 };
 use openvm_client_executor::{
     io::ClientExecutorInput, ChainVariant, CHAIN_ID_ETH_MAINNET, CHAIN_ID_LINEA_MAINNET,
@@ -24,9 +27,9 @@ use openvm_sdk::{
     prover::{AppProver, ContinuationProver},
     Sdk, StdIn,
 };
-use openvm_stark_sdk::{bench::run_with_metric_collection, p3_baby_bear::BabyBear};
 use openvm_transpiler::{elf::Elf, openvm_platform::memory::MEM_SIZE, FromElf};
 pub use reth_primitives;
+use reth_primitives::hex::ToHexExt;
 use std::{path::PathBuf, sync::Arc};
 use tracing::info_span;
 
@@ -72,6 +75,9 @@ struct HostArgs {
     /// Max cells per chip in segment for continuations
     #[arg(short, long, alias = "max_cells_per_chip_in_segment")]
     pub max_cells_per_chip_in_segment: Option<usize>,
+
+    #[arg(long)]
+    pub kzg_intrinsics: bool,
 }
 
 const OPENVM_CLIENT_ETH_ELF: &[u8] = include_bytes!("../elf/openvm-client-eth");
@@ -80,6 +86,7 @@ fn reth_vm_config(
     app_log_blowup: usize,
     max_segment_length: usize,
     max_cells_per_chip_in_segment: usize,
+    use_kzg_intrinsics: bool,
 ) -> SdkVmConfig {
     let mut system_config = SystemConfig::default()
         .with_continuations()
@@ -91,24 +98,37 @@ fn reth_vm_config(
     ));
     let int256 = Int256::default();
     let bn_config = PairingCurve::Bn254.curve_config();
+    let bls_config = PairingCurve::Bls12_381.curve_config();
     // The builder will do this automatically, but we set it just in case.
     let rv32m = Rv32M { range_tuple_checker_sizes: int256.range_tuple_checker_sizes };
+    let mut supported_moduli = vec![
+        bn_config.modulus.clone(),
+        bn_config.scalar.clone(),
+        SECP256K1_CONFIG.modulus.clone(),
+        SECP256K1_CONFIG.scalar.clone(),
+    ];
+    let mut supported_complex_moduli = vec![bn_config.modulus.clone()];
+    let mut supported_curves = vec![bn_config.clone(), SECP256K1_CONFIG.clone()];
+    let mut supported_pairing_curves = vec![PairingCurve::Bn254];
+    if use_kzg_intrinsics {
+        supported_moduli.push(bls_config.modulus.clone());
+        supported_moduli.push(bls_config.scalar.clone());
+        supported_complex_moduli.push(bls_config.modulus.clone());
+        supported_curves.push(bls_config.clone());
+        supported_pairing_curves.push(PairingCurve::Bls12_381);
+    }
     SdkVmConfig::builder()
         .system(system_config.into())
         .rv32i(Default::default())
         .rv32m(rv32m)
         .io(Default::default())
         .keccak(Default::default())
+        .sha256(Default::default())
         .bigint(int256)
-        .modular(ModularExtension::new(vec![
-            bn_config.modulus.clone(),
-            bn_config.scalar.clone(),
-            SECP256K1_CONFIG.modulus.clone(),
-            SECP256K1_CONFIG.scalar.clone(),
-        ]))
-        .fp2(Fp2Extension::new(vec![bn_config.modulus.clone()]))
-        .ecc(WeierstrassExtension::new(vec![bn_config.clone(), SECP256K1_CONFIG.clone()]))
-        .pairing(PairingExtension::new(vec![PairingCurve::Bn254]))
+        .modular(ModularExtension::new(supported_moduli))
+        .fp2(Fp2Extension::new(supported_complex_moduli))
+        .ecc(WeierstrassExtension::new(supported_curves))
+        .pairing(PairingExtension::new(supported_pairing_curves))
         .build()
 }
 
@@ -187,8 +207,12 @@ async fn main() -> eyre::Result<()> {
     let max_cells_per_chip_in_segment =
         args.max_cells_per_chip_in_segment.unwrap_or(((1 << 23) - 100) * 120);
 
-    let vm_config =
-        reth_vm_config(app_log_blowup, max_segment_length, max_cells_per_chip_in_segment);
+    let vm_config = reth_vm_config(
+        app_log_blowup,
+        max_segment_length,
+        max_cells_per_chip_in_segment,
+        args.kzg_intrinsics,
+    );
     let sdk = Sdk;
     let elf = Elf::decode(OPENVM_CLIENT_ETH_ELF, MEM_SIZE as u32)?;
     let exe = VmExe::from_elf(elf, vm_config.transpiler()).unwrap();
@@ -209,9 +233,13 @@ async fn main() -> eyre::Result<()> {
         info_span!("reth-block", block_number = args.block_number).in_scope(
             || -> eyre::Result<()> {
                 if args.execute {
-                    let executor = VmExecutor::<_, _>::new(app_config.app_vm_config);
-                    info_span!("execute", group = program_name)
-                        .in_scope(|| executor.execute(exe, stdin))?;
+                    let pvs = info_span!("execute", group = program_name)
+                        .in_scope(|| sdk.execute(exe, app_config.app_vm_config, stdin))?;
+                    let block_hash: Vec<u8> = pvs
+                        .iter()
+                        .map(|x| x.as_canonical_u32().try_into().unwrap())
+                        .collect::<Vec<_>>();
+                    println!("block_hash: {}", ToHexExt::encode_hex(&block_hash));
                 } else if args.tracegen {
                     let executor = VmExecutor::<_, _>::new(app_config.app_vm_config);
                     info_span!("tracegen", group = program_name).in_scope(|| {
@@ -255,7 +283,13 @@ async fn main() -> eyre::Result<()> {
                         full_agg_pk,
                     );
                     prover.set_program_name(program_name);
-                    let _evm_proof = prover.generate_proof_for_evm(stdin);
+                    let evm_proof = prover.generate_proof_for_evm(stdin);
+                    let instances = &evm_proof.instances[0];
+                    let block_hash = instances[instances.len() - 32..]
+                        .iter()
+                        .map(|x| x.to_bytes()[0])
+                        .collect::<Vec<_>>();
+                    println!("block_hash: {}", ToHexExt::encode_hex(&block_hash));
                 }
 
                 Ok(())
