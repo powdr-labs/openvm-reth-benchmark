@@ -214,7 +214,7 @@ jobs:
           echo "branch_name=$BRANCH_NAME" >> $GITHUB_OUTPUT
           echo "${{ github.event_name }}"
       - name: Create pull request
-        if: ${{ !inputs.manual_call && github.event_name != 'schedule' }}
+        if: ${{ !inputs.manual_call && github.event_name != 'schedule' && !(github.event.inputs.run_benchmark == 'true' || inputs.run_benchmark) }}
         uses: repo-sync/pull-request@v2
         id: create-pr
         with:
@@ -236,7 +236,7 @@ jobs:
       instance_family: ${{ inputs.instance_family || github.event.inputs.instance_family || 'm8g.24xlarge' }}
       ref: ${{ needs.patch.outputs.branch_name }}
       tag: ${{ needs.patch.outputs.tag }}
-      block_number: ${{ fromJSON(inputs.benchmark_block_number || github.event.inputs.benchmark_block_number) }}
+      block_number: ${{ inputs.benchmark_block_number || github.event.inputs.benchmark_block_number || 21000000 }}
       profiling: none
     secrets: inherit
 
@@ -249,7 +249,7 @@ jobs:
       instance_family: ${{ inputs.instance_family || github.event.inputs.instance_family || 'm8g.24xlarge' }}
       ref: ${{ needs.patch.outputs.branch_name }}
       tag: ${{ needs.patch.outputs.tag }}
-      block_number: ${{ fromJSON(inputs.benchmark_block_number || github.event.inputs.benchmark_block_number) }}
+      block_number: ${{ inputs.benchmark_block_number || github.event.inputs.benchmark_block_number || 21000000 }}
       profiling: host
     secrets: inherit
 
@@ -262,7 +262,7 @@ jobs:
       instance_family: ${{ inputs.instance_family || github.event.inputs.instance_family || 'm8g.24xlarge' }}
       ref: ${{ needs.patch.outputs.branch_name }}
       tag: ${{ needs.patch.outputs.tag }}
-      block_number: ${{ fromJSON(inputs.benchmark_block_number || github.event.inputs.benchmark_block_number) }}
+      block_number: ${{ inputs.benchmark_block_number || github.event.inputs.benchmark_block_number || 21000000 }}
       profiling: guest
     secrets: inherit
 
