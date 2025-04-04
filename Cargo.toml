@@ -7,6 +7,7 @@ members = [
     "crates/primitives",
     "crates/storage/rpc-db",
     "crates/storage/witness-db",
+    "crates/host-bench",
 ]
 exclude = []
 resolver = "2"
@@ -19,6 +20,7 @@ exclude = ["**/target"]
 version = "0.1.0"
 
 [workspace.dependencies]
+bincode_derive = "=2.0.0-rc.3"
 eyre = "0.6"
 anyhow = { version = "1.0.86", default-features = false }
 tracing = { version = "0.1.40", default-features = false }
@@ -37,7 +39,7 @@ thiserror = "1.0.61"
 hex-literal = "0.4.1"
 rayon = "1.10.0"
 rlp = "0.5.2"
-bincode = { version = "2.0.0-rc", default-features = false, features = [
+bincode = { version = "=2.0.0-rc.3", default-features = false, features = [
     "derive",
     "alloc",
     "serde",
@@ -51,7 +53,7 @@ openvm-client-executor = { path = "./crates/executor/client" }
 openvm-host-executor = { path = "./crates/executor/host" }
 openvm-mpt = { path = "./crates/mpt" }
 openvm-primitives = { path = "./crates/primitives" }
-
+openvm-reth-benchmark = { path = "./crates/host-bench", default-features = false }
 # reth
 reth-primitives = { git = "https://github.com/axiom-crypto/reth", branch = "openvm/v1.0.6", default-features = false, features = [
     "alloy-compat",
@@ -123,26 +125,26 @@ alloy-eips = { version = "0.3", default-features = false }
 alloy-trie = "0.5.0"
 
 # openvm
-openvm-stark-sdk = { git = "https://github.com/openvm-org/stark-backend.git", rev = "884f8e6aabf72bde00dc51f1f1121277bff73b1e", default-features = false }
-openvm-build = { git = "https://github.com/openvm-org/openvm.git", rev = "f41640c37bc5468a0775a38098053fe37ea3538a", default-features = false }
-openvm = { git = "https://github.com/openvm-org/openvm.git", rev = "f41640c37bc5468a0775a38098053fe37ea3538a", default-features = false }
-openvm-transpiler = { git = "https://github.com/openvm-org/openvm.git", rev = "f41640c37bc5468a0775a38098053fe37ea3538a", default-features = false }
-openvm-circuit = { git = "https://github.com/openvm-org/openvm.git", rev = "f41640c37bc5468a0775a38098053fe37ea3538a", default-features = false }
-openvm-benchmarks = { git = "https://github.com/openvm-org/openvm.git", rev = "f41640c37bc5468a0775a38098053fe37ea3538a", default-features = false }
-openvm-keccak256-circuit = { git = "https://github.com/openvm-org/openvm.git", rev = "f41640c37bc5468a0775a38098053fe37ea3538a", default-features = false }
-openvm-keccak256-transpiler = { git = "https://github.com/openvm-org/openvm.git", rev = "f41640c37bc5468a0775a38098053fe37ea3538a", default-features = false }
-openvm-rv32im-circuit = { git = "https://github.com/openvm-org/openvm.git", rev = "f41640c37bc5468a0775a38098053fe37ea3538a", default-features = false }
-openvm-rv32im-transpiler = { git = "https://github.com/openvm-org/openvm.git", rev = "f41640c37bc5468a0775a38098053fe37ea3538a", default-features = false }
-openvm-bigint-circuit = { git = "https://github.com/openvm-org/openvm.git", rev = "f41640c37bc5468a0775a38098053fe37ea3538a", default-features = false }
-openvm-bigint-transpiler = { git = "https://github.com/openvm-org/openvm.git", rev = "f41640c37bc5468a0775a38098053fe37ea3538a", default-features = false }
-openvm-algebra-circuit = { git = "https://github.com/openvm-org/openvm.git", rev = "f41640c37bc5468a0775a38098053fe37ea3538a", default-features = false }
-openvm-algebra-transpiler = { git = "https://github.com/openvm-org/openvm.git", rev = "f41640c37bc5468a0775a38098053fe37ea3538a", default-features = false }
-openvm-ecc-circuit = { git = "https://github.com/openvm-org/openvm.git", rev = "f41640c37bc5468a0775a38098053fe37ea3538a", default-features = false }
-openvm-ecc-transpiler = { git = "https://github.com/openvm-org/openvm.git", rev = "f41640c37bc5468a0775a38098053fe37ea3538a", default-features = false }
-openvm-pairing-circuit = { git = "https://github.com/openvm-org/openvm.git", rev = "f41640c37bc5468a0775a38098053fe37ea3538a", default-features = false }
-openvm-sdk = { git = "https://github.com/openvm-org/openvm.git", rev = "f41640c37bc5468a0775a38098053fe37ea3538a", default-features = false }
-openvm-native-compiler = { git = "https://github.com/openvm-org/openvm.git", rev = "f41640c37bc5468a0775a38098053fe37ea3538a", default-features = false }
-openvm-native-recursion = { git = "https://github.com/openvm-org/openvm.git", rev = "f41640c37bc5468a0775a38098053fe37ea3538a", default-features = false }
+openvm-stark-sdk = { git = "https://github.com/openvm-org/stark-backend.git", tag = "v1.0.0", default-features = false }
+openvm-build = { git = "https://github.com/openvm-org/openvm.git", rev = "51f07d50d20174b23091f48e25d9ea421b4e2787", default-features = false }
+openvm = { git = "https://github.com/openvm-org/openvm.git", rev = "51f07d50d20174b23091f48e25d9ea421b4e2787", default-features = false }
+openvm-transpiler = { git = "https://github.com/openvm-org/openvm.git", rev = "51f07d50d20174b23091f48e25d9ea421b4e2787", default-features = false }
+openvm-circuit = { git = "https://github.com/openvm-org/openvm.git", rev = "51f07d50d20174b23091f48e25d9ea421b4e2787", default-features = false }
+openvm-benchmarks = { git = "https://github.com/openvm-org/openvm.git", rev = "51f07d50d20174b23091f48e25d9ea421b4e2787", default-features = false }
+openvm-keccak256-circuit = { git = "https://github.com/openvm-org/openvm.git", rev = "51f07d50d20174b23091f48e25d9ea421b4e2787", default-features = false }
+openvm-keccak256-transpiler = { git = "https://github.com/openvm-org/openvm.git", rev = "51f07d50d20174b23091f48e25d9ea421b4e2787", default-features = false }
+openvm-rv32im-circuit = { git = "https://github.com/openvm-org/openvm.git", rev = "51f07d50d20174b23091f48e25d9ea421b4e2787", default-features = false }
+openvm-rv32im-transpiler = { git = "https://github.com/openvm-org/openvm.git", rev = "51f07d50d20174b23091f48e25d9ea421b4e2787", default-features = false }
+openvm-bigint-circuit = { git = "https://github.com/openvm-org/openvm.git", rev = "51f07d50d20174b23091f48e25d9ea421b4e2787", default-features = false }
+openvm-bigint-transpiler = { git = "https://github.com/openvm-org/openvm.git", rev = "51f07d50d20174b23091f48e25d9ea421b4e2787", default-features = false }
+openvm-algebra-circuit = { git = "https://github.com/openvm-org/openvm.git", rev = "51f07d50d20174b23091f48e25d9ea421b4e2787", default-features = false }
+openvm-algebra-transpiler = { git = "https://github.com/openvm-org/openvm.git", rev = "51f07d50d20174b23091f48e25d9ea421b4e2787", default-features = false }
+openvm-ecc-circuit = { git = "https://github.com/openvm-org/openvm.git", rev = "51f07d50d20174b23091f48e25d9ea421b4e2787", default-features = false }
+openvm-ecc-transpiler = { git = "https://github.com/openvm-org/openvm.git", rev = "51f07d50d20174b23091f48e25d9ea421b4e2787", default-features = false }
+openvm-pairing-circuit = { git = "https://github.com/openvm-org/openvm.git", rev = "51f07d50d20174b23091f48e25d9ea421b4e2787", default-features = false }
+openvm-sdk = { git = "https://github.com/openvm-org/openvm.git", rev = "51f07d50d20174b23091f48e25d9ea421b4e2787", default-features = false }
+openvm-native-compiler = { git = "https://github.com/openvm-org/openvm.git", rev = "51f07d50d20174b23091f48e25d9ea421b4e2787", default-features = false }
+openvm-native-recursion = { git = "https://github.com/openvm-org/openvm.git", rev = "51f07d50d20174b23091f48e25d9ea421b4e2787", default-features = false }
 
 [workspace.lints]
 rust.missing_debug_implementations = "warn"
