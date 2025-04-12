@@ -76,7 +76,7 @@ on:
         type: number
         required: false
         description: Number of proofs that internal verifier aggregates
-        default: 4
+        default: 3
   workflow_call:
     inputs:
       ref:
@@ -147,7 +147,7 @@ on:
         type: number
         required: false
         description: Number of proofs that internal verifier aggregates
-        default: 4
+        default: 3
       tag:
         type: string
         required: false
