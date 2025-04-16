@@ -65,8 +65,8 @@ on:
       segment_max_cells:
         type: string # number might have u32 limit
         required: false
-        description: Max cells per chip in segment for continuations
-        default: "4294967295" # 2**32 - 1
+        description: Total main trace cells (excluding memory)
+        default: "1200000000" # 1.2B
       # num_children_leaf:
       #   type: number
       #   required: false
@@ -136,8 +136,8 @@ on:
       segment_max_cells:
         type: string
         required: false
-        description: Max cells per chip in segment for continuations
-        default: "4294967295" # 2**32 - 1
+        description: Total main trace cells (excluding memory)
+        default: "1200000000" # 1.2B
       num_children_leaf:
         type: number
         required: false
