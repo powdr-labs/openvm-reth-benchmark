@@ -213,7 +213,8 @@ jobs:
           input_hash=$(echo $input_json_str | sha256sum | cut -d' ' -f1)
           METRIC_NAME=reth-$current_sha-${input_hash}
           echo "METRIC_NAME=${METRIC_NAME}" >> $GITHUB_ENV
-          METRIC_PATH=".bench_metrics/${METRIC_NAME}.json"
+          mkdir -p .bench_metrics/${METRIC_NAME}
+          METRIC_PATH=".bench_metrics/${METRIC_NAME}"
           echo "METRIC_PATH=${METRIC_PATH}" >> $GITHUB_ENV
           echo "name=${METRIC_NAME}" >> $GITHUB_OUTPUT
       - name: Set cache keys
@@ -369,7 +370,10 @@ jobs:
         run: |
           export JEMALLOC_SYS_WITH_MALLOC_CONF=${JEMALLOC_SYS_WITH_MALLOC_CONF}
           export RUST_LOG="info,p3_=warn"
-          export OUTPUT_PATH=${METRIC_PATH}
+          export OUTPUT_PATH=${METRIC_PATH}/metrics.json
+          if [[ "${{ inputs.profiling || github.event.inputs.profiling }}" == "guest" ]]; then
+            export GUEST_SYMBOLS_PATH=${METRIC_PATH}/guest.syms
+          fi
 
           if [[ "${{ inputs.profiling || github.event.inputs.profiling }}" == "host" ]]; then
             echo -1 | sudo tee /proc/sys/kernel/perf_event_paranoid
@@ -382,8 +386,8 @@ jobs:
             echo "MEM_USAGE_PATH=memory_usage.png" >> $GITHUB_ENV
           fi
 
-      - name: Upload metric file
-        id: upload-metric-artifact
+      - name: Upload metric artifacts
+        id: upload-metric-artifacts
         uses: actions/upload-artifact@v4
         with:
           name: ${{ steps.set-metric-name.outputs.name }}
@@ -398,13 +402,17 @@ jobs:
           retention-days: 1
 
       - name: Upload Benchmark Metrics
-        run: s5cmd cp ${METRIC_PATH} ${{ env.S3_METRICS_PATH }}/${METRIC_NAME}.json
+        run: |
+          s5cmd cp ${METRIC_PATH}/metrics.json ${{ env.S3_METRICS_PATH }}/${METRIC_NAME}/metrics.json
+          if [[ "${{ inputs.profiling || github.event.inputs.profiling }}" == "guest" ]]; then
+            s5cmd cp ${METRIC_PATH}/guest.syms ${{ env.S3_METRICS_PATH }}/${METRIC_NAME}/guest.syms
+          fi
 
       - name: Generate markdown
         run: |
           BENCHER_METRIC_PATH=bencher.json
-          openvm-prof --json-paths $METRIC_PATH --output-json $BENCHER_METRIC_PATH
-          MD_PATH=${METRIC_PATH%.json}.md
+          openvm-prof --json-paths ${METRIC_PATH}/metrics.json --output-json $BENCHER_METRIC_PATH
+          MD_PATH=${METRIC_PATH}/metrics.md
           echo "MD_PATH=${MD_PATH}" >> $GITHUB_ENV
           echo "BENCHER_METRIC_PATH=${BENCHER_METRIC_PATH}" >> $GITHUB_ENV
 
@@ -433,7 +441,7 @@ jobs:
         run: |
           cargo install inferno
 
-          python3 openvm/ci/scripts/metric_unify/flamegraph.py $METRIC_PATH
+          python3 openvm/ci/scripts/metric_unify/flamegraph.py ${METRIC_PATH}/metrics.json --guest-symbols ${METRIC_PATH}/guest.syms
           s5cmd cp '.bench_metrics/flamegraphs/*.svg' "${{ env.S3_FLAMEGRAPHS_PATH }}/${METRIC_NAME}/"
 
           echo "" >> $MD_PATH
