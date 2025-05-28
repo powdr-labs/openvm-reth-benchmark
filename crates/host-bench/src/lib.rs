@@ -311,6 +311,9 @@ pub async fn run_reth_benchmark<E: StarkFriEngine<SC>>(
     let elf = Elf::decode(openvm_client_eth_elf, MEM_SIZE as u32)?;
     let exe = VmExe::from_elf(elf, vm_config.transpiler()).unwrap();
 
+    let powdr_openvm::CompiledProgram { exe, vm_config } =
+        powdr::apc(exe, vm_config, openvm_client_eth_elf, stdin.clone());
+
     let program_name = format!("reth.{}.block_{}", args.mode, args.block_number);
     // NOTE: args.benchmark.app_config resets SegmentationStrategy if max_segment_length is set
     args.benchmark.max_segment_length = None;
@@ -441,4 +444,55 @@ fn try_load_input_from_cache(
     } else {
         None
     })
+}
+
+mod powdr {
+    type F = crate::BabyBear;
+    use openvm_circuit::arch::instructions::exe::VmExe;
+    use openvm_sdk::{config::SdkVmConfig, StdIn};
+    use powdr_openvm::{
+        customize, export_pil, instructions_to_airs, pgo, BusMap, BusType, CompiledProgram,
+        OriginalCompiledProgram, PowdrConfig, SpecializedConfig,
+    };
+    use powdr_riscv_elf::load_elf_from_buffer;
+
+    /// This function is used to generate the specialized program for the Powdr APC.
+    /// It takes:
+    /// - `exe`: The original transpiled OpenVM executable.
+    /// - `vm_config`: The base VM configuration the executable relates to.
+    /// - `elf`: The original ELF file, used to detect the basic blocks.
+    /// - `stdin`: The standard input to the program, used for PGO data generation to choose which basic blocks to accelerate.
+    pub fn apc(
+        exe: VmExe<F>,
+        vm_config: SdkVmConfig,
+        elf: &[u8],
+        stdin: StdIn,
+    ) -> CompiledProgram<F> {
+        let og = OriginalCompiledProgram { exe: exe.clone(), sdk_vm_config: vm_config.clone() };
+
+        let pgo_data = pgo(og, stdin.clone()).unwrap();
+
+        let bus_map =
+            BusMap::openvm_base().with_sha(7).with_bus_type(8, BusType::TupleRangeChecker);
+
+        let powdr_config = PowdrConfig::new(1, 0).with_bus_map(bus_map);
+
+        let elf_powdr = load_elf_from_buffer(elf);
+
+        let airs =
+            instructions_to_airs::<_, powdr_number::BabyBearField>(exe.clone(), vm_config.clone());
+
+        let (exe, extension) = customize(
+            exe,
+            vm_config.clone(),
+            &elf_powdr.text_labels,
+            &airs,
+            powdr_config.clone(),
+            Some(pgo_data),
+        );
+        // Generate the custom config based on the generated instructions
+        let vm_config = SpecializedConfig::from_base_and_extension(vm_config, extension);
+        export_pil(vm_config.clone(), "debug.pil", 1000, &powdr_config.bus_map);
+        CompiledProgram { exe, vm_config }
+    }
 }

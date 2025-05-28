@@ -149,6 +149,11 @@ openvm-sdk = { git = "https://github.com/openvm-org/openvm.git", tag = "v1.1.2",
 openvm-native-compiler = { git = "https://github.com/openvm-org/openvm.git", tag = "v1.1.2", default-features = false }
 openvm-native-recursion = { git = "https://github.com/openvm-org/openvm.git", tag = "v1.1.2", default-features = false }
 
+# powdr
+powdr-openvm = { git = "https://github.com/powdr-labs/powdr.git", branch = "latest", default-features = false }
+powdr-riscv-elf = { git = "https://github.com/powdr-labs/powdr.git", branch = "latest", default-features = false }
+powdr-number = { git = "https://github.com/powdr-labs/powdr.git", branch = "latest", default-features = false }
+
 [workspace.lints]
 rust.missing_debug_implementations = "warn"
 rust.unreachable_pub = "warn"
@@ -283,6 +288,11 @@ openvm-rv32-adapters = { path = "../openvm/extensions/rv32-adapters" }
 openvm-rv32im-circuit = { path = "../openvm/extensions/rv32im/circuit" }
 openvm-rv32im-transpiler = { path = "../openvm/extensions/rv32im/transpiler" }
 openvm-rv32im-guest = { path = "../openvm/extensions/rv32im/guest" }
+
+[patch."https://github.com/powdr-labs/powdr.git"]
+powdr-openvm = { path = "../powdr/openvm" }
+powdr-riscv-elf = { path = "../powdr/riscv-elf" }
+powdr-number = { path = "../powdr/number" }
 
 
 # [patch.crates-io]

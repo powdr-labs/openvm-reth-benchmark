@@ -52,6 +52,11 @@ derive_more = "1.0.0"
 # halo2
 halo2-axiom = { version = "0.5.0", default-features = false }
 
+# powdr
+powdr-openvm = { workspace = true }
+powdr-riscv-elf = { workspace = true }
+powdr-number = { workspace = true }
+
 [features]
 default = ["mimalloc", "bench-metrics"]
 bench-metrics = ["openvm-benchmarks-prove/bench-metrics"]
