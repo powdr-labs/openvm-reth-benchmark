@@ -34,6 +34,7 @@ use reth_primitives::hex::ToHexExt;
 use serde_json::json;
 use std::{fs, path::PathBuf, sync::Arc};
 use tracing::info_span;
+use tracing_subscriber::FmtSubscriber;
 
 mod execute;
 
@@ -104,6 +105,12 @@ pub struct HostArgs {
     /// Optional path to write the input to. Only needed for mode=make_input
     #[arg(long)]
     pub input_path: Option<PathBuf>,
+
+    #[arg(long)]
+    apc: usize,
+
+    #[arg(long)]
+    apc_skip: usize,
 }
 
 /// Segments based on total trace cells across all chips
@@ -218,6 +225,14 @@ pub async fn run_reth_benchmark<E: StarkFriEngine<SC>>(
         std::env::set_var("RUST_LOG", "info");
     }
 
+    // Uncomment these to enable powdr logs.
+    // I haven't figured out how to get both powdr and openvm logs at the same time.
+    // If you uncomment these, you have to comment out some lines below when calling openvm,
+    // otherwise the logger gets initialized twice and panics.
+    // Look for similar comments below.
+    // let subscriber = FmtSubscriber::builder().with_max_level(tracing::Level::DEBUG).finish();
+    // tracing::subscriber::set_global_default(subscriber).expect("setting default subscriber failed");
+
     // Parse the command line arguments.
     let mut args = args;
     let provider_config = args.provider.into_provider().await?;
@@ -312,13 +327,16 @@ pub async fn run_reth_benchmark<E: StarkFriEngine<SC>>(
     let exe = VmExe::from_elf(elf, vm_config.transpiler()).unwrap();
 
     let powdr_openvm::CompiledProgram { exe, vm_config } =
-        powdr::apc(exe, vm_config, openvm_client_eth_elf, stdin.clone());
+        powdr::apc(exe, vm_config, openvm_client_eth_elf, args.apc, args.apc_skip, stdin.clone());
 
     let program_name = format!("reth.{}.block_{}", args.mode, args.block_number);
     // NOTE: args.benchmark.app_config resets SegmentationStrategy if max_segment_length is set
     args.benchmark.max_segment_length = None;
     let app_config = args.benchmark.app_config(vm_config.clone());
 
+    // Comment out the 3 lines below to get powdr logs instead of openvm logs.
+    // If these are enabled the powdr logs above need to be disabled.
+    // Look for similar comments at the beginning of this function.
     run_with_metric_collection("OUTPUT_PATH", || {
         info_span!("reth-block", block_number = args.block_number).in_scope(
             || -> eyre::Result<()> {
@@ -466,6 +484,8 @@ mod powdr {
         exe: VmExe<F>,
         vm_config: SdkVmConfig,
         elf: &[u8],
+        apc: usize,
+        apc_skip: usize,
         stdin: StdIn,
     ) -> CompiledProgram<F> {
         let og = OriginalCompiledProgram { exe: exe.clone(), sdk_vm_config: vm_config.clone() };
@@ -475,7 +495,9 @@ mod powdr {
         let bus_map =
             BusMap::openvm_base().with_sha(7).with_bus_type(8, BusType::TupleRangeChecker);
 
-        let powdr_config = PowdrConfig::new(1, 0).with_bus_map(bus_map);
+        let powdr_config = PowdrConfig::new(apc as u64, apc_skip as u64)
+            .with_bus_map(bus_map)
+            .with_degree_bound(2);
 
         let elf_powdr = load_elf_from_buffer(elf);
 
