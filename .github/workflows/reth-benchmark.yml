@@ -285,10 +285,10 @@ jobs:
 
       - name: Install openvm-prof
         run: |
-          cargo install --git https://github.com/openvm-org/openvm.git --profile=dev --force openvm-prof
+          cargo install --git https://github.com/powdr-labs/openvm.git --tag v1.1.2 --profile=dev --force openvm-prof
       - name: Checkout openvm (for scripts)
         run: |
-          git clone --depth=1 https://github.com/openvm-org/openvm.git
+          git clone --depth=1 https://github.com/powdr-labs/openvm.git
 
       - name: Install architecture specific tools
         run: |
@@ -317,7 +317,7 @@ jobs:
       - name: Install cargo-openvm
         if: steps.cache-guest-elf-restore.outputs.cache-hit != 'true'
         run: |
-          cargo install --git https://github.com/openvm-org/openvm.git --locked --force cargo-openvm
+          cargo install --git https://github.com/powdr-labs/openvm.git --tag v1.1.2 --locked --force cargo-openvm
       - name: Build Guest ELF
         if: steps.cache-guest-elf-restore.outputs.cache-hit != 'true'
         working-directory: bin/client-eth

@@ -120,12 +120,12 @@ jobs:
         env:
           OPENVM_REV: "${{ inputs.OPENVM_REV || github.event.inputs.OPENVM_REV }}"
         run: |
-          echo "result=${OPENVM_REV:-$(git ls-remote https://github.com/openvm-org/openvm.git refs/heads/main | cut -f1)}" >> "$GITHUB_OUTPUT"
+          echo "result=${OPENVM_REV:-$(git ls-remote https://github.com/powdr-labs/openvm.git refs/heads/main | cut -f1)}" >> "$GITHUB_OUTPUT"
 
       - name: Check out openvm repository
         uses: actions/checkout@v4
         with:
-          repository: "openvm-org/openvm"
+          repository: "powdr-labs/openvm"
           ref: ${{ steps.get-openvm-rev.outputs.result }}
 
       - name: Get STARK_BACKEND_REV from openvm

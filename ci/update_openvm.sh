@@ -33,7 +33,7 @@ echo "Cloning openvm at $NEW_OPENVM_REV to determine stark-backend revision..."
 TMP_DIR=$(mktemp -d)
 trap 'rm -rf "$TMP_DIR"' EXIT
 
-git clone --quiet --depth 1 https://github.com/openvm-org/openvm.git "$TMP_DIR" > /dev/null 2>&1
+git clone --quiet --depth 1 https://github.com/powdr-labs/openvm.git "$TMP_DIR" > /dev/null 2>&1
 cd "$TMP_DIR"
 git checkout --quiet "$NEW_OPENVM_REV" > /dev/null 2>&1
 

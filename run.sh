@@ -1,7 +1,7 @@
 #!/bin/bash
 set -e
 cd bin/client-eth
-cargo openvm build --no-transpile
+RUSTFLAGS="-Clink-arg=--emit-relocs" cargo openvm build --no-transpile
 mkdir -p ../host/elf
 SRC="target/riscv32im-risc0-zkvm-elf/release/openvm-client-eth"
 DEST="../host/elf/openvm-client-eth"

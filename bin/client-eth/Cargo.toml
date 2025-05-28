@@ -63,7 +63,7 @@ ruint = { git = "https://github.com/axiom-crypto/uint", branch = "v1.12.3-openvm
 [profile.release]
 panic = "abort"
 lto = "fat"
-strip = true
+strip = false
 
 [profile.profiling]
 inherits = "release"

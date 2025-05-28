@@ -1,6 +1,6 @@
 # OpenVM Reth Benchmark
 
-Benchmarks of running [Reth](https://github.com/paradigmxyz/reth) on the [OpenVM](https://github.com/openvm-org/openvm)
+Benchmarks of running [Reth](https://github.com/paradigmxyz/reth) on the powdr fork of the [OpenVM](https://github.com/powdr-labs/openvm)
 framework to generate zero-knowledge proofs of EVM block execution on Ethereum Mainnet.
 
 > [!CAUTION]
@@ -16,7 +16,7 @@ To run these benchmarks locally, you must first have [Rust](https://www.rust-lan
 Install the OpenVM command line interface by building from source via:
 
 ```bash
-cargo install --git 'http://github.com/openvm-org/openvm.git' cargo-openvm
+cargo install --git 'http://github.com/powdr-labs/openvm.git' --tag v1.1.2 cargo-openvm
 ```
 
 ### RPC Node Requirement
