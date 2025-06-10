@@ -466,11 +466,12 @@ fn try_load_input_from_cache(
 
 mod powdr {
     type F = crate::BabyBear;
+    type P = powdr_number::BabyBearField;
     use openvm_circuit::arch::instructions::exe::VmExe;
     use openvm_sdk::{config::SdkVmConfig, StdIn};
     use powdr_openvm::{
         customize, export_pil, instructions_to_airs, pgo, BusMap, BusType, CompiledProgram,
-        OriginalCompiledProgram, PowdrConfig, SpecializedConfig,
+        OriginalCompiledProgram, PgoConfig, PowdrConfig, SpecializedConfig,
     };
     use powdr_riscv_elf::load_elf_from_buffer;
 
@@ -487,7 +488,7 @@ mod powdr {
         apc: usize,
         apc_skip: usize,
         stdin: StdIn,
-    ) -> CompiledProgram<F> {
+    ) -> CompiledProgram<P> {
         let og = OriginalCompiledProgram { exe: exe.clone(), sdk_vm_config: vm_config.clone() };
 
         let pgo_data = pgo(og, stdin.clone()).unwrap();
@@ -497,12 +498,21 @@ mod powdr {
 
         let powdr_config = PowdrConfig::new(apc as u64, apc_skip as u64)
             .with_bus_map(bus_map)
-            .with_degree_bound(2);
+            .with_degree_bound(powdr_constraint_solver::inliner::DegreeBound {
+                identities: 2,
+                bus_interactions: 2,
+            });
 
         let elf_powdr = load_elf_from_buffer(elf);
 
-        let airs =
-            instructions_to_airs::<_, powdr_number::BabyBearField>(exe.clone(), vm_config.clone());
+        let used_instructions = exe
+            .program
+            .instructions_and_debug_infos
+            .iter()
+            .map(|instr| instr.as_ref().unwrap().0.opcode)
+            .collect();
+
+        let airs = instructions_to_airs(vm_config.clone(), &used_instructions);
 
         let (exe, extension) = customize(
             exe,
@@ -510,7 +520,8 @@ mod powdr {
             &elf_powdr.text_labels,
             &airs,
             powdr_config.clone(),
-            Some(pgo_data),
+            // TODO: We use PGO in Instuction mode since Cell mode requires creating all APCs, which runs out of memory.
+            PgoConfig::Instruction(pgo_data),
         );
         // Generate the custom config based on the generated instructions
         let vm_config = SpecializedConfig::from_base_and_extension(vm_config, extension);
