@@ -56,7 +56,6 @@ halo2-axiom = { version = "0.5.0", default-features = false }
 powdr-openvm = { workspace = true }
 powdr-riscv-elf = { workspace = true }
 powdr-number = { workspace = true }
-powdr-constraint-solver = { workspace = true }
 
 [features]
 default = ["mimalloc", "bench-metrics"]
