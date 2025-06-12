@@ -498,10 +498,7 @@ mod powdr {
 
         let powdr_config = PowdrConfig::new(apc as u64, apc_skip as u64)
             .with_bus_map(bus_map)
-            .with_degree_bound(powdr_constraint_solver::inliner::DegreeBound {
-                identities: 2,
-                bus_interactions: 2,
-            });
+            .with_degree_bound(powdr_openvm::DegreeBound { identities: 2, bus_interactions: 2 });
 
         let elf_powdr = load_elf_from_buffer(elf);
 
@@ -518,7 +515,7 @@ mod powdr {
             exe,
             vm_config.clone(),
             &elf_powdr.text_labels,
-            &airs,
+            airs,
             powdr_config.clone(),
             // TODO: We use PGO in Instuction mode since Cell mode requires creating all APCs, which runs out of memory.
             PgoConfig::Instruction(pgo_data),
