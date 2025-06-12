@@ -469,6 +469,10 @@ mod powdr {
     type P = powdr_number::BabyBearField;
     use openvm_circuit::arch::instructions::exe::VmExe;
     use openvm_sdk::{config::SdkVmConfig, StdIn};
+    use powdr_autoprecompiles::openvm::{
+        DEFAULT_BITWISE_LOOKUP, DEFAULT_EXECUTION_BRIDGE, DEFAULT_MEMORY,
+        DEFAULT_PC_LOOKUP, DEFAULT_VARIABLE_RANGE_CHECKER,
+    };
     use powdr_openvm::{
         customize, export_pil, instructions_to_airs, pgo, BusMap, BusType, CompiledProgram,
         OriginalCompiledProgram, PgoConfig, PowdrConfig, SpecializedConfig,
@@ -493,15 +497,27 @@ mod powdr {
 
         let pgo_data = pgo(og, stdin.clone()).unwrap();
 
-        let bus_map =
-            BusMap::openvm_base().with_sha(7).with_bus_type(8, BusType::TupleRangeChecker);
+        // Compared with the default BusMap in powdr, reth uses sha, which shifts the last two ids.
+        let sha_bus_id = 7;
+        let tuple_range_checker_bus_id = 8;
+
+        let bus_map = BusMap::new(
+            [
+                (DEFAULT_EXECUTION_BRIDGE, BusType::ExecutionBridge),
+                (DEFAULT_MEMORY, BusType::Memory),
+                (DEFAULT_PC_LOOKUP, BusType::PcLookup),
+                (DEFAULT_VARIABLE_RANGE_CHECKER, BusType::VariableRangeChecker),
+                (DEFAULT_BITWISE_LOOKUP, BusType::BitwiseLookup),
+                (sha_bus_id, BusType::Sha),
+                (tuple_range_checker_bus_id, BusType::TupleRangeChecker),
+            ]
+            .into_iter()
+            .collect(),
+        );
 
         let powdr_config = PowdrConfig::new(apc as u64, apc_skip as u64)
             .with_bus_map(bus_map)
-            .with_degree_bound(powdr_constraint_solver::inliner::DegreeBound {
-                identities: 2,
-                bus_interactions: 2,
-            });
+            .with_degree_bound(powdr_openvm::DegreeBound { identities: 2, bus_interactions: 2 });
 
         let elf_powdr = load_elf_from_buffer(elf);
 
