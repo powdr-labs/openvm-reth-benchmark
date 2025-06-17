@@ -11,7 +11,7 @@ if [ ! -f "$DEST" ] || ! cmp -s "$SRC" "$DEST"; then
 fi
 cd ../..
 
-#mkdir -p rpc-cache
+mkdir -p rpc-cache
 source .env
 # MODE=execute # can be execute, tracegen, prove-app, prove-stark, or prove-evm
 PROFILE="release"
