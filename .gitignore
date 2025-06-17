@@ -23,7 +23,5 @@ elf
 # KZG trusted setup
 **/params
 
-**/rpc-cache
-
 # Metrics
 metrics.json
