@@ -12,7 +12,7 @@ fi
 cd ../..
 
 #mkdir -p rpc-cache
-#source .env
+source .env
 # MODE=execute # can be execute, tracegen, prove-app, prove-stark, or prove-evm
 PROFILE="release"
 FEATURES="bench-metrics,nightly-features,jemalloc"
