@@ -29,6 +29,7 @@ use openvm_sdk::{
 };
 use openvm_stark_sdk::engine::StarkFriEngine;
 use openvm_transpiler::{elf::Elf, openvm_platform::memory::MEM_SIZE, FromElf};
+use powdr_openvm::{CompiledProgram, OriginalCompiledProgram};
 pub use reth_primitives;
 use reth_primitives::hex::ToHexExt;
 use serde_json::json;
@@ -325,8 +326,8 @@ pub async fn run_reth_benchmark<E: StarkFriEngine<SC>>(
     let elf = Elf::decode(openvm_client_eth_elf, MEM_SIZE as u32)?;
     let exe = VmExe::from_elf(elf, sdk_vm_config.transpiler()).unwrap();
 
-    let powdr_openvm::CompiledProgram { exe, vm_config } = powdr::apc(
-        powdr_openvm::OriginalCompiledProgram { exe, sdk_vm_config },
+    let CompiledProgram { exe, vm_config } = powdr::apc(
+        OriginalCompiledProgram { exe, sdk_vm_config },
         openvm_client_eth_elf,
         args.apc,
         args.apc_skip,
@@ -477,8 +478,10 @@ mod powdr {
             DEFAULT_BITWISE_LOOKUP, DEFAULT_EXECUTION_BRIDGE, DEFAULT_MEMORY, DEFAULT_PC_LOOKUP,
             DEFAULT_VARIABLE_RANGE_CHECKER,
         },
-        customize, export_pil, pgo, BusMap, BusType, CompiledProgram, OriginalCompiledProgram,
-        PgoConfig, PowdrConfig, SpecializedConfig,
+        customize,
+        extraction_utils::{export_pil, get_airs_and_bus_map},
+        instruction_blacklist, pgo, BusMap, BusType, CompiledProgram, DegreeBound,
+        OriginalCompiledProgram, PgoConfig, PowdrConfig, SpecializedConfig,
     };
     use powdr_riscv_elf::load_elf_from_buffer;
 
@@ -498,42 +501,38 @@ mod powdr {
         let pgo_data = pgo(original_program.clone(), stdin.clone()).unwrap();
 
         let powdr_config = PowdrConfig::new(apc as u64, apc_skip as u64)
-            .with_degree_bound(powdr_openvm::DegreeBound { identities: 2, bus_interactions: 2 });
+            .with_degree_bound(DegreeBound { identities: 2, bus_interactions: 2 });
 
         let elf_powdr = load_elf_from_buffer(elf);
 
+        let blacklist = instruction_blacklist();
         let used_instructions = original_program
             .exe
             .program
             .instructions_and_debug_infos
             .iter()
             .map(|instr| instr.as_ref().unwrap().0.opcode)
+            .filter(|opcode| !blacklist.contains(&opcode.as_usize()))
             .collect();
 
-        let (airs, _) = powdr_openvm::get_airs_and_bus_map(
-            original_program.sdk_vm_config.clone(),
-            &used_instructions,
-        )
-        .unwrap();
+        let (airs, _) =
+            get_airs_and_bus_map(original_program.sdk_vm_config.clone(), &used_instructions)
+                .unwrap();
 
         // The bus map returned by `get_airs_and_bus_map` is incorrect. We create the correct one.
-        // Compared with the default BusMap in powdr, reth uses sha, which shifts the last two ids.
+        // Compared with the default BusMap in _openvm, reth uses sha, which shifts the last two ids.
         let sha_bus_id = 7;
         let tuple_range_checker_bus_id = 8;
 
-        let bus_map = BusMap::new(
-            [
-                (DEFAULT_EXECUTION_BRIDGE, BusType::ExecutionBridge),
-                (DEFAULT_MEMORY, BusType::Memory),
-                (DEFAULT_PC_LOOKUP, BusType::PcLookup),
-                (DEFAULT_VARIABLE_RANGE_CHECKER, BusType::VariableRangeChecker),
-                (DEFAULT_BITWISE_LOOKUP, BusType::BitwiseLookup),
-                (sha_bus_id, BusType::Sha),
-                (tuple_range_checker_bus_id, BusType::TupleRangeChecker),
-            ]
-            .into_iter()
-            .collect(),
-        );
+        let bus_map = BusMap::from_id_type_pairs([
+            (DEFAULT_EXECUTION_BRIDGE, BusType::ExecutionBridge),
+            (DEFAULT_MEMORY, BusType::Memory),
+            (DEFAULT_PC_LOOKUP, BusType::PcLookup),
+            (DEFAULT_VARIABLE_RANGE_CHECKER, BusType::VariableRangeChecker),
+            (DEFAULT_BITWISE_LOOKUP, BusType::BitwiseLookup),
+            (sha_bus_id, BusType::Sha),
+            (tuple_range_checker_bus_id, BusType::TupleRangeChecker),
+        ]);
 
         let (exe, extension) = customize(
             original_program.clone(),
