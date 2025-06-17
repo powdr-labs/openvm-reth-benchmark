@@ -247,11 +247,11 @@ openvm-rv32im-guest = { git = "https://github.com/powdr-labs/openvm.git", rev = 
 # LOCAL USAGE PATCHES
 
 # Uncomment to use a local version of powdr.
-[patch."https://github.com/powdr-labs/powdr.git"]
-powdr-openvm = { path = "../powdr/openvm" }
-powdr-riscv-elf = { path = "../powdr/riscv-elf" }
-powdr-number = { path = "../powdr/number" }
-powdr-autoprecompiles = { path = "../powdr/autoprecompiles" }
+# [patch."https://github.com/powdr-labs/powdr.git"]
+# powdr-openvm = { path = "../powdr/openvm" }
+# powdr-riscv-elf = { path = "../powdr/riscv-elf" }
+# powdr-number = { path = "../powdr/number" }
+# powdr-autoprecompiles = { path = "../powdr/autoprecompiles" }
 
 # Uncomment the 2 patches below to use a local version of OpenVM.
 
