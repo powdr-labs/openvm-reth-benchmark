@@ -29,12 +29,12 @@ use openvm_sdk::{
 };
 use openvm_stark_sdk::engine::StarkFriEngine;
 use openvm_transpiler::{elf::Elf, openvm_platform::memory::MEM_SIZE, FromElf};
+use powdr_openvm::{CompiledProgram, OriginalCompiledProgram};
 pub use reth_primitives;
 use reth_primitives::hex::ToHexExt;
 use serde_json::json;
 use std::{fs, path::PathBuf, sync::Arc};
 use tracing::info_span;
-use tracing_subscriber::FmtSubscriber;
 
 mod execute;
 
@@ -315,7 +315,7 @@ pub async fn run_reth_benchmark<E: StarkFriEngine<SC>>(
     let leaf_log_blowup = args.benchmark.leaf_log_blowup.unwrap_or(RETH_DEFAULT_LEAF_LOG_BLOWUP);
     args.benchmark.leaf_log_blowup = Some(leaf_log_blowup);
 
-    let vm_config = reth_vm_config(
+    let sdk_vm_config = reth_vm_config(
         app_log_blowup,
         segment_max_height,
         segment_max_cells,
@@ -324,10 +324,15 @@ pub async fn run_reth_benchmark<E: StarkFriEngine<SC>>(
     let mut sdk = GenericSdk::<E>::new();
     sdk.set_agg_tree_config(args.benchmark.agg_tree_config);
     let elf = Elf::decode(openvm_client_eth_elf, MEM_SIZE as u32)?;
-    let exe = VmExe::from_elf(elf, vm_config.transpiler()).unwrap();
+    let exe = VmExe::from_elf(elf, sdk_vm_config.transpiler()).unwrap();
 
-    let powdr_openvm::CompiledProgram { exe, vm_config } =
-        powdr::apc(exe, vm_config, openvm_client_eth_elf, args.apc, args.apc_skip, stdin.clone());
+    let CompiledProgram { exe, vm_config } = powdr::apc(
+        OriginalCompiledProgram { exe, sdk_vm_config },
+        openvm_client_eth_elf,
+        args.apc,
+        args.apc_skip,
+        stdin.clone(),
+    );
 
     let program_name = format!("reth.{}.block_{}", args.mode, args.block_number);
     // NOTE: args.benchmark.app_config resets SegmentationStrategy if max_segment_length is set
@@ -465,12 +470,17 @@ fn try_load_input_from_cache(
 }
 
 mod powdr {
-    type F = crate::BabyBear;
     type P = powdr_number::BabyBearField;
-    use openvm_circuit::arch::instructions::exe::VmExe;
-    use openvm_sdk::{config::SdkVmConfig, StdIn};
+
+    use openvm_sdk::StdIn;
     use powdr_openvm::{
-        customize, export_pil, instructions_to_airs, pgo, BusMap, BusType, CompiledProgram,
+        bus_map::{
+            DEFAULT_BITWISE_LOOKUP, DEFAULT_EXECUTION_BRIDGE, DEFAULT_MEMORY, DEFAULT_PC_LOOKUP,
+            DEFAULT_VARIABLE_RANGE_CHECKER,
+        },
+        customize,
+        extraction_utils::{export_pil, get_airs_and_bus_map},
+        instruction_blacklist, pgo, BusMap, BusType, CompiledProgram, DegreeBound,
         OriginalCompiledProgram, PgoConfig, PowdrConfig, SpecializedConfig,
     };
     use powdr_riscv_elf::load_elf_from_buffer;
@@ -482,50 +492,61 @@ mod powdr {
     /// - `elf`: The original ELF file, used to detect the basic blocks.
     /// - `stdin`: The standard input to the program, used for PGO data generation to choose which basic blocks to accelerate.
     pub fn apc(
-        exe: VmExe<F>,
-        vm_config: SdkVmConfig,
+        original_program: OriginalCompiledProgram<P>,
         elf: &[u8],
         apc: usize,
         apc_skip: usize,
         stdin: StdIn,
     ) -> CompiledProgram<P> {
-        let og = OriginalCompiledProgram { exe: exe.clone(), sdk_vm_config: vm_config.clone() };
-
-        let pgo_data = pgo(og, stdin.clone()).unwrap();
-
-        let bus_map =
-            BusMap::openvm_base().with_sha(7).with_bus_type(8, BusType::TupleRangeChecker);
+        let pgo_data = pgo(original_program.clone(), stdin.clone()).unwrap();
 
         let powdr_config = PowdrConfig::new(apc as u64, apc_skip as u64)
-            .with_bus_map(bus_map)
-            .with_degree_bound(powdr_constraint_solver::inliner::DegreeBound {
-                identities: 2,
-                bus_interactions: 2,
-            });
+            .with_degree_bound(DegreeBound { identities: 3, bus_interactions: 2 });
 
         let elf_powdr = load_elf_from_buffer(elf);
 
-        let used_instructions = exe
+        let blacklist = instruction_blacklist();
+        let used_instructions = original_program
+            .exe
             .program
             .instructions_and_debug_infos
             .iter()
             .map(|instr| instr.as_ref().unwrap().0.opcode)
+            .filter(|opcode| !blacklist.contains(&opcode.as_usize()))
             .collect();
 
-        let airs = instructions_to_airs(vm_config.clone(), &used_instructions);
+        let (airs, _) =
+            get_airs_and_bus_map(original_program.sdk_vm_config.clone(), &used_instructions)
+                .unwrap();
+
+        // The bus map returned by `get_airs_and_bus_map` is incorrect. We create the correct one.
+        // Compared with the default BusMap in _openvm, reth uses sha, which shifts the last two ids.
+        let sha_bus_id = 7;
+        let tuple_range_checker_bus_id = 8;
+
+        let bus_map = BusMap::from_id_type_pairs([
+            (DEFAULT_EXECUTION_BRIDGE, BusType::ExecutionBridge),
+            (DEFAULT_MEMORY, BusType::Memory),
+            (DEFAULT_PC_LOOKUP, BusType::PcLookup),
+            (DEFAULT_VARIABLE_RANGE_CHECKER, BusType::VariableRangeChecker),
+            (DEFAULT_BITWISE_LOOKUP, BusType::BitwiseLookup),
+            (sha_bus_id, BusType::Sha),
+            (tuple_range_checker_bus_id, BusType::TupleRangeChecker),
+        ]);
 
         let (exe, extension) = customize(
-            exe,
-            vm_config.clone(),
+            original_program.clone(),
             &elf_powdr.text_labels,
             &airs,
             powdr_config.clone(),
+            bus_map.clone(),
             // TODO: We use PGO in Instuction mode since Cell mode requires creating all APCs, which runs out of memory.
             PgoConfig::Instruction(pgo_data),
         );
         // Generate the custom config based on the generated instructions
-        let vm_config = SpecializedConfig::from_base_and_extension(vm_config, extension);
-        export_pil(vm_config.clone(), "debug.pil", 1000, &powdr_config.bus_map);
+        let vm_config =
+            SpecializedConfig::from_base_and_extension(original_program.sdk_vm_config, extension);
+        export_pil(vm_config.clone(), "debug.pil", &["KeccakVmAir"], &bus_map);
         CompiledProgram { exe, vm_config }
     }
 }
