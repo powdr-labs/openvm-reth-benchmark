@@ -501,7 +501,7 @@ mod powdr {
         let pgo_data = pgo(original_program.clone(), stdin.clone()).unwrap();
 
         let powdr_config = PowdrConfig::new(apc as u64, apc_skip as u64)
-            .with_degree_bound(DegreeBound { identities: 2, bus_interactions: 2 });
+            .with_degree_bound(DegreeBound { identities: 3, bus_interactions: 2 });
 
         let elf_powdr = load_elf_from_buffer(elf);
 
