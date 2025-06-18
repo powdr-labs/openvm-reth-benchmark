@@ -29,7 +29,7 @@ use openvm_sdk::{
 };
 use openvm_stark_sdk::engine::StarkFriEngine;
 use openvm_transpiler::{elf::Elf, openvm_platform::memory::MEM_SIZE, FromElf};
-use powdr_openvm::{CompiledProgram, OriginalCompiledProgram};
+use powdr_openvm::{CompiledProgram, OriginalCompiledProgram, PgoType};
 pub use reth_primitives;
 use reth_primitives::hex::ToHexExt;
 use serde_json::json;
@@ -111,6 +111,9 @@ pub struct HostArgs {
 
     #[arg(long)]
     apc_skip: usize,
+
+    #[arg(long)]
+    pgo_type: PgoType,
 }
 
 /// Segments based on total trace cells across all chips
@@ -331,6 +334,7 @@ pub async fn run_reth_benchmark<E: StarkFriEngine<SC>>(
         openvm_client_eth_elf,
         args.apc,
         args.apc_skip,
+        args.pgo_type,
         stdin.clone(),
     );
 
@@ -473,7 +477,7 @@ mod powdr {
     use openvm_sdk::StdIn;
     use powdr_openvm::{
         compile_exe_with_elf, pgo, CompiledProgram, DegreeBound, OriginalCompiledProgram,
-        PgoConfig, PowdrConfig,
+        PgoConfig, PgoType, PowdrConfig,
     };
 
     /// This function is used to generate the specialized program for the Powdr APC.
@@ -487,14 +491,20 @@ mod powdr {
         elf: &[u8],
         apc: usize,
         apc_skip: usize,
+        pgo_type: PgoType,
         stdin: StdIn,
     ) -> CompiledProgram {
-        let pgo_data = pgo(original_program.clone(), stdin.clone()).unwrap();
+        let pgo_config = match pgo_type {
+            PgoType::None => PgoConfig::None,
+            PgoType::Instruction => {
+                PgoConfig::Instruction(pgo(original_program.clone(), stdin).unwrap())
+            }
+            PgoType::Cell => PgoConfig::Cell(pgo(original_program.clone(), stdin).unwrap()),
+        };
 
         let config = PowdrConfig::new(apc as u64, apc_skip as u64)
             .with_degree_bound(DegreeBound { identities: 3, bus_interactions: 2 });
 
-        compile_exe_with_elf(original_program, elf, config, PgoConfig::Instruction(pgo_data))
-            .unwrap()
+        compile_exe_with_elf(original_program, elf, config, pgo_config).unwrap()
     }
 }
