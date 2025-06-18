@@ -35,3 +35,17 @@ export JEMALLOC_SYS_WITH_MALLOC_CONF="retain:true,background_thread:true,metadat
 RUSTFLAGS=$RUSTFLAGS cargo build --bin openvm-reth-benchmark-bin --profile=$PROFILE --no-default-features --features=$FEATURES
 PARAMS_DIR="params"
 RUST_LOG="debug" OUTPUT_PATH="metrics.json" ./target/$PROFILE/openvm-reth-benchmark-bin --kzg-params-dir $PARAMS_DIR --mode $MODE --block-number $BLOCK_NUMBER --rpc-url $RPC_1 --cache-dir rpc-cache --apc "$APC" --apc-skip "$APC_SKIP"
+
+if [ "$MODE" = "prove-app" ]; then
+  echo "==> Generating trace cell plot..."
+  if [ ! -d "scripts/.venv" ]; then
+    echo "Creating Python virtual environment..."
+    python3 -m venv scripts/.venv
+  fi
+  source scripts/.venv/bin/activate
+  pip install -r scripts/requirements.txt
+  filename="trace_cells_by_air_${BLOCK_NUMBER}_$APC.png"
+  python scripts/plot_trace_cells.py metrics.json --output $filename --subtitle "Reth via OpenVM, $APC APCs, Block $BLOCK_NUMBER"
+  echo "Trace cell plot saved as $filename"
+  deactivate
+fi
