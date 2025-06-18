@@ -113,7 +113,7 @@ pub struct HostArgs {
     apc_skip: usize,
 
     #[arg(long)]
-    pgo_mode: PgoType,
+    pgo_type: PgoType,
 }
 
 /// Segments based on total trace cells across all chips
@@ -334,7 +334,7 @@ pub async fn run_reth_benchmark<E: StarkFriEngine<SC>>(
         openvm_client_eth_elf,
         args.apc,
         args.apc_skip,
-        args.pgo_mode,
+        args.pgo_type,
         stdin.clone(),
     );
 

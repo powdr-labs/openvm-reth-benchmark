@@ -44,4 +44,4 @@ RUST_LOG="debug" OUTPUT_PATH="metrics.json" ./target/$PROFILE/openvm-reth-benchm
   --cache-dir "rpc-cache" \
   --apc "$APC" \
   --apc-skip "$APC_SKIP" \
-  --pgo-mode "$PGO_MODE"
+  --pgo-type "$PGO_TYPE"
