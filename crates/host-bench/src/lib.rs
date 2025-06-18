@@ -470,20 +470,11 @@ fn try_load_input_from_cache(
 }
 
 mod powdr {
-    type P = powdr_number::BabyBearField;
-
     use openvm_sdk::StdIn;
     use powdr_openvm::{
-        bus_map::{
-            DEFAULT_BITWISE_LOOKUP, DEFAULT_EXECUTION_BRIDGE, DEFAULT_MEMORY, DEFAULT_PC_LOOKUP,
-            DEFAULT_VARIABLE_RANGE_CHECKER,
-        },
-        customize,
-        extraction_utils::{export_pil, get_airs_and_bus_map},
-        instruction_blacklist, pgo, BusMap, BusType, CompiledProgram, DegreeBound,
-        OriginalCompiledProgram, PgoConfig, PowdrConfig, SpecializedConfig,
+        compile_exe_with_elf, pgo, CompiledProgram, DegreeBound, OriginalCompiledProgram,
+        PgoConfig, PowdrConfig,
     };
-    use powdr_riscv_elf::load_elf_from_buffer;
 
     /// This function is used to generate the specialized program for the Powdr APC.
     /// It takes:
@@ -492,61 +483,18 @@ mod powdr {
     /// - `elf`: The original ELF file, used to detect the basic blocks.
     /// - `stdin`: The standard input to the program, used for PGO data generation to choose which basic blocks to accelerate.
     pub fn apc(
-        original_program: OriginalCompiledProgram<P>,
+        original_program: OriginalCompiledProgram,
         elf: &[u8],
         apc: usize,
         apc_skip: usize,
         stdin: StdIn,
-    ) -> CompiledProgram<P> {
+    ) -> CompiledProgram {
         let pgo_data = pgo(original_program.clone(), stdin.clone()).unwrap();
 
-        let powdr_config = PowdrConfig::new(apc as u64, apc_skip as u64)
+        let config = PowdrConfig::new(apc as u64, apc_skip as u64)
             .with_degree_bound(DegreeBound { identities: 3, bus_interactions: 2 });
 
-        let elf_powdr = load_elf_from_buffer(elf);
-
-        let blacklist = instruction_blacklist();
-        let used_instructions = original_program
-            .exe
-            .program
-            .instructions_and_debug_infos
-            .iter()
-            .map(|instr| instr.as_ref().unwrap().0.opcode)
-            .filter(|opcode| !blacklist.contains(&opcode.as_usize()))
-            .collect();
-
-        let (airs, _) =
-            get_airs_and_bus_map(original_program.sdk_vm_config.clone(), &used_instructions)
-                .unwrap();
-
-        // The bus map returned by `get_airs_and_bus_map` is incorrect. We create the correct one.
-        // Compared with the default BusMap in _openvm, reth uses sha, which shifts the last two ids.
-        let sha_bus_id = 7;
-        let tuple_range_checker_bus_id = 8;
-
-        let bus_map = BusMap::from_id_type_pairs([
-            (DEFAULT_EXECUTION_BRIDGE, BusType::ExecutionBridge),
-            (DEFAULT_MEMORY, BusType::Memory),
-            (DEFAULT_PC_LOOKUP, BusType::PcLookup),
-            (DEFAULT_VARIABLE_RANGE_CHECKER, BusType::VariableRangeChecker),
-            (DEFAULT_BITWISE_LOOKUP, BusType::BitwiseLookup),
-            (sha_bus_id, BusType::Sha),
-            (tuple_range_checker_bus_id, BusType::TupleRangeChecker),
-        ]);
-
-        let (exe, extension) = customize(
-            original_program.clone(),
-            &elf_powdr.text_labels,
-            &airs,
-            powdr_config.clone(),
-            bus_map.clone(),
-            // TODO: We use PGO in Instuction mode since Cell mode requires creating all APCs, which runs out of memory.
-            PgoConfig::Instruction(pgo_data),
-        );
-        // Generate the custom config based on the generated instructions
-        let vm_config =
-            SpecializedConfig::from_base_and_extension(original_program.sdk_vm_config, extension);
-        export_pil(vm_config.clone(), "debug.pil", &["KeccakVmAir"], &bus_map);
-        CompiledProgram { exe, vm_config }
+        compile_exe_with_elf(original_program, elf, config, PgoConfig::Instruction(pgo_data))
+            .unwrap()
     }
 }
