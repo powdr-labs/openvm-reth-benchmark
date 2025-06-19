@@ -237,7 +237,7 @@ jobs:
       - name: Set build args
         id: set-build-args
         run: |
-          FEATURES="bench-metrics,nightly-features,${{ inputs.memory_allocator || github.event.inputs.memory_allocator || 'jemalloc' }}"
+          FEATURES="bench-metrics,evm-verify,nightly-features,${{ inputs.memory_allocator || github.event.inputs.memory_allocator || 'jemalloc' }}"
           if [[ "${{ inputs.profiling || github.event.inputs.profiling }}" == "guest" ]]; then
             FEATURES="${FEATURES},profiling"
           fi
@@ -285,7 +285,7 @@ jobs:
 
       - name: Install openvm-prof
         run: |
-          cargo install --git https://github.com/powdr-labs/openvm.git --tag v1.1.2 --profile=dev --force openvm-prof
+          cargo install --git https://github.com/powdr-labs/openvm.git --rev 33abb41 --profile=dev --force openvm-prof
       - name: Checkout openvm (for scripts)
         run: |
           git clone --depth=1 https://github.com/powdr-labs/openvm.git
@@ -317,7 +317,7 @@ jobs:
       - name: Install cargo-openvm
         if: steps.cache-guest-elf-restore.outputs.cache-hit != 'true'
         run: |
-          cargo install --git https://github.com/powdr-labs/openvm.git --tag v1.1.2 --locked --force cargo-openvm
+          cargo install --git https://github.com/powdr-labs/openvm.git --rev 33abb41 --locked --force cargo-openvm
       - name: Build Guest ELF
         if: steps.cache-guest-elf-restore.outputs.cache-hit != 'true'
         working-directory: bin/client-eth

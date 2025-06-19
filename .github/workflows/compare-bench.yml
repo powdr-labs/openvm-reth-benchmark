@@ -118,7 +118,7 @@ jobs:
 
       - name: Install openvm-prof
         run: |
-          cargo install --git https://github.com/powdr-labs/openvm.git --tag v1.1.2 --profile=dev --force openvm-prof
+          cargo install --git https://github.com/powdr-labs/openvm.git --rev 33abb41 --profile=dev --force openvm-prof
       - name: Compare metrics
         run: |
           ls

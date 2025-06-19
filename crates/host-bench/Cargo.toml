@@ -25,6 +25,7 @@ openvm-host-executor.workspace = true
 openvm-client-executor.workspace = true
 
 # alloy
+alloy-primitives.workspace = true
 alloy-provider.workspace = true
 alloy-rpc-client.workspace = true
 alloy-transport.workspace = true
@@ -59,8 +60,10 @@ powdr-number = { workspace = true }
 powdr-autoprecompiles = { workspace = true }
 
 [features]
-default = ["mimalloc", "bench-metrics"]
+default = ["mimalloc", "bench-metrics", "evm-verify"]
 bench-metrics = ["openvm-benchmarks-prove/bench-metrics"]
+evm-prove = ["openvm-sdk/evm-prove"]
+evm-verify = ["evm-prove", "openvm-sdk/evm-verify"]
 profiling = ["openvm-sdk/profiling", "openvm-benchmarks-prove/profiling"]
 mimalloc = ["openvm-benchmarks-prove/mimalloc"]
 jemalloc = ["openvm-benchmarks-prove/jemalloc"]
