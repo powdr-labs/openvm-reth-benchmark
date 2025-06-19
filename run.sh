@@ -35,6 +35,10 @@ export JEMALLOC_SYS_WITH_MALLOC_CONF="retain:true,background_thread:true,metadat
 RUSTFLAGS=$RUSTFLAGS cargo build --bin openvm-reth-benchmark-bin --profile=$PROFILE --no-default-features --features=$FEATURES
 PARAMS_DIR="params"
 
+: "${MODE:=execute}"
+: "${APC:=0}"
+: "${APC_SKIP:=0}"
+: "${PGO_TYPE:=cell}"
 
 RUST_LOG="debug" OUTPUT_PATH="metrics.json" ./target/$PROFILE/openvm-reth-benchmark-bin \
   --kzg-params-dir "$PARAMS_DIR" \
@@ -45,3 +49,4 @@ RUST_LOG="debug" OUTPUT_PATH="metrics.json" ./target/$PROFILE/openvm-reth-benchm
   --apc "$APC" \
   --apc-skip "$APC_SKIP" \
   --pgo-type "$PGO_TYPE"
+
