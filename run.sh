@@ -35,6 +35,7 @@ export JEMALLOC_SYS_WITH_MALLOC_CONF="retain:true,background_thread:true,metadat
 RUSTFLAGS=$RUSTFLAGS cargo build --bin openvm-reth-benchmark-bin --profile=$PROFILE --no-default-features --features=$FEATURES
 PARAMS_DIR="params"
 
+# Default options if not set
 : "${MODE:=execute}"
 : "${APC:=0}"
 : "${APC_SKIP:=0}"
