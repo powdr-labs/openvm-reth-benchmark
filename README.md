@@ -16,7 +16,7 @@ To run these benchmarks locally, you must first have [Rust](https://www.rust-lan
 Install the OpenVM command line interface by building from source via:
 
 ```bash
-cargo install --git 'http://github.com/powdr-labs/openvm.git' --tag v1.1.2 cargo-openvm
+cargo install --git https://github.com/powdr-labs/openvm.git --rev 33abb41 cargo-openvm
 ```
 
 ### RPC Node Requirement
