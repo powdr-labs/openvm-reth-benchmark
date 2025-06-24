@@ -468,8 +468,8 @@ fn try_load_input_from_cache(
 mod powdr {
     use openvm_sdk::StdIn;
     use powdr_openvm::{
-        compile_exe_with_elf, pgo, CompiledProgram, DegreeBound, OriginalCompiledProgram,
-        PgoConfig, PgoType, PowdrConfig,
+        compile_exe_with_elf, execution_profile, CompiledProgram, DegreeBound,
+        OriginalCompiledProgram, PgoConfig, PgoType, PowdrConfig,
     };
 
     /// This function is used to generate the specialized program for the Powdr APC.
@@ -489,9 +489,9 @@ mod powdr {
         let pgo_config = match pgo_type {
             PgoType::None => PgoConfig::None,
             PgoType::Instruction => {
-                PgoConfig::Instruction(pgo(original_program.clone(), stdin).unwrap())
+                PgoConfig::Instruction(execution_profile(original_program.clone(), stdin))
             }
-            PgoType::Cell => PgoConfig::Cell(pgo(original_program.clone(), stdin).unwrap()),
+            PgoType::Cell => PgoConfig::Cell(execution_profile(original_program.clone(), stdin)),
         };
 
         let config = PowdrConfig::new(apc as u64, apc_skip as u64)
