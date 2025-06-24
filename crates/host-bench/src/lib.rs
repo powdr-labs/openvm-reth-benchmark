@@ -53,6 +53,8 @@ pub enum BenchMode {
     ProveEvm,
     /// Generate input file only.
     MakeInput,
+    /// Compile with apcs, no execution.
+    Compile
 }
 
 impl std::fmt::Display for BenchMode {
@@ -64,6 +66,7 @@ impl std::fmt::Display for BenchMode {
             Self::ProveStark => write!(f, "prove_stark"),
             Self::ProveEvm => write!(f, "prove_evm"),
             Self::MakeInput => write!(f, "make_input"),
+            Self::Compile => write!(f, "compile"),
         }
     }
 }
@@ -342,6 +345,10 @@ pub async fn run_reth_benchmark<E: StarkFriEngine<SC>>(
         info_span!("reth-block", block_number = args.block_number).in_scope(
             || -> eyre::Result<()> {
                 match args.mode {
+                    BenchMode::Compile => {
+                        // This mode is used to compile the program with APCs, no execution.
+                        println!("Compiled program with APCs");
+                    }
                     BenchMode::Execute => {
                         let pvs = info_span!("execute", group = program_name)
                             .in_scope(|| sdk.execute(exe, app_config.app_vm_config, stdin))?;
