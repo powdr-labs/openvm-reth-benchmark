@@ -112,8 +112,8 @@ pub struct HostArgs {
     #[arg(long)]
     apc_skip: usize,
 
-    #[arg(long)]
-    pgo_type: PgoType,
+    // #[arg(long)]
+    // pgo_type: PgoType,
 }
 
 /// Segments based on total trace cells across all chips
@@ -324,19 +324,19 @@ pub async fn run_reth_benchmark<E: StarkFriEngine<SC>>(
     let elf = Elf::decode(openvm_client_eth_elf, MEM_SIZE as u32)?;
     let exe = VmExe::from_elf(elf, sdk_vm_config.transpiler()).unwrap();
 
-    let CompiledProgram { exe, vm_config } = powdr::apc(
+    let compiled_program = powdr::apc(
         OriginalCompiledProgram { exe, sdk_vm_config },
         openvm_client_eth_elf,
         args.apc,
         args.apc_skip,
-        args.pgo_type,
+        PgoType::Cell(Some(60000)),
         stdin.clone(),
     );
 
     let program_name = format!("reth.{}.block_{}", args.mode, args.block_number);
     // NOTE: args.benchmark.app_config resets SegmentationStrategy if max_segment_length is set
     args.benchmark.max_segment_length = None;
-    let app_config = args.benchmark.app_config(vm_config.clone());
+    let app_config = args.benchmark.app_config(compiled_program.vm_config.clone());
 
     // Comment out the 3 lines below to get powdr logs instead of openvm logs.
     // If these are enabled the powdr logs above need to be disabled.
@@ -344,6 +344,12 @@ pub async fn run_reth_benchmark<E: StarkFriEngine<SC>>(
     run_with_metric_collection("OUTPUT_PATH", || {
         info_span!("reth-block", block_number = args.block_number).in_scope(
             || -> eyre::Result<()> {
+
+                let metrics = compiled_program.powdr_airs_metrics();
+                println!("Created {} apcs out of max {}, total powdr column count {}", metrics.len(), args.apc, metrics.iter().map(|m| m.width).sum::<usize>());
+
+                let CompiledProgram { exe, vm_config } = compiled_program;
+
                 match args.mode {
                     BenchMode::Compile => {
                         // This mode is used to compile the program with APCs, no execution.
@@ -498,7 +504,7 @@ mod powdr {
             PgoType::Instruction => {
                 PgoConfig::Instruction(execution_profile(original_program.clone(), stdin))
             }
-            PgoType::Cell => PgoConfig::Cell(execution_profile(original_program.clone(), stdin)),
+            PgoType::Cell(max_total_apc_columns) => PgoConfig::Cell(execution_profile(original_program.clone(), stdin), max_total_apc_columns),
         };
 
         let config = PowdrConfig::new(apc as u64, apc_skip as u64)
