@@ -498,8 +498,8 @@ mod powdr {
             PgoType::Instruction => {
                 PgoConfig::Instruction(execution_profile(original_program.clone(), stdin))
             }
-            PgoType::Cell(apcs) => {
-                PgoConfig::Cell(execution_profile(original_program.clone(), stdin), apcs)
+            PgoType::Cell(_) => {
+                PgoConfig::Cell(execution_profile(original_program.clone(), stdin), None)
             }
         };
 
