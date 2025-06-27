@@ -54,7 +54,7 @@ pub enum BenchMode {
     /// Generate input file only.
     MakeInput,
     /// Compile with apcs, no execution.
-    Compile
+    Compile,
 }
 
 impl std::fmt::Display for BenchMode {
@@ -498,7 +498,9 @@ mod powdr {
             PgoType::Instruction => {
                 PgoConfig::Instruction(execution_profile(original_program.clone(), stdin))
             }
-            PgoType::Cell => PgoConfig::Cell(execution_profile(original_program.clone(), stdin)),
+            PgoType::Cell(_) => {
+                PgoConfig::Cell(execution_profile(original_program.clone(), stdin), None)
+            }
         };
 
         let config = PowdrConfig::new(apc as u64, apc_skip as u64)
