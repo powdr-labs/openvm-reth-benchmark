@@ -18,19 +18,12 @@ PROFILE="release"
 FEATURES="bench-metrics,nightly-features,jemalloc"
 BLOCK_NUMBER=21882667
 
-arch=$(uname -m)
-case $arch in
-arm64 | aarch64)
-  RUSTFLAGS="-Ctarget-cpu=native"
-  ;;
-x86_64 | amd64)
+if grep -m1 -q 'avx512f' /proc/cpuinfo; then
   RUSTFLAGS="-Ctarget-cpu=native -C target-feature=+avx512f"
-  ;;
-*)
-  echo "Unsupported architecture: $arch"
-  exit 1
-  ;;
-esac
+else
+  RUSTFLAGS="-Ctarget-cpu=native"
+fi
+
 export JEMALLOC_SYS_WITH_MALLOC_CONF="retain:true,background_thread:true,metadata_thp:always,dirty_decay_ms:-1,muzzy_decay_ms:-1,abort_conf:true"
 RUSTFLAGS=$RUSTFLAGS cargo build --bin openvm-reth-benchmark-bin --profile=$PROFILE --no-default-features --features=$FEATURES
 PARAMS_DIR="params"
