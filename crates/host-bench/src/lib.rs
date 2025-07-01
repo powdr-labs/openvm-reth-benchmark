@@ -228,14 +228,6 @@ pub async fn run_reth_benchmark<E: StarkFriEngine<SC>>(
         std::env::set_var("RUST_LOG", "info");
     }
 
-    // Uncomment these to enable powdr logs.
-    // I haven't figured out how to get both powdr and openvm logs at the same time.
-    // If you uncomment these, you have to comment out some lines below when calling openvm,
-    // otherwise the logger gets initialized twice and panics.
-    // Look for similar comments below.
-    // let subscriber = FmtSubscriber::builder().with_max_level(tracing::Level::DEBUG).finish();
-    // tracing::subscriber::set_global_default(subscriber).expect("setting default subscriber failed");
-
     // Parse the command line arguments.
     let mut args = args;
     let provider_config = args.provider.into_provider().await?;
@@ -324,23 +316,27 @@ pub async fn run_reth_benchmark<E: StarkFriEngine<SC>>(
     let elf = Elf::decode(openvm_client_eth_elf, MEM_SIZE as u32)?;
     let exe = VmExe::from_elf(elf, sdk_vm_config.transpiler()).unwrap();
 
-    let CompiledProgram { exe, vm_config } = powdr::apc(
-        OriginalCompiledProgram { exe, sdk_vm_config },
-        openvm_client_eth_elf,
-        args.apc,
-        args.apc_skip,
-        args.pgo_type,
-        stdin.clone(),
-    );
+    let CompiledProgram { exe, vm_config } = {
+        // We do this in a separate scope so the log initialization does not conflict with OpenVM's.
+        // The powdr log is enabled during the scope of `_guard`.
+        let subscriber = tracing_subscriber::FmtSubscriber::builder().with_max_level(tracing::Level::DEBUG).finish();
+        let _guard = tracing::subscriber::set_default(subscriber);
+
+        powdr::apc(
+            OriginalCompiledProgram { exe, sdk_vm_config },
+            openvm_client_eth_elf,
+            args.apc,
+            args.apc_skip,
+            args.pgo_type,
+            stdin.clone(),
+        )
+    };
 
     let program_name = format!("reth.{}.block_{}", args.mode, args.block_number);
     // NOTE: args.benchmark.app_config resets SegmentationStrategy if max_segment_length is set
     args.benchmark.max_segment_length = None;
     let app_config = args.benchmark.app_config(vm_config.clone());
 
-    // Comment out the 3 lines below to get powdr logs instead of openvm logs.
-    // If these are enabled the powdr logs above need to be disabled.
-    // Look for similar comments at the beginning of this function.
     run_with_metric_collection("OUTPUT_PATH", || {
         info_span!("reth-block", block_number = args.block_number).in_scope(
             || -> eyre::Result<()> {
