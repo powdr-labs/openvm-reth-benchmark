@@ -1,0 +1,1336 @@
+Apc(opcode: 4372, execution_frequency: 986059, cells_saved_per_row: 559, cells_per_row_after_saving: 237, percent_saved: 70.23%)
+BasicBlock(start_idx: 135, statements: [
+   instr   0:   LOADW rd_rs2_ptr = 60, rs1_ptr = 56, imm = 0, mem_as = 2, needs_write = 1, imm_sign = 0
+   instr   1:   LOADW rd_rs2_ptr = 64, rs1_ptr = 56, imm = 4, mem_as = 2, needs_write = 1, imm_sign = 0
+   instr   2:   LOADW rd_rs2_ptr = 68, rs1_ptr = 56, imm = 8, mem_as = 2, needs_write = 1, imm_sign = 0
+   instr   3:   LOADW rd_rs2_ptr = 20, rs1_ptr = 56, imm = 12, mem_as = 2, needs_write = 1, imm_sign = 0
+   instr   4:   STOREW rd_rs2_ptr = 60, rs1_ptr = 52, imm = 0, mem_as = 2, needs_write = 1, imm_sign = 0
+   instr   5:   STOREW rd_rs2_ptr = 64, rs1_ptr = 52, imm = 4, mem_as = 2, needs_write = 1, imm_sign = 0
+   instr   6:   STOREW rd_rs2_ptr = 68, rs1_ptr = 52, imm = 8, mem_as = 2, needs_write = 1, imm_sign = 0
+   instr   7:   STOREW rd_rs2_ptr = 20, rs1_ptr = 52, imm = 12, mem_as = 2, needs_write = 1, imm_sign = 0
+   instr   8:   ADD rd_ptr = 56, rs1_ptr = 56, rs2 = 16, rs2_as = 0
+   instr   9:   ADD rd_ptr = 48, rs1_ptr = 48, rs2 = 16777200, rs2_as = 0
+   instr  10:   ADD rd_ptr = 52, rs1_ptr = 52, rs2 = 16, rs2_as = 0
+   instr  11:   BLTU 44 48 2013265877 1 1
+])
+
+Apc(opcode: 4361, execution_frequency: 442931, cells_saved_per_row: 611, cells_per_row_after_saving: 198, percent_saved: 75.53%)
+BasicBlock(start_idx: 69, statements: [
+   instr   0:   LOADB rd_rs2_ptr = 68, rs1_ptr = 44, imm = 0, mem_as = 2, needs_write = 1, imm_sign = 0
+   instr   1:   ADD rd_ptr = 56, rs1_ptr = 44, rs2 = 1, rs2_as = 0
+   instr   2:   ADD rd_ptr = 52, rs1_ptr = 64, rs2 = 1, rs2_as = 0
+   instr   3:   STOREB rd_rs2_ptr = 68, rs1_ptr = 64, imm = 0, mem_as = 2, needs_write = 1, imm_sign = 0
+   instr   4:   ADD rd_ptr = 48, rs1_ptr = 48, rs2 = 16777215, rs2_as = 0
+   instr   5:   AND rd_ptr = 44, rs1_ptr = 60, rs2 = 3, rs2_as = 0
+   instr   6:   SLTU rd_ptr = 44, rs1_ptr = 0, rs2 = 44, rs2_as = 1
+   instr   7:   SLTU rd_ptr = 64, rs1_ptr = 0, rs2 = 48, rs2_as = 1
+   instr   8:   AND rd_ptr = 68, rs1_ptr = 44, rs2 = 64, rs2_as = 1
+   instr   9:   ADD rd_ptr = 60, rs1_ptr = 60, rs2 = 1, rs2_as = 0
+   instr  10:   ADD rd_ptr = 44, rs1_ptr = 56, rs2 = 0, rs2_as = 0
+   instr  11:   ADD rd_ptr = 64, rs1_ptr = 52, rs2 = 0, rs2_as = 0
+   instr  12:   BNE 68 0 2013265873 1 1
+])
+
+Apc(opcode: 4359, execution_frequency: 446338, cells_saved_per_row: 210, cells_per_row_after_saving: 82, percent_saved: 71.92%)
+BasicBlock(start_idx: 62, statements: [
+   instr   0:   AND rd_ptr = 52, rs1_ptr = 44, rs2 = 3, rs2_as = 0
+   instr   1:   SLTU rd_ptr = 52, rs1_ptr = 52, rs2 = 1, rs2_as = 0
+   instr   2:   SLTU rd_ptr = 56, rs1_ptr = 48, rs2 = 1, rs2_as = 0
+   instr   3:   OR rd_ptr = 52, rs1_ptr = 52, rs2 = 56, rs2_as = 1
+   instr   4:   BNE 52 0 248 1 1
+])
+
+Apc(opcode: 8058, execution_frequency: 376584, cells_saved_per_row: 482, cells_per_row_after_saving: 179, percent_saved: 72.92%)
+BasicBlock(start_idx: 153417, statements: [
+   instr   0:   LOADW rd_rs2_ptr = 40, rs1_ptr = 104, imm = 316, mem_as = 2, needs_write = 1, imm_sign = 0
+   instr   1:   LOADBU rd_rs2_ptr = 44, rs1_ptr = 40, imm = 0, mem_as = 2, needs_write = 1, imm_sign = 0
+   instr   2:   ADD rd_ptr = 40, rs1_ptr = 40, rs2 = 1, rs2_as = 0
+   instr   3:   STOREW rd_rs2_ptr = 40, rs1_ptr = 104, imm = 316, mem_as = 2, needs_write = 1, imm_sign = 0
+   instr   4:   SLL rd_ptr = 44, rs1_ptr = 44, rs2 = 2, rs2_as = 0
+   instr   5:   ADD rd_ptr = 44, rs1_ptr = 88, rs2 = 44, rs2_as = 1
+   instr   6:   LOADW rd_rs2_ptr = 48, rs1_ptr = 44, imm = 0, mem_as = 2, needs_write = 1, imm_sign = 0
+   instr   7:   ADD rd_ptr = 40, rs1_ptr = 104, rs2 = 0, rs2_as = 0
+   instr   8:   ADD rd_ptr = 44, rs1_ptr = 36, rs2 = 0, rs2_as = 0
+   instr   9:   JALR 4 48 0 1 0
+])
+
+Apc(opcode: 4370, execution_frequency: 290667, cells_saved_per_row: 162, cells_per_row_after_saving: 72, percent_saved: 69.23%)
+BasicBlock(start_idx: 128, statements: [
+   instr   0:   ADD rd_ptr = 52, rs1_ptr = 40, rs2 = 0, rs2_as = 0
+   instr   1:   ADD rd_ptr = 56, rs1_ptr = 44, rs2 = 0, rs2_as = 0
+   instr   2:   AND rd_ptr = 44, rs1_ptr = 52, rs2 = 3, rs2_as = 0
+   instr   3:   BNE 44 0 2013265733 1 1
+])
+
+Apc(opcode: 14873, execution_frequency: 289803, cells_saved_per_row: 162, cells_per_row_after_saving: 72, percent_saved: 69.23%)
+BasicBlock(start_idx: 454722, statements: [
+   instr   0:   ADD rd_ptr = 48, rs1_ptr = 48, rs2 = 16777215, rs2_as = 0
+   instr   1:   ADD rd_ptr = 44, rs1_ptr = 44, rs2 = 1, rs2_as = 0
+   instr   2:   ADD rd_ptr = 40, rs1_ptr = 40, rs2 = 1, rs2_as = 0
+   instr   3:   BNE 48 0 2013265897 1 1
+])
+
+Apc(opcode: 4386, execution_frequency: 446338, cells_saved_per_row: 62, cells_per_row_after_saving: 44, percent_saved: 58.49%)
+BasicBlock(start_idx: 245, statements: [
+   instr   0:   AND rd_ptr = 44, rs1_ptr = 48, rs2 = 2, rs2_as = 0
+   instr   1:   BNE 44 0 16 1 1
+])
+
+Apc(opcode: 4387, execution_frequency: 420009, cells_saved_per_row: 62, cells_per_row_after_saving: 44, percent_saved: 58.49%)
+BasicBlock(start_idx: 247, statements: [
+   instr   0:   AND rd_ptr = 44, rs1_ptr = 48, rs2 = 1, rs2_as = 0
+   instr   1:   BNE 44 0 44 1 1
+])
+
+Apc(opcode: 4376, execution_frequency: 231848, cells_saved_per_row: 210, cells_per_row_after_saving: 90, percent_saved: 70.00%)
+BasicBlock(start_idx: 157, statements: [
+   instr   0:   LOADW rd_rs2_ptr = 44, rs1_ptr = 56, imm = 0, mem_as = 2, needs_write = 1, imm_sign = 0
+   instr   1:   STOREW rd_rs2_ptr = 44, rs1_ptr = 52, imm = 0, mem_as = 2, needs_write = 1, imm_sign = 0
+   instr   2:   ADD rd_ptr = 52, rs1_ptr = 52, rs2 = 4, rs2_as = 0
+   instr   3:   ADD rd_ptr = 56, rs1_ptr = 56, rs2 = 4, rs2_as = 0
+   instr   4:   JAL 0 0 336 1 0
+])
+
+Apc(opcode: 4375, execution_frequency: 312920, cells_saved_per_row: 62, cells_per_row_after_saving: 44, percent_saved: 58.49%)
+BasicBlock(start_idx: 155, statements: [
+   instr   0:   AND rd_ptr = 44, rs1_ptr = 48, rs2 = 4, rs2_as = 0
+   instr   1:   BEQ 44 0 356 1 1
+])
+
+Apc(opcode: 4373, execution_frequency: 312920, cells_saved_per_row: 62, cells_per_row_after_saving: 44, percent_saved: 58.49%)
+BasicBlock(start_idx: 147, statements: [
+   instr   0:   AND rd_ptr = 44, rs1_ptr = 48, rs2 = 8, rs2_as = 0
+   instr   1:   BEQ 44 0 28 1 1
+])
+
+Apc(opcode: 4371, execution_frequency: 312920, cells_saved_per_row: 66, cells_per_row_after_saving: 50, percent_saved: 56.90%)
+BasicBlock(start_idx: 132, statements: [
+   instr   0:   ADD rd_ptr = 44, rs1_ptr = 0, rs2 = 16, rs2_as = 0
+   instr   1:   BLTU 48 44 56 1 1
+])
+
+Apc(opcode: 4368, execution_frequency: 58495, cells_saved_per_row: 1455, cells_per_row_after_saving: 245, percent_saved: 85.59%)
+BasicBlock(start_idx: 102, statements: [
+   instr   0:   LOADW rd_rs2_ptr = 64, rs1_ptr = 52, imm = 65524, mem_as = 2, needs_write = 1, imm_sign = 1
+   instr   1:   SRL rd_ptr = 60, rs1_ptr = 60, rs2 = 24, rs2_as = 0
+   instr   2:   SLL rd_ptr = 68, rs1_ptr = 64, rs2 = 8, rs2_as = 0
+   instr   3:   LOADW rd_rs2_ptr = 20, rs1_ptr = 52, imm = 65528, mem_as = 2, needs_write = 1, imm_sign = 1
+   instr   4:   OR rd_ptr = 60, rs1_ptr = 68, rs2 = 60, rs2_as = 1
+   instr   5:   STOREW rd_rs2_ptr = 60, rs1_ptr = 44, imm = 0, mem_as = 2, needs_write = 1, imm_sign = 0
+   instr   6:   SRL rd_ptr = 60, rs1_ptr = 64, rs2 = 24, rs2_as = 0
+   instr   7:   SLL rd_ptr = 64, rs1_ptr = 20, rs2 = 8, rs2_as = 0
+   instr   8:   LOADW rd_rs2_ptr = 68, rs1_ptr = 52, imm = 65532, mem_as = 2, needs_write = 1, imm_sign = 1
+   instr   9:   OR rd_ptr = 60, rs1_ptr = 64, rs2 = 60, rs2_as = 1
+   instr  10:   STOREW rd_rs2_ptr = 60, rs1_ptr = 44, imm = 4, mem_as = 2, needs_write = 1, imm_sign = 0
+   instr  11:   SRL rd_ptr = 64, rs1_ptr = 20, rs2 = 24, rs2_as = 0
+   instr  12:   SLL rd_ptr = 20, rs1_ptr = 68, rs2 = 8, rs2_as = 0
+   instr  13:   LOADW rd_rs2_ptr = 60, rs1_ptr = 52, imm = 0, mem_as = 2, needs_write = 1, imm_sign = 0
+   instr  14:   OR rd_ptr = 64, rs1_ptr = 20, rs2 = 64, rs2_as = 1
+   instr  15:   STOREW rd_rs2_ptr = 64, rs1_ptr = 44, imm = 8, mem_as = 2, needs_write = 1, imm_sign = 0
+   instr  16:   SRL rd_ptr = 64, rs1_ptr = 68, rs2 = 24, rs2_as = 0
+   instr  17:   SLL rd_ptr = 68, rs1_ptr = 60, rs2 = 8, rs2_as = 0
+   instr  18:   OR rd_ptr = 64, rs1_ptr = 68, rs2 = 64, rs2_as = 1
+   instr  19:   STOREW rd_rs2_ptr = 64, rs1_ptr = 44, imm = 12, mem_as = 2, needs_write = 1, imm_sign = 0
+   instr  20:   ADD rd_ptr = 44, rs1_ptr = 44, rs2 = 16, rs2_as = 0
+   instr  21:   ADD rd_ptr = 48, rs1_ptr = 48, rs2 = 16777200, rs2_as = 0
+   instr  22:   ADD rd_ptr = 52, rs1_ptr = 52, rs2 = 16, rs2_as = 0
+   instr  23:   BLTU 56 48 2013265829 1 1
+])
+
+Apc(opcode: 11722, execution_frequency: 122274, cells_saved_per_row: 124, cells_per_row_after_saving: 46, percent_saved: 72.94%)
+BasicBlock(start_idx: 257138, statements: [
+   instr   0:   AND rd_ptr = 44, rs1_ptr = 40, rs2 = 1, rs2_as = 0
+   instr   1:   ADD rd_ptr = 40, rs1_ptr = 0, rs2 = 33, rs2_as = 0
+   instr   2:   BNE 44 0 2013265813 1 1
+])
+
+Apc(opcode: 8059, execution_frequency: 376584, cells_saved_per_row: 51, cells_per_row_after_saving: 60, percent_saved: 45.95%)
+BasicBlock(start_idx: 153427, statements: [
+   instr   0:   LOADBU rd_rs2_ptr = 84, rs1_ptr = 104, imm = 248, mem_as = 2, needs_write = 1, imm_sign = 0
+   instr   1:   BEQ 84 0 2013265877 1 1
+])
+
+Apc(opcode: 11716, execution_frequency: 122274, cells_saved_per_row: 314, cells_per_row_after_saving: 122, percent_saved: 72.02%)
+BasicBlock(start_idx: 257113, statements: [
+   instr   0:   LOADW rd_rs2_ptr = 44, rs1_ptr = 32, imm = 68, mem_as = 2, needs_write = 1, imm_sign = 0
+   instr   1:   ADD rd_ptr = 44, rs1_ptr = 44, rs2 = 1, rs2_as = 0
+   instr   2:   STOREW rd_rs2_ptr = 44, rs1_ptr = 32, imm = 68, mem_as = 2, needs_write = 1, imm_sign = 0
+   instr   3:   ADD rd_ptr = 72, rs1_ptr = 40, rs2 = 72, rs2_as = 1
+   instr   4:   ADD rd_ptr = 80, rs1_ptr = 80, rs2 = 16777215, rs2_as = 0
+   instr   5:   ADD rd_ptr = 76, rs1_ptr = 76, rs2 = 4, rs2_as = 0
+   instr   6:   BEQ 80 0 116 1 1
+])
+
+Apc(opcode: 14866, execution_frequency: 124756, cells_saved_per_row: 215, cells_per_row_after_saving: 103, percent_saved: 67.61%)
+BasicBlock(start_idx: 454660, statements: [
+   instr   0:   LOADW rd_rs2_ptr = 68, rs1_ptr = 64, imm = 0, mem_as = 2, needs_write = 1, imm_sign = 0
+   instr   1:   STOREW rd_rs2_ptr = 68, rs1_ptr = 56, imm = 0, mem_as = 2, needs_write = 1, imm_sign = 0
+   instr   2:   ADD rd_ptr = 56, rs1_ptr = 56, rs2 = 4, rs2_as = 0
+   instr   3:   ADD rd_ptr = 64, rs1_ptr = 64, rs2 = 4, rs2_as = 0
+   instr   4:   BLTU 56 52 2013265905 1 1
+])
+
+Apc(opcode: 4374, execution_frequency: 115942, cells_saved_per_row: 279, cells_per_row_after_saving: 125, percent_saved: 69.06%)
+BasicBlock(start_idx: 149, statements: [
+   instr   0:   LOADW rd_rs2_ptr = 44, rs1_ptr = 56, imm = 0, mem_as = 2, needs_write = 1, imm_sign = 0
+   instr   1:   LOADW rd_rs2_ptr = 60, rs1_ptr = 56, imm = 4, mem_as = 2, needs_write = 1, imm_sign = 0
+   instr   2:   STOREW rd_rs2_ptr = 44, rs1_ptr = 52, imm = 0, mem_as = 2, needs_write = 1, imm_sign = 0
+   instr   3:   STOREW rd_rs2_ptr = 60, rs1_ptr = 52, imm = 4, mem_as = 2, needs_write = 1, imm_sign = 0
+   instr   4:   ADD rd_ptr = 52, rs1_ptr = 52, rs2 = 8, rs2_as = 0
+   instr   5:   ADD rd_ptr = 56, rs1_ptr = 56, rs2 = 8, rs2_as = 0
+])
+
+Apc(opcode: 6405, execution_frequency: 174951, cells_saved_per_row: 153, cells_per_row_after_saving: 113, percent_saved: 57.52%)
+BasicBlock(start_idx: 106803, statements: [
+   instr   0:   ADD rd_ptr = 40, rs1_ptr = 88, rs2 = 92, rs2_as = 1
+   instr   1:   STOREB rd_rs2_ptr = 76, rs1_ptr = 40, imm = 0, mem_as = 2, needs_write = 1, imm_sign = 0
+   instr   2:   ADD rd_ptr = 92, rs1_ptr = 92, rs2 = 1, rs2_as = 0
+   instr   3:   STOREW rd_rs2_ptr = 92, rs1_ptr = 8, imm = 16, mem_as = 2, needs_write = 1, imm_sign = 0
+])
+
+Apc(opcode: 14872, execution_frequency: 293001, cells_saved_per_row: 79, cells_per_row_after_saving: 101, percent_saved: 43.89%)
+BasicBlock(start_idx: 454719, statements: [
+   instr   0:   LOADBU rd_rs2_ptr = 52, rs1_ptr = 40, imm = 0, mem_as = 2, needs_write = 1, imm_sign = 0
+   instr   1:   LOADBU rd_rs2_ptr = 56, rs1_ptr = 44, imm = 0, mem_as = 2, needs_write = 1, imm_sign = 0
+   instr   2:   BNE 52 56 28 1 1
+])
+
+Apc(opcode: 6407, execution_frequency: 174951, cells_saved_per_row: 143, cells_per_row_after_saving: 111, percent_saved: 56.30%)
+BasicBlock(start_idx: 106811, statements: [
+   instr   0:   LOADW rd_rs2_ptr = 76, rs1_ptr = 8, imm = 40, mem_as = 2, needs_write = 1, imm_sign = 0
+   instr   1:   ADD rd_ptr = 84, rs1_ptr = 84, rs2 = 16777212, rs2_as = 0
+   instr   2:   STOREW rd_rs2_ptr = 84, rs1_ptr = 36, imm = 0, mem_as = 2, needs_write = 1, imm_sign = 0
+   instr   3:   BLTU 108 76 36 1 1
+])
+
+Apc(opcode: 4362, execution_frequency: 155671, cells_saved_per_row: 62, cells_per_row_after_saving: 44, percent_saved: 58.49%)
+BasicBlock(start_idx: 82, statements: [
+   instr   0:   AND rd_ptr = 44, rs1_ptr = 52, rs2 = 3, rs2_as = 0
+   instr   1:   BEQ 44 0 196 1 1
+])
+
+Apc(opcode: 4391, execution_frequency: 116411, cells_saved_per_row: 886, cells_per_row_after_saving: 476, percent_saved: 65.05%)
+BasicBlock(start_idx: 299, statements: [
+   instr   0:   LOADB rd_rs2_ptr = 44, rs1_ptr = 56, imm = 0, mem_as = 2, needs_write = 1, imm_sign = 0
+   instr   1:   LOADB rd_rs2_ptr = 60, rs1_ptr = 56, imm = 1, mem_as = 2, needs_write = 1, imm_sign = 0
+   instr   2:   LOADB rd_rs2_ptr = 64, rs1_ptr = 56, imm = 2, mem_as = 2, needs_write = 1, imm_sign = 0
+   instr   3:   STOREB rd_rs2_ptr = 44, rs1_ptr = 52, imm = 0, mem_as = 2, needs_write = 1, imm_sign = 0
+   instr   4:   STOREB rd_rs2_ptr = 60, rs1_ptr = 52, imm = 1, mem_as = 2, needs_write = 1, imm_sign = 0
+   instr   5:   LOADB rd_rs2_ptr = 44, rs1_ptr = 56, imm = 3, mem_as = 2, needs_write = 1, imm_sign = 0
+   instr   6:   STOREB rd_rs2_ptr = 64, rs1_ptr = 52, imm = 2, mem_as = 2, needs_write = 1, imm_sign = 0
+   instr   7:   LOADB rd_rs2_ptr = 60, rs1_ptr = 56, imm = 4, mem_as = 2, needs_write = 1, imm_sign = 0
+   instr   8:   LOADB rd_rs2_ptr = 64, rs1_ptr = 56, imm = 5, mem_as = 2, needs_write = 1, imm_sign = 0
+   instr   9:   STOREB rd_rs2_ptr = 44, rs1_ptr = 52, imm = 3, mem_as = 2, needs_write = 1, imm_sign = 0
+   instr  10:   LOADB rd_rs2_ptr = 44, rs1_ptr = 56, imm = 6, mem_as = 2, needs_write = 1, imm_sign = 0
+   instr  11:   STOREB rd_rs2_ptr = 60, rs1_ptr = 52, imm = 4, mem_as = 2, needs_write = 1, imm_sign = 0
+   instr  12:   STOREB rd_rs2_ptr = 64, rs1_ptr = 52, imm = 5, mem_as = 2, needs_write = 1, imm_sign = 0
+   instr  13:   LOADB rd_rs2_ptr = 60, rs1_ptr = 56, imm = 7, mem_as = 2, needs_write = 1, imm_sign = 0
+   instr  14:   STOREB rd_rs2_ptr = 44, rs1_ptr = 52, imm = 6, mem_as = 2, needs_write = 1, imm_sign = 0
+   instr  15:   ADD rd_ptr = 56, rs1_ptr = 56, rs2 = 8, rs2_as = 0
+   instr  16:   ADD rd_ptr = 44, rs1_ptr = 52, rs2 = 8, rs2_as = 0
+   instr  17:   STOREB rd_rs2_ptr = 60, rs1_ptr = 52, imm = 7, mem_as = 2, needs_write = 1, imm_sign = 0
+   instr  18:   ADD rd_ptr = 52, rs1_ptr = 44, rs2 = 0, rs2_as = 0
+   instr  19:   AND rd_ptr = 44, rs1_ptr = 48, rs2 = 4, rs2_as = 0
+   instr  20:   BNE 44 0 2013265581 1 1
+])
+
+Apc(opcode: 4385, execution_frequency: 121230, cells_saved_per_row: 453, cells_per_row_after_saving: 271, percent_saved: 62.57%)
+BasicBlock(start_idx: 234, statements: [
+   instr   0:   LOADB rd_rs2_ptr = 44, rs1_ptr = 56, imm = 0, mem_as = 2, needs_write = 1, imm_sign = 0
+   instr   1:   LOADB rd_rs2_ptr = 60, rs1_ptr = 56, imm = 1, mem_as = 2, needs_write = 1, imm_sign = 0
+   instr   2:   LOADB rd_rs2_ptr = 64, rs1_ptr = 56, imm = 2, mem_as = 2, needs_write = 1, imm_sign = 0
+   instr   3:   STOREB rd_rs2_ptr = 44, rs1_ptr = 52, imm = 0, mem_as = 2, needs_write = 1, imm_sign = 0
+   instr   4:   STOREB rd_rs2_ptr = 60, rs1_ptr = 52, imm = 1, mem_as = 2, needs_write = 1, imm_sign = 0
+   instr   5:   LOADB rd_rs2_ptr = 44, rs1_ptr = 56, imm = 3, mem_as = 2, needs_write = 1, imm_sign = 0
+   instr   6:   STOREB rd_rs2_ptr = 64, rs1_ptr = 52, imm = 2, mem_as = 2, needs_write = 1, imm_sign = 0
+   instr   7:   ADD rd_ptr = 56, rs1_ptr = 56, rs2 = 4, rs2_as = 0
+   instr   8:   ADD rd_ptr = 60, rs1_ptr = 52, rs2 = 4, rs2_as = 0
+   instr   9:   STOREB rd_rs2_ptr = 44, rs1_ptr = 52, imm = 3, mem_as = 2, needs_write = 1, imm_sign = 0
+   instr  10:   ADD rd_ptr = 52, rs1_ptr = 60, rs2 = 0, rs2_as = 0
+])
+
+Apc(opcode: 4382, execution_frequency: 133418, cells_saved_per_row: 62, cells_per_row_after_saving: 44, percent_saved: 58.49%)
+BasicBlock(start_idx: 228, statements: [
+   instr   0:   AND rd_ptr = 44, rs1_ptr = 48, rs2 = 16, rs2_as = 0
+   instr   1:   BNE 44 0 132 1 1
+])
+
+Apc(opcode: 11587, execution_frequency: 61159, cells_saved_per_row: 530, cells_per_row_after_saving: 182, percent_saved: 74.44%)
+BasicBlock(start_idx: 255772, statements: [
+   instr   0:   LOADW rd_rs2_ptr = 40, rs1_ptr = 36, imm = 4, mem_as = 2, needs_write = 1, imm_sign = 0
+   instr   1:   ADD rd_ptr = 40, rs1_ptr = 40, rs2 = 44, rs2_as = 1
+   instr   2:   ADD rd_ptr = 48, rs1_ptr = 0, rs2 = 160, rs2_as = 0
+   instr   3:   STOREB rd_rs2_ptr = 48, rs1_ptr = 40, imm = 0, mem_as = 2, needs_write = 1, imm_sign = 0
+   instr   4:   LOADW rd_rs2_ptr = 40, rs1_ptr = 36, imm = 0, mem_as = 2, needs_write = 1, imm_sign = 0
+   instr   5:   ADD rd_ptr = 72, rs1_ptr = 44, rs2 = 1, rs2_as = 0
+   instr   6:   STOREW rd_rs2_ptr = 72, rs1_ptr = 36, imm = 8, mem_as = 2, needs_write = 1, imm_sign = 0
+   instr   7:   SUB rd_ptr = 40, rs1_ptr = 40, rs2 = 72, rs2_as = 1
+   instr   8:   ADD rd_ptr = 48, rs1_ptr = 0, rs2 = 31, rs2_as = 0
+   instr   9:   ADD rd_ptr = 44, rs1_ptr = 32, rs2 = 73, rs2_as = 0
+   instr  10:   BGEU 48 40 172 1 1
+])
+
+Apc(opcode: 4378, execution_frequency: 29951, cells_saved_per_row: 1455, cells_per_row_after_saving: 245, percent_saved: 85.59%)
+BasicBlock(start_idx: 168, statements: [
+   instr   0:   LOADW rd_rs2_ptr = 64, rs1_ptr = 52, imm = 65524, mem_as = 2, needs_write = 1, imm_sign = 1
+   instr   1:   SRL rd_ptr = 60, rs1_ptr = 60, rs2 = 8, rs2_as = 0
+   instr   2:   SLL rd_ptr = 68, rs1_ptr = 64, rs2 = 24, rs2_as = 0
+   instr   3:   LOADW rd_rs2_ptr = 20, rs1_ptr = 52, imm = 65528, mem_as = 2, needs_write = 1, imm_sign = 1
+   instr   4:   OR rd_ptr = 60, rs1_ptr = 68, rs2 = 60, rs2_as = 1
+   instr   5:   STOREW rd_rs2_ptr = 60, rs1_ptr = 44, imm = 0, mem_as = 2, needs_write = 1, imm_sign = 0
+   instr   6:   SRL rd_ptr = 60, rs1_ptr = 64, rs2 = 8, rs2_as = 0
+   instr   7:   SLL rd_ptr = 64, rs1_ptr = 20, rs2 = 24, rs2_as = 0
+   instr   8:   LOADW rd_rs2_ptr = 68, rs1_ptr = 52, imm = 65532, mem_as = 2, needs_write = 1, imm_sign = 1
+   instr   9:   OR rd_ptr = 60, rs1_ptr = 64, rs2 = 60, rs2_as = 1
+   instr  10:   STOREW rd_rs2_ptr = 60, rs1_ptr = 44, imm = 4, mem_as = 2, needs_write = 1, imm_sign = 0
+   instr  11:   SRL rd_ptr = 64, rs1_ptr = 20, rs2 = 8, rs2_as = 0
+   instr  12:   SLL rd_ptr = 20, rs1_ptr = 68, rs2 = 24, rs2_as = 0
+   instr  13:   LOADW rd_rs2_ptr = 60, rs1_ptr = 52, imm = 0, mem_as = 2, needs_write = 1, imm_sign = 0
+   instr  14:   OR rd_ptr = 64, rs1_ptr = 20, rs2 = 64, rs2_as = 1
+   instr  15:   STOREW rd_rs2_ptr = 64, rs1_ptr = 44, imm = 8, mem_as = 2, needs_write = 1, imm_sign = 0
+   instr  16:   SRL rd_ptr = 64, rs1_ptr = 68, rs2 = 8, rs2_as = 0
+   instr  17:   SLL rd_ptr = 68, rs1_ptr = 60, rs2 = 24, rs2_as = 0
+   instr  18:   OR rd_ptr = 64, rs1_ptr = 68, rs2 = 64, rs2_as = 1
+   instr  19:   STOREW rd_rs2_ptr = 64, rs1_ptr = 44, imm = 12, mem_as = 2, needs_write = 1, imm_sign = 0
+   instr  20:   ADD rd_ptr = 44, rs1_ptr = 44, rs2 = 16, rs2_as = 0
+   instr  21:   ADD rd_ptr = 48, rs1_ptr = 48, rs2 = 16777200, rs2_as = 0
+   instr  22:   ADD rd_ptr = 52, rs1_ptr = 52, rs2 = 16, rs2_as = 0
+   instr  23:   BLTU 56 48 2013265829 1 1
+])
+
+Apc(opcode: 4363, execution_frequency: 133418, cells_saved_per_row: 66, cells_per_row_after_saving: 50, percent_saved: 56.90%)
+BasicBlock(start_idx: 84, statements: [
+   instr   0:   ADD rd_ptr = 60, rs1_ptr = 0, rs2 = 32, rs2_as = 0
+   instr   1:   BLTU 48 60 572 1 1
+])
+
+Apc(opcode: 6053, execution_frequency: 42794, cells_saved_per_row: 285, cells_per_row_after_saving: 75, percent_saved: 79.17%)
+BasicBlock(start_idx: 98322, statements: [
+   instr   0:   SLL rd_ptr = 56, rs1_ptr = 56, rs2 = 2, rs2_as = 0
+   instr   1:   LUI 40 0 958 1 0
+   instr   2:   ADD rd_ptr = 40, rs1_ptr = 40, rs2 = 16777048, rs2_as = 0
+   instr   3:   ADD rd_ptr = 40, rs1_ptr = 56, rs2 = 40, rs2_as = 1
+   instr   4:   LOADW rd_rs2_ptr = 40, rs1_ptr = 40, imm = 0, mem_as = 2, needs_write = 1, imm_sign = 0
+   instr   5:   JALR 0 40 0 1 0
+])
+
+Apc(opcode: 4360, execution_frequency: 155671, cells_saved_per_row: 65, cells_per_row_after_saving: 63, percent_saved: 50.78%)
+BasicBlock(start_idx: 67, statements: [
+   instr   0:   ADD rd_ptr = 60, rs1_ptr = 44, rs2 = 1, rs2_as = 0
+   instr   1:   ADD rd_ptr = 64, rs1_ptr = 40, rs2 = 0, rs2_as = 0
+])
+
+Apc(opcode: 11590, execution_frequency: 61159, cells_saved_per_row: 513, cells_per_row_after_saving: 215, percent_saved: 70.47%)
+BasicBlock(start_idx: 255804, statements: [
+   instr   0:   LOADW rd_rs2_ptr = 40, rs1_ptr = 32, imm = 68, mem_as = 2, needs_write = 1, imm_sign = 0
+   instr   1:   ADD rd_ptr = 40, rs1_ptr = 40, rs2 = 1, rs2_as = 0
+   instr   2:   STOREW rd_rs2_ptr = 40, rs1_ptr = 32, imm = 68, mem_as = 2, needs_write = 1, imm_sign = 0
+   instr   3:   LOADW rd_rs2_ptr = 4, rs1_ptr = 8, imm = 60, mem_as = 2, needs_write = 1, imm_sign = 0
+   instr   4:   LOADW rd_rs2_ptr = 32, rs1_ptr = 8, imm = 56, mem_as = 2, needs_write = 1, imm_sign = 0
+   instr   5:   LOADW rd_rs2_ptr = 36, rs1_ptr = 8, imm = 52, mem_as = 2, needs_write = 1, imm_sign = 0
+   instr   6:   LOADW rd_rs2_ptr = 72, rs1_ptr = 8, imm = 48, mem_as = 2, needs_write = 1, imm_sign = 0
+   instr   7:   LOADW rd_rs2_ptr = 76, rs1_ptr = 8, imm = 44, mem_as = 2, needs_write = 1, imm_sign = 0
+   instr   8:   LOADW rd_rs2_ptr = 80, rs1_ptr = 8, imm = 40, mem_as = 2, needs_write = 1, imm_sign = 0
+   instr   9:   ADD rd_ptr = 8, rs1_ptr = 8, rs2 = 64, rs2_as = 0
+   instr  10:   JALR 0 4 0 1 0
+])
+
+Apc(opcode: 6448, execution_frequency: 38765, cells_saved_per_row: 441, cells_per_row_after_saving: 120, percent_saved: 78.61%)
+BasicBlock(start_idx: 107647, statements: [
+   instr   0:   AND rd_ptr = 40, rs1_ptr = 36, rs2 = 3, rs2_as = 0
+   instr   1:   SLTU rd_ptr = 56, rs1_ptr = 40, rs2 = 1, rs2_as = 0
+   instr   2:   ADD rd_ptr = 60, rs1_ptr = 0, rs2 = 4, rs2_as = 0
+   instr   3:   SUB rd_ptr = 60, rs1_ptr = 60, rs2 = 40, rs2_as = 1
+   instr   4:   ADD rd_ptr = 56, rs1_ptr = 56, rs2 = 16777215, rs2_as = 0
+   instr   5:   AND rd_ptr = 56, rs1_ptr = 56, rs2 = 60, rs2_as = 1
+   instr   6:   ADD rd_ptr = 36, rs1_ptr = 56, rs2 = 36, rs2_as = 1
+   instr   7:   ADD rd_ptr = 40, rs1_ptr = 36, rs2 = 52, rs2_as = 1
+   instr   8:   BLTU 40 36 28 1 1
+])
+
+Apc(opcode: 11717, execution_frequency: 152896, cells_saved_per_row: 53, cells_per_row_after_saving: 58, percent_saved: 47.75%)
+BasicBlock(start_idx: 257120, statements: [
+   instr   0:   LOADW rd_rs2_ptr = 32, rs1_ptr = 76, imm = 0, mem_as = 2, needs_write = 1, imm_sign = 0
+   instr   1:   BEQ 32 0 88 1 1
+])
+
+Apc(opcode: 7748, execution_frequency: 36781, cells_saved_per_row: 906, cells_per_row_after_saving: 244, percent_saved: 78.78%)
+BasicBlock(start_idx: 142845, statements: [
+   instr   0:   LOADW rd_rs2_ptr = 48, rs1_ptr = 40, imm = 360, mem_as = 2, needs_write = 1, imm_sign = 0
+   instr   1:   SLL rd_ptr = 52, rs1_ptr = 44, rs2 = 5, rs2_as = 0
+   instr   2:   ADD rd_ptr = 52, rs1_ptr = 48, rs2 = 52, rs2_as = 1
+   instr   3:   STOREW rd_rs2_ptr = 0, rs1_ptr = 52, imm = 0, mem_as = 2, needs_write = 1, imm_sign = 0
+   instr   4:   STOREW rd_rs2_ptr = 0, rs1_ptr = 52, imm = 4, mem_as = 2, needs_write = 1, imm_sign = 0
+   instr   5:   STOREW rd_rs2_ptr = 0, rs1_ptr = 52, imm = 8, mem_as = 2, needs_write = 1, imm_sign = 0
+   instr   6:   STOREW rd_rs2_ptr = 0, rs1_ptr = 52, imm = 12, mem_as = 2, needs_write = 1, imm_sign = 0
+   instr   7:   STOREW rd_rs2_ptr = 0, rs1_ptr = 52, imm = 16, mem_as = 2, needs_write = 1, imm_sign = 0
+   instr   8:   STOREW rd_rs2_ptr = 0, rs1_ptr = 52, imm = 20, mem_as = 2, needs_write = 1, imm_sign = 0
+   instr   9:   STOREW rd_rs2_ptr = 0, rs1_ptr = 52, imm = 24, mem_as = 2, needs_write = 1, imm_sign = 0
+   instr  10:   STOREW rd_rs2_ptr = 0, rs1_ptr = 52, imm = 28, mem_as = 2, needs_write = 1, imm_sign = 0
+   instr  11:   ADD rd_ptr = 52, rs1_ptr = 44, rs2 = 1, rs2_as = 0
+   instr  12:   SLL rd_ptr = 44, rs1_ptr = 52, rs2 = 5, rs2_as = 0
+   instr  13:   ADD rd_ptr = 44, rs1_ptr = 48, rs2 = 44, rs2_as = 1
+   instr  14:   ADD rd_ptr = 48, rs1_ptr = 0, rs2 = 32, rs2_as = 0
+   instr  15:   STOREW rd_rs2_ptr = 52, rs1_ptr = 40, imm = 364, mem_as = 2, needs_write = 1, imm_sign = 0
+   instr  16:   BEQ 44 48 68 1 1
+])
+
+Apc(opcode: 4389, execution_frequency: 204716, cells_saved_per_row: 72, cells_per_row_after_saving: 109, percent_saved: 39.78%)
+BasicBlock(start_idx: 259, statements: [
+   instr   0:   LOADB rd_rs2_ptr = 44, rs1_ptr = 56, imm = 0, mem_as = 2, needs_write = 1, imm_sign = 0
+   instr   1:   STOREB rd_rs2_ptr = 44, rs1_ptr = 52, imm = 0, mem_as = 2, needs_write = 1, imm_sign = 0
+   instr   2:   JALR 0 4 0 1 0
+])
+
+Apc(opcode: 11584, execution_frequency: 61159, cells_saved_per_row: 256, cells_per_row_after_saving: 116, percent_saved: 68.82%)
+BasicBlock(start_idx: 255750, statements: [
+   instr   0:   ADD rd_ptr = 36, rs1_ptr = 44, rs2 = 0, rs2_as = 0
+   instr   1:   LOADBU rd_rs2_ptr = 40, rs1_ptr = 32, imm = 72, mem_as = 2, needs_write = 1, imm_sign = 0
+   instr   2:   ADD rd_ptr = 44, rs1_ptr = 0, rs2 = 16777215, rs2_as = 0
+   instr   3:   ADD rd_ptr = 48, rs1_ptr = 0, rs2 = 2, rs2_as = 0
+   instr   4:   STOREW rd_rs2_ptr = 44, rs1_ptr = 32, imm = 68, mem_as = 2, needs_write = 1, imm_sign = 0
+   instr   5:   BNE 40 48 48 1 1
+])
+
+Apc(opcode: 10579, execution_frequency: 64294, cells_saved_per_row: 201, cells_per_row_after_saving: 99, percent_saved: 67.00%)
+BasicBlock(start_idx: 237416, statements: [
+   instr   0:   LOADBU rd_rs2_ptr = 24, rs1_ptr = 64, imm = 0, mem_as = 2, needs_write = 1, imm_sign = 0
+   instr   1:   SLTU rd_ptr = 24, rs1_ptr = 24, rs2 = 1, rs2_as = 0
+   instr   2:   ADD rd_ptr = 64, rs1_ptr = 64, rs2 = 1, rs2_as = 0
+   instr   3:   ADD rd_ptr = 68, rs1_ptr = 68, rs2 = 24, rs2_as = 1
+   instr   4:   BNE 64 20 2013265905 1 1
+])
+
+Apc(opcode: 4786, execution_frequency: 26532, cells_saved_per_row: 494, cells_per_row_after_saving: 101, percent_saved: 83.03%)
+BasicBlock(start_idx: 9715, statements: [
+   instr   0:   AND rd_ptr = 40, rs1_ptr = 76, rs2 = 3, rs2_as = 0
+   instr   1:   SLTU rd_ptr = 44, rs1_ptr = 40, rs2 = 1, rs2_as = 0
+   instr   2:   ADD rd_ptr = 48, rs1_ptr = 0, rs2 = 4, rs2_as = 0
+   instr   3:   SUB rd_ptr = 48, rs1_ptr = 48, rs2 = 40, rs2_as = 1
+   instr   4:   ADD rd_ptr = 44, rs1_ptr = 44, rs2 = 16777215, rs2_as = 0
+   instr   5:   AND rd_ptr = 44, rs1_ptr = 44, rs2 = 48, rs2_as = 1
+   instr   6:   ADD rd_ptr = 76, rs1_ptr = 44, rs2 = 76, rs2_as = 1
+   instr   7:   LUI 40 0 131072 1 0
+   instr   8:   ADD rd_ptr = 40, rs1_ptr = 40, rs2 = 16777109, rs2_as = 0
+   instr   9:   BLTU 76 40 44 1 1
+])
+
+Apc(opcode: 11585, execution_frequency: 61159, cells_saved_per_row: 72, cells_per_row_after_saving: 34, percent_saved: 67.92%)
+BasicBlock(start_idx: 255767, statements: [
+   instr   0:   AND rd_ptr = 40, rs1_ptr = 40, rs2 = 1, rs2_as = 0
+   instr   1:   BEQ 40 0 92 1 1
+])
+
+Apc(opcode: 6408, execution_frequency: 174951, cells_saved_per_row: 47, cells_per_row_after_saving: 64, percent_saved: 42.34%)
+BasicBlock(start_idx: 106815, statements: [
+   instr   0:   LOADW rd_rs2_ptr = 40, rs1_ptr = 8, imm = 8, mem_as = 2, needs_write = 1, imm_sign = 0
+   instr   1:   BNE 92 40 2013265869 1 1
+])
+
+Apc(opcode: 11583, execution_frequency: 61159, cells_saved_per_row: 439, cells_per_row_after_saving: 214, percent_saved: 67.23%)
+BasicBlock(start_idx: 255740, statements: [
+   instr   0:   ADD rd_ptr = 8, rs1_ptr = 8, rs2 = 16777152, rs2_as = 0
+   instr   1:   STOREW rd_rs2_ptr = 4, rs1_ptr = 8, imm = 60, mem_as = 2, needs_write = 1, imm_sign = 0
+   instr   2:   STOREW rd_rs2_ptr = 32, rs1_ptr = 8, imm = 56, mem_as = 2, needs_write = 1, imm_sign = 0
+   instr   3:   STOREW rd_rs2_ptr = 36, rs1_ptr = 8, imm = 52, mem_as = 2, needs_write = 1, imm_sign = 0
+   instr   4:   STOREW rd_rs2_ptr = 72, rs1_ptr = 8, imm = 48, mem_as = 2, needs_write = 1, imm_sign = 0
+   instr   5:   STOREW rd_rs2_ptr = 76, rs1_ptr = 8, imm = 44, mem_as = 2, needs_write = 1, imm_sign = 0
+   instr   6:   STOREW rd_rs2_ptr = 80, rs1_ptr = 8, imm = 40, mem_as = 2, needs_write = 1, imm_sign = 0
+   instr   7:   ADD rd_ptr = 32, rs1_ptr = 40, rs2 = 0, rs2_as = 0
+   instr   8:   LOADW rd_rs2_ptr = 40, rs1_ptr = 40, imm = 68, mem_as = 2, needs_write = 1, imm_sign = 0
+   instr   9:   BNE 40 0 264 1 1
+])
+
+Apc(opcode: 6406, execution_frequency: 174951, cells_saved_per_row: 50, cells_per_row_after_saving: 71, percent_saved: 41.32%)
+BasicBlock(start_idx: 106808, statements: [
+   instr   0:   STOREW rd_rs2_ptr = 0, rs1_ptr = 8, imm = 40, mem_as = 2, needs_write = 1, imm_sign = 0
+   instr   1:   BLTU 84 96 148 1 1
+])
+
+Apc(opcode: 7728, execution_frequency: 32999, cells_saved_per_row: 906, cells_per_row_after_saving: 244, percent_saved: 78.78%)
+BasicBlock(start_idx: 142379, statements: [
+   instr   0:   LOADW rd_rs2_ptr = 48, rs1_ptr = 40, imm = 360, mem_as = 2, needs_write = 1, imm_sign = 0
+   instr   1:   SLL rd_ptr = 52, rs1_ptr = 44, rs2 = 5, rs2_as = 0
+   instr   2:   ADD rd_ptr = 52, rs1_ptr = 48, rs2 = 52, rs2_as = 1
+   instr   3:   STOREW rd_rs2_ptr = 0, rs1_ptr = 52, imm = 0, mem_as = 2, needs_write = 1, imm_sign = 0
+   instr   4:   STOREW rd_rs2_ptr = 0, rs1_ptr = 52, imm = 4, mem_as = 2, needs_write = 1, imm_sign = 0
+   instr   5:   STOREW rd_rs2_ptr = 0, rs1_ptr = 52, imm = 8, mem_as = 2, needs_write = 1, imm_sign = 0
+   instr   6:   STOREW rd_rs2_ptr = 0, rs1_ptr = 52, imm = 12, mem_as = 2, needs_write = 1, imm_sign = 0
+   instr   7:   STOREW rd_rs2_ptr = 0, rs1_ptr = 52, imm = 16, mem_as = 2, needs_write = 1, imm_sign = 0
+   instr   8:   STOREW rd_rs2_ptr = 0, rs1_ptr = 52, imm = 20, mem_as = 2, needs_write = 1, imm_sign = 0
+   instr   9:   STOREW rd_rs2_ptr = 0, rs1_ptr = 52, imm = 24, mem_as = 2, needs_write = 1, imm_sign = 0
+   instr  10:   STOREW rd_rs2_ptr = 0, rs1_ptr = 52, imm = 28, mem_as = 2, needs_write = 1, imm_sign = 0
+   instr  11:   ADD rd_ptr = 52, rs1_ptr = 44, rs2 = 1, rs2_as = 0
+   instr  12:   SLL rd_ptr = 44, rs1_ptr = 52, rs2 = 5, rs2_as = 0
+   instr  13:   ADD rd_ptr = 44, rs1_ptr = 48, rs2 = 44, rs2_as = 1
+   instr  14:   ADD rd_ptr = 48, rs1_ptr = 0, rs2 = 32, rs2_as = 0
+   instr  15:   STOREW rd_rs2_ptr = 52, rs1_ptr = 40, imm = 364, mem_as = 2, needs_write = 1, imm_sign = 0
+   instr  16:   BEQ 44 48 56 1 1
+])
+
+Apc(opcode: 4367, execution_frequency: 45558, cells_saved_per_row: 503, cells_per_row_after_saving: 191, percent_saved: 72.48%)
+BasicBlock(start_idx: 92, statements: [
+   instr   0:   LOADW rd_rs2_ptr = 60, rs1_ptr = 56, imm = 0, mem_as = 2, needs_write = 1, imm_sign = 0
+   instr   1:   STOREB rd_rs2_ptr = 60, rs1_ptr = 52, imm = 0, mem_as = 2, needs_write = 1, imm_sign = 0
+   instr   2:   SRL rd_ptr = 44, rs1_ptr = 60, rs2 = 8, rs2_as = 0
+   instr   3:   STOREB rd_rs2_ptr = 44, rs1_ptr = 52, imm = 1, mem_as = 2, needs_write = 1, imm_sign = 0
+   instr   4:   SRL rd_ptr = 64, rs1_ptr = 60, rs2 = 16, rs2_as = 0
+   instr   5:   ADD rd_ptr = 44, rs1_ptr = 52, rs2 = 3, rs2_as = 0
+   instr   6:   STOREB rd_rs2_ptr = 64, rs1_ptr = 52, imm = 2, mem_as = 2, needs_write = 1, imm_sign = 0
+   instr   7:   ADD rd_ptr = 48, rs1_ptr = 48, rs2 = 16777213, rs2_as = 0
+   instr   8:   ADD rd_ptr = 52, rs1_ptr = 56, rs2 = 16, rs2_as = 0
+   instr   9:   ADD rd_ptr = 56, rs1_ptr = 0, rs2 = 16, rs2_as = 0
+])
+
+Apc(opcode: 7747, execution_frequency: 36781, cells_saved_per_row: 430, cells_per_row_after_saving: 136, percent_saved: 75.97%)
+BasicBlock(start_idx: 142833, statements: [
+   instr   0:   ADD rd_ptr = 52, rs1_ptr = 48, rs2 = 16777213, rs2_as = 0
+   instr   1:   SLTU rd_ptr = 48, rs1_ptr = 52, rs2 = 48, rs2_as = 1
+   instr   2:   ADD rd_ptr = 48, rs1_ptr = 44, rs2 = 48, rs2_as = 1
+   instr   3:   LOADW rd_rs2_ptr = 44, rs1_ptr = 40, imm = 364, mem_as = 2, needs_write = 1, imm_sign = 0
+   instr   4:   ADD rd_ptr = 48, rs1_ptr = 48, rs2 = 16777215, rs2_as = 0
+   instr   5:   STOREW rd_rs2_ptr = 52, rs1_ptr = 40, imm = 232, mem_as = 2, needs_write = 1, imm_sign = 0
+   instr   6:   ADD rd_ptr = 52, rs1_ptr = 0, rs2 = 1024, rs2_as = 0
+   instr   7:   STOREW rd_rs2_ptr = 48, rs1_ptr = 40, imm = 236, mem_as = 2, needs_write = 1, imm_sign = 0
+   instr   8:   BNE 44 52 16 1 1
+])
+
+Apc(opcode: 11719, execution_frequency: 122274, cells_saved_per_row: 87, cells_per_row_after_saving: 93, percent_saved: 48.33%)
+BasicBlock(start_idx: 257124, statements: [
+   instr   0:   LOADBU rd_rs2_ptr = 40, rs1_ptr = 32, imm = 72, mem_as = 2, needs_write = 1, imm_sign = 0
+   instr   1:   STOREW rd_rs2_ptr = 84, rs1_ptr = 32, imm = 68, mem_as = 2, needs_write = 1, imm_sign = 0
+   instr   2:   BNE 40 88 48 1 1
+])
+
+Apc(opcode: 4383, execution_frequency: 80276, cells_saved_per_row: 62, cells_per_row_after_saving: 44, percent_saved: 58.49%)
+BasicBlock(start_idx: 230, statements: [
+   instr   0:   AND rd_ptr = 44, rs1_ptr = 48, rs2 = 8, rs2_as = 0
+   instr   1:   BNE 44 0 272 1 1
+])
+
+Apc(opcode: 11718, execution_frequency: 122274, cells_saved_per_row: 53, cells_per_row_after_saving: 58, percent_saved: 47.75%)
+BasicBlock(start_idx: 257122, statements: [
+   instr   0:   LOADW rd_rs2_ptr = 40, rs1_ptr = 32, imm = 68, mem_as = 2, needs_write = 1, imm_sign = 0
+   instr   1:   BNE 40 0 812 1 1
+])
+
+Apc(opcode: 7749, execution_frequency: 36781, cells_saved_per_row: 810, cells_per_row_after_saving: 275, percent_saved: 74.65%)
+BasicBlock(start_idx: 142862, statements: [
+   instr   0:   LOADW rd_rs2_ptr = 48, rs1_ptr = 40, imm = 316, mem_as = 2, needs_write = 1, imm_sign = 0
+   instr   1:   LOADBU rd_rs2_ptr = 52, rs1_ptr = 48, imm = 0, mem_as = 2, needs_write = 1, imm_sign = 0
+   instr   2:   LOADBU rd_rs2_ptr = 56, rs1_ptr = 48, imm = 1, mem_as = 2, needs_write = 1, imm_sign = 0
+   instr   3:   SLL rd_ptr = 52, rs1_ptr = 52, rs2 = 8, rs2_as = 0
+   instr   4:   OR rd_ptr = 52, rs1_ptr = 52, rs2 = 56, rs2_as = 1
+   instr   5:   STOREW rd_rs2_ptr = 0, rs1_ptr = 44, imm = 65508, mem_as = 2, needs_write = 1, imm_sign = 1
+   instr   6:   STOREW rd_rs2_ptr = 52, rs1_ptr = 44, imm = 65504, mem_as = 2, needs_write = 1, imm_sign = 1
+   instr   7:   STOREW rd_rs2_ptr = 0, rs1_ptr = 44, imm = 65512, mem_as = 2, needs_write = 1, imm_sign = 1
+   instr   8:   STOREW rd_rs2_ptr = 0, rs1_ptr = 44, imm = 65516, mem_as = 2, needs_write = 1, imm_sign = 1
+   instr   9:   STOREW rd_rs2_ptr = 0, rs1_ptr = 44, imm = 65520, mem_as = 2, needs_write = 1, imm_sign = 1
+   instr  10:   STOREW rd_rs2_ptr = 0, rs1_ptr = 44, imm = 65524, mem_as = 2, needs_write = 1, imm_sign = 1
+   instr  11:   STOREW rd_rs2_ptr = 0, rs1_ptr = 44, imm = 65528, mem_as = 2, needs_write = 1, imm_sign = 1
+   instr  12:   STOREW rd_rs2_ptr = 0, rs1_ptr = 44, imm = 65532, mem_as = 2, needs_write = 1, imm_sign = 1
+   instr  13:   ADD rd_ptr = 48, rs1_ptr = 48, rs2 = 2, rs2_as = 0
+   instr  14:   STOREW rd_rs2_ptr = 48, rs1_ptr = 40, imm = 316, mem_as = 2, needs_write = 1, imm_sign = 0
+   instr  15:   JALR 0 4 0 1 0
+])
+
+Apc(opcode: 6446, execution_frequency: 38765, cells_saved_per_row: 429, cells_per_row_after_saving: 159, percent_saved: 72.96%)
+BasicBlock(start_idx: 107630, statements: [
+   instr   0:   LOADW rd_rs2_ptr = 72, rs1_ptr = 8, imm = 12, mem_as = 2, needs_write = 1, imm_sign = 0
+   instr   1:   ADD rd_ptr = 76, rs1_ptr = 76, rs2 = 16777212, rs2_as = 0
+   instr   2:   STOREW rd_rs2_ptr = 76, rs1_ptr = 44, imm = 0, mem_as = 2, needs_write = 1, imm_sign = 0
+   instr   3:   AND rd_ptr = 48, rs1_ptr = 72, rs2 = 3, rs2_as = 0
+   instr   4:   SLTU rd_ptr = 40, rs1_ptr = 0, rs2 = 48, rs2_as = 1
+   instr   5:   SLL rd_ptr = 40, rs1_ptr = 40, rs2 = 2, rs2_as = 0
+   instr   6:   ADD rd_ptr = 40, rs1_ptr = 40, rs2 = 72, rs2_as = 1
+   instr   7:   AND rd_ptr = 52, rs1_ptr = 40, rs2 = 16777212, rs2_as = 0
+   instr   8:   BLT 40 0 428 1 1
+])
+
+Apc(opcode: 7727, execution_frequency: 32999, cells_saved_per_row: 430, cells_per_row_after_saving: 136, percent_saved: 75.97%)
+BasicBlock(start_idx: 142367, statements: [
+   instr   0:   ADD rd_ptr = 52, rs1_ptr = 48, rs2 = 16777213, rs2_as = 0
+   instr   1:   SLTU rd_ptr = 48, rs1_ptr = 52, rs2 = 48, rs2_as = 1
+   instr   2:   ADD rd_ptr = 48, rs1_ptr = 44, rs2 = 48, rs2_as = 1
+   instr   3:   LOADW rd_rs2_ptr = 44, rs1_ptr = 40, imm = 364, mem_as = 2, needs_write = 1, imm_sign = 0
+   instr   4:   ADD rd_ptr = 48, rs1_ptr = 48, rs2 = 16777215, rs2_as = 0
+   instr   5:   STOREW rd_rs2_ptr = 52, rs1_ptr = 40, imm = 232, mem_as = 2, needs_write = 1, imm_sign = 0
+   instr   6:   ADD rd_ptr = 52, rs1_ptr = 0, rs2 = 1024, rs2_as = 0
+   instr   7:   STOREW rd_rs2_ptr = 48, rs1_ptr = 40, imm = 236, mem_as = 2, needs_write = 1, imm_sign = 0
+   instr   8:   BNE 44 52 16 1 1
+])
+
+Apc(opcode: 4390, execution_frequency: 53142, cells_saved_per_row: 1574, cells_per_row_after_saving: 852, percent_saved: 64.88%)
+BasicBlock(start_idx: 262, statements: [
+   instr   0:   LOADB rd_rs2_ptr = 44, rs1_ptr = 56, imm = 0, mem_as = 2, needs_write = 1, imm_sign = 0
+   instr   1:   LOADB rd_rs2_ptr = 60, rs1_ptr = 56, imm = 1, mem_as = 2, needs_write = 1, imm_sign = 0
+   instr   2:   LOADB rd_rs2_ptr = 64, rs1_ptr = 56, imm = 2, mem_as = 2, needs_write = 1, imm_sign = 0
+   instr   3:   STOREB rd_rs2_ptr = 44, rs1_ptr = 52, imm = 0, mem_as = 2, needs_write = 1, imm_sign = 0
+   instr   4:   STOREB rd_rs2_ptr = 60, rs1_ptr = 52, imm = 1, mem_as = 2, needs_write = 1, imm_sign = 0
+   instr   5:   LOADB rd_rs2_ptr = 44, rs1_ptr = 56, imm = 3, mem_as = 2, needs_write = 1, imm_sign = 0
+   instr   6:   STOREB rd_rs2_ptr = 64, rs1_ptr = 52, imm = 2, mem_as = 2, needs_write = 1, imm_sign = 0
+   instr   7:   LOADB rd_rs2_ptr = 60, rs1_ptr = 56, imm = 4, mem_as = 2, needs_write = 1, imm_sign = 0
+   instr   8:   LOADB rd_rs2_ptr = 64, rs1_ptr = 56, imm = 5, mem_as = 2, needs_write = 1, imm_sign = 0
+   instr   9:   STOREB rd_rs2_ptr = 44, rs1_ptr = 52, imm = 3, mem_as = 2, needs_write = 1, imm_sign = 0
+   instr  10:   LOADB rd_rs2_ptr = 44, rs1_ptr = 56, imm = 6, mem_as = 2, needs_write = 1, imm_sign = 0
+   instr  11:   STOREB rd_rs2_ptr = 60, rs1_ptr = 52, imm = 4, mem_as = 2, needs_write = 1, imm_sign = 0
+   instr  12:   STOREB rd_rs2_ptr = 64, rs1_ptr = 52, imm = 5, mem_as = 2, needs_write = 1, imm_sign = 0
+   instr  13:   LOADB rd_rs2_ptr = 60, rs1_ptr = 56, imm = 7, mem_as = 2, needs_write = 1, imm_sign = 0
+   instr  14:   STOREB rd_rs2_ptr = 44, rs1_ptr = 52, imm = 6, mem_as = 2, needs_write = 1, imm_sign = 0
+   instr  15:   LOADB rd_rs2_ptr = 44, rs1_ptr = 56, imm = 8, mem_as = 2, needs_write = 1, imm_sign = 0
+   instr  16:   LOADB rd_rs2_ptr = 64, rs1_ptr = 56, imm = 9, mem_as = 2, needs_write = 1, imm_sign = 0
+   instr  17:   STOREB rd_rs2_ptr = 60, rs1_ptr = 52, imm = 7, mem_as = 2, needs_write = 1, imm_sign = 0
+   instr  18:   LOADB rd_rs2_ptr = 60, rs1_ptr = 56, imm = 10, mem_as = 2, needs_write = 1, imm_sign = 0
+   instr  19:   STOREB rd_rs2_ptr = 44, rs1_ptr = 52, imm = 8, mem_as = 2, needs_write = 1, imm_sign = 0
+   instr  20:   STOREB rd_rs2_ptr = 64, rs1_ptr = 52, imm = 9, mem_as = 2, needs_write = 1, imm_sign = 0
+   instr  21:   LOADB rd_rs2_ptr = 44, rs1_ptr = 56, imm = 11, mem_as = 2, needs_write = 1, imm_sign = 0
+   instr  22:   STOREB rd_rs2_ptr = 60, rs1_ptr = 52, imm = 10, mem_as = 2, needs_write = 1, imm_sign = 0
+   instr  23:   LOADB rd_rs2_ptr = 60, rs1_ptr = 56, imm = 12, mem_as = 2, needs_write = 1, imm_sign = 0
+   instr  24:   LOADB rd_rs2_ptr = 64, rs1_ptr = 56, imm = 13, mem_as = 2, needs_write = 1, imm_sign = 0
+   instr  25:   STOREB rd_rs2_ptr = 44, rs1_ptr = 52, imm = 11, mem_as = 2, needs_write = 1, imm_sign = 0
+   instr  26:   LOADB rd_rs2_ptr = 44, rs1_ptr = 56, imm = 14, mem_as = 2, needs_write = 1, imm_sign = 0
+   instr  27:   STOREB rd_rs2_ptr = 60, rs1_ptr = 52, imm = 12, mem_as = 2, needs_write = 1, imm_sign = 0
+   instr  28:   STOREB rd_rs2_ptr = 64, rs1_ptr = 52, imm = 13, mem_as = 2, needs_write = 1, imm_sign = 0
+   instr  29:   LOADB rd_rs2_ptr = 60, rs1_ptr = 56, imm = 15, mem_as = 2, needs_write = 1, imm_sign = 0
+   instr  30:   STOREB rd_rs2_ptr = 44, rs1_ptr = 52, imm = 14, mem_as = 2, needs_write = 1, imm_sign = 0
+   instr  31:   ADD rd_ptr = 56, rs1_ptr = 56, rs2 = 16, rs2_as = 0
+   instr  32:   ADD rd_ptr = 44, rs1_ptr = 52, rs2 = 16, rs2_as = 0
+   instr  33:   STOREB rd_rs2_ptr = 60, rs1_ptr = 52, imm = 15, mem_as = 2, needs_write = 1, imm_sign = 0
+   instr  34:   ADD rd_ptr = 52, rs1_ptr = 44, rs2 = 0, rs2_as = 0
+   instr  35:   AND rd_ptr = 44, rs1_ptr = 48, rs2 = 8, rs2_as = 0
+   instr  36:   BEQ 44 0 2013265657 1 1
+])
+
+Apc(opcode: 6013, execution_frequency: 42866, cells_saved_per_row: 305, cells_per_row_after_saving: 136, percent_saved: 69.16%)
+BasicBlock(start_idx: 96938, statements: [
+   instr   0:   ADD rd_ptr = 8, rs1_ptr = 8, rs2 = 16777200, rs2_as = 0
+   instr   1:   STOREW rd_rs2_ptr = 4, rs1_ptr = 8, imm = 12, mem_as = 2, needs_write = 1, imm_sign = 0
+   instr   2:   STOREW rd_rs2_ptr = 32, rs1_ptr = 8, imm = 8, mem_as = 2, needs_write = 1, imm_sign = 0
+   instr   3:   ADD rd_ptr = 32, rs1_ptr = 40, rs2 = 0, rs2_as = 0
+   instr   4:   LOADBU rd_rs2_ptr = 40, rs1_ptr = 40, imm = 0, mem_as = 2, needs_write = 1, imm_sign = 0
+   instr   5:   ADD rd_ptr = 44, rs1_ptr = 0, rs2 = 3, rs2_as = 0
+   instr   6:   BEQ 40 44 296 1 1
+])
+
+Apc(opcode: 6449, execution_frequency: 38765, cells_saved_per_row: 106, cells_per_row_after_saving: 44, percent_saved: 70.67%)
+BasicBlock(start_idx: 107656, statements: [
+   instr   0:   LUI 56 0 131072 1 0
+   instr   1:   ADD rd_ptr = 56, rs1_ptr = 56, rs2 = 1, rs2_as = 0
+   instr   2:   BGEU 40 56 16 1 1
+])
+
+Apc(opcode: 11588, execution_frequency: 61159, cells_saved_per_row: 168, cells_per_row_after_saving: 113, percent_saved: 59.79%)
+BasicBlock(start_idx: 255783, statements: [
+   instr   0:   LOADW rd_rs2_ptr = 40, rs1_ptr = 36, imm = 4, mem_as = 2, needs_write = 1, imm_sign = 0
+   instr   1:   ADD rd_ptr = 40, rs1_ptr = 40, rs2 = 72, rs2_as = 1
+   instr   2:   ADD rd_ptr = 48, rs1_ptr = 0, rs2 = 32, rs2_as = 0
+   instr   3:   AUIPC 4 0 16773216 1 0
+   instr   4:   JALR 4 4 1104 1 0
+])
+
+Apc(opcode: 6454, execution_frequency: 38765, cells_saved_per_row: 300, cells_per_row_after_saving: 128, percent_saved: 70.09%)
+BasicBlock(start_idx: 107702, statements: [
+   instr   0:   SUB rd_ptr = 40, rs1_ptr = 76, rs2 = 80, rs2_as = 1
+   instr   1:   SLTU rd_ptr = 48, rs1_ptr = 76, rs2 = 40, rs2_as = 1
+   instr   2:   ADD rd_ptr = 48, rs1_ptr = 48, rs2 = 16777215, rs2_as = 0
+   instr   3:   AND rd_ptr = 48, rs1_ptr = 48, rs2 = 40, rs2_as = 1
+   instr   4:   ADD rd_ptr = 40, rs1_ptr = 0, rs2 = 32, rs2_as = 0
+   instr   5:   STOREW rd_rs2_ptr = 48, rs1_ptr = 44, imm = 0, mem_as = 2, needs_write = 1, imm_sign = 0
+   instr   6:   BNE 72 40 32 1 1
+])
+
+Apc(opcode: 6447, execution_frequency: 38765, cells_saved_per_row: 173, cells_per_row_after_saving: 75, percent_saved: 69.76%)
+BasicBlock(start_idx: 107640, statements: [
+   instr   0:   LUI 40 0 1123 1 0
+   instr   1:   LOADBU rd_rs2_ptr = 0, rs1_ptr = 40, imm = 1472, mem_as = 2, needs_write = 0, imm_sign = 0
+   instr   2:   LUI 40 0 1123 1 0
+   instr   3:   LOADW rd_rs2_ptr = 36, rs1_ptr = 40, imm = 1368, mem_as = 2, needs_write = 1, imm_sign = 0
+   instr   4:   BNE 36 0 12 1 1
+])
+
+Apc(opcode: 11589, execution_frequency: 61159, cells_saved_per_row: 99, cells_per_row_after_saving: 68, percent_saved: 59.28%)
+BasicBlock(start_idx: 255788, statements: [
+   instr   0:   ADD rd_ptr = 40, rs1_ptr = 72, rs2 = 32, rs2_as = 0
+   instr   1:   STOREW rd_rs2_ptr = 40, rs1_ptr = 36, imm = 8, mem_as = 2, needs_write = 1, imm_sign = 0
+   instr   2:   JAL 0 0 56 1 0
+])
+
+Apc(opcode: 11591, execution_frequency: 43299, cells_saved_per_row: 620, cells_per_row_after_saving: 304, percent_saved: 67.10%)
+BasicBlock(start_idx: 255843, statements: [
+   instr   0:   ADD rd_ptr = 8, rs1_ptr = 8, rs2 = 16777152, rs2_as = 0
+   instr   1:   STOREW rd_rs2_ptr = 4, rs1_ptr = 8, imm = 60, mem_as = 2, needs_write = 1, imm_sign = 0
+   instr   2:   STOREW rd_rs2_ptr = 32, rs1_ptr = 8, imm = 56, mem_as = 2, needs_write = 1, imm_sign = 0
+   instr   3:   STOREW rd_rs2_ptr = 36, rs1_ptr = 8, imm = 52, mem_as = 2, needs_write = 1, imm_sign = 0
+   instr   4:   STOREW rd_rs2_ptr = 72, rs1_ptr = 8, imm = 48, mem_as = 2, needs_write = 1, imm_sign = 0
+   instr   5:   STOREW rd_rs2_ptr = 76, rs1_ptr = 8, imm = 44, mem_as = 2, needs_write = 1, imm_sign = 0
+   instr   6:   STOREW rd_rs2_ptr = 80, rs1_ptr = 8, imm = 40, mem_as = 2, needs_write = 1, imm_sign = 0
+   instr   7:   STOREW rd_rs2_ptr = 84, rs1_ptr = 8, imm = 36, mem_as = 2, needs_write = 1, imm_sign = 0
+   instr   8:   STOREW rd_rs2_ptr = 88, rs1_ptr = 8, imm = 32, mem_as = 2, needs_write = 1, imm_sign = 0
+   instr   9:   STOREW rd_rs2_ptr = 92, rs1_ptr = 8, imm = 28, mem_as = 2, needs_write = 1, imm_sign = 0
+   instr  10:   ADD rd_ptr = 36, rs1_ptr = 44, rs2 = 0, rs2_as = 0
+   instr  11:   LOADBU rd_rs2_ptr = 44, rs1_ptr = 44, imm = 0, mem_as = 2, needs_write = 1, imm_sign = 0
+   instr  12:   ADD rd_ptr = 32, rs1_ptr = 40, rs2 = 0, rs2_as = 0
+   instr  13:   BEQ 44 0 36 1 1
+])
+
+Apc(opcode: 6049, execution_frequency: 42794, cells_saved_per_row: 855, cells_per_row_after_saving: 424, percent_saved: 66.85%)
+BasicBlock(start_idx: 98268, statements: [
+   instr   0:   ADD rd_ptr = 8, rs1_ptr = 8, rs2 = 16776960, rs2_as = 0
+   instr   1:   STOREW rd_rs2_ptr = 4, rs1_ptr = 8, imm = 252, mem_as = 2, needs_write = 1, imm_sign = 0
+   instr   2:   STOREW rd_rs2_ptr = 32, rs1_ptr = 8, imm = 248, mem_as = 2, needs_write = 1, imm_sign = 0
+   instr   3:   STOREW rd_rs2_ptr = 36, rs1_ptr = 8, imm = 244, mem_as = 2, needs_write = 1, imm_sign = 0
+   instr   4:   STOREW rd_rs2_ptr = 72, rs1_ptr = 8, imm = 240, mem_as = 2, needs_write = 1, imm_sign = 0
+   instr   5:   STOREW rd_rs2_ptr = 76, rs1_ptr = 8, imm = 236, mem_as = 2, needs_write = 1, imm_sign = 0
+   instr   6:   STOREW rd_rs2_ptr = 80, rs1_ptr = 8, imm = 232, mem_as = 2, needs_write = 1, imm_sign = 0
+   instr   7:   STOREW rd_rs2_ptr = 84, rs1_ptr = 8, imm = 228, mem_as = 2, needs_write = 1, imm_sign = 0
+   instr   8:   STOREW rd_rs2_ptr = 88, rs1_ptr = 8, imm = 224, mem_as = 2, needs_write = 1, imm_sign = 0
+   instr   9:   STOREW rd_rs2_ptr = 92, rs1_ptr = 8, imm = 220, mem_as = 2, needs_write = 1, imm_sign = 0
+   instr  10:   STOREW rd_rs2_ptr = 96, rs1_ptr = 8, imm = 216, mem_as = 2, needs_write = 1, imm_sign = 0
+   instr  11:   STOREW rd_rs2_ptr = 100, rs1_ptr = 8, imm = 212, mem_as = 2, needs_write = 1, imm_sign = 0
+   instr  12:   STOREW rd_rs2_ptr = 104, rs1_ptr = 8, imm = 208, mem_as = 2, needs_write = 1, imm_sign = 0
+   instr  13:   STOREW rd_rs2_ptr = 108, rs1_ptr = 8, imm = 204, mem_as = 2, needs_write = 1, imm_sign = 0
+   instr  14:   LOADW rd_rs2_ptr = 48, rs1_ptr = 44, imm = 0, mem_as = 2, needs_write = 1, imm_sign = 0
+   instr  15:   ADD rd_ptr = 32, rs1_ptr = 40, rs2 = 0, rs2_as = 0
+   instr  16:   ADD rd_ptr = 40, rs1_ptr = 0, rs2 = 4, rs2_as = 0
+   instr  17:   STOREW rd_rs2_ptr = 0, rs1_ptr = 8, imm = 32, mem_as = 2, needs_write = 1, imm_sign = 0
+   instr  18:   BGEU 48 40 116 1 1
+])
+
+Apc(opcode: 6444, execution_frequency: 38765, cells_saved_per_row: 595, cells_per_row_after_saving: 270, percent_saved: 68.79%)
+BasicBlock(start_idx: 107614, statements: [
+   instr   0:   ADD rd_ptr = 8, rs1_ptr = 8, rs2 = 16777136, rs2_as = 0
+   instr   1:   STOREW rd_rs2_ptr = 4, rs1_ptr = 8, imm = 76, mem_as = 2, needs_write = 1, imm_sign = 0
+   instr   2:   STOREW rd_rs2_ptr = 32, rs1_ptr = 8, imm = 72, mem_as = 2, needs_write = 1, imm_sign = 0
+   instr   3:   STOREW rd_rs2_ptr = 36, rs1_ptr = 8, imm = 68, mem_as = 2, needs_write = 1, imm_sign = 0
+   instr   4:   STOREW rd_rs2_ptr = 72, rs1_ptr = 8, imm = 64, mem_as = 2, needs_write = 1, imm_sign = 0
+   instr   5:   STOREW rd_rs2_ptr = 76, rs1_ptr = 8, imm = 60, mem_as = 2, needs_write = 1, imm_sign = 0
+   instr   6:   STOREW rd_rs2_ptr = 80, rs1_ptr = 8, imm = 56, mem_as = 2, needs_write = 1, imm_sign = 0
+   instr   7:   STOREW rd_rs2_ptr = 84, rs1_ptr = 8, imm = 52, mem_as = 2, needs_write = 1, imm_sign = 0
+   instr   8:   LOADW rd_rs2_ptr = 76, rs1_ptr = 44, imm = 0, mem_as = 2, needs_write = 1, imm_sign = 0
+   instr   9:   ADD rd_ptr = 32, rs1_ptr = 40, rs2 = 0, rs2_as = 0
+   instr  10:   ADD rd_ptr = 40, rs1_ptr = 0, rs2 = 4, rs2_as = 0
+   instr  11:   STOREW rd_rs2_ptr = 0, rs1_ptr = 8, imm = 12, mem_as = 2, needs_write = 1, imm_sign = 0
+   instr  12:   BLTU 76 40 188 1 1
+])
+
+Apc(opcode: 7729, execution_frequency: 32999, cells_saved_per_row: 627, cells_per_row_after_saving: 244, percent_saved: 71.99%)
+BasicBlock(start_idx: 142396, statements: [
+   instr   0:   LOADW rd_rs2_ptr = 48, rs1_ptr = 40, imm = 316, mem_as = 2, needs_write = 1, imm_sign = 0
+   instr   1:   LOADBU rd_rs2_ptr = 52, rs1_ptr = 48, imm = 0, mem_as = 2, needs_write = 1, imm_sign = 0
+   instr   2:   STOREW rd_rs2_ptr = 0, rs1_ptr = 44, imm = 65508, mem_as = 2, needs_write = 1, imm_sign = 1
+   instr   3:   STOREW rd_rs2_ptr = 52, rs1_ptr = 44, imm = 65504, mem_as = 2, needs_write = 1, imm_sign = 1
+   instr   4:   STOREW rd_rs2_ptr = 0, rs1_ptr = 44, imm = 65512, mem_as = 2, needs_write = 1, imm_sign = 1
+   instr   5:   STOREW rd_rs2_ptr = 0, rs1_ptr = 44, imm = 65516, mem_as = 2, needs_write = 1, imm_sign = 1
+   instr   6:   STOREW rd_rs2_ptr = 0, rs1_ptr = 44, imm = 65520, mem_as = 2, needs_write = 1, imm_sign = 1
+   instr   7:   STOREW rd_rs2_ptr = 0, rs1_ptr = 44, imm = 65524, mem_as = 2, needs_write = 1, imm_sign = 1
+   instr   8:   STOREW rd_rs2_ptr = 0, rs1_ptr = 44, imm = 65528, mem_as = 2, needs_write = 1, imm_sign = 1
+   instr   9:   STOREW rd_rs2_ptr = 0, rs1_ptr = 44, imm = 65532, mem_as = 2, needs_write = 1, imm_sign = 1
+   instr  10:   ADD rd_ptr = 48, rs1_ptr = 48, rs2 = 1, rs2_as = 0
+   instr  11:   STOREW rd_rs2_ptr = 48, rs1_ptr = 40, imm = 316, mem_as = 2, needs_write = 1, imm_sign = 0
+   instr  12:   JALR 0 4 0 1 0
+])
+
+Apc(opcode: 7712, execution_frequency: 32158, cells_saved_per_row: 358, cells_per_row_after_saving: 144, percent_saved: 71.31%)
+BasicBlock(start_idx: 142033, statements: [
+   instr   0:   ADD rd_ptr = 52, rs1_ptr = 48, rs2 = 16777214, rs2_as = 0
+   instr   1:   SLTU rd_ptr = 56, rs1_ptr = 52, rs2 = 48, rs2_as = 1
+   instr   2:   LOADW rd_rs2_ptr = 48, rs1_ptr = 40, imm = 364, mem_as = 2, needs_write = 1, imm_sign = 0
+   instr   3:   ADD rd_ptr = 44, rs1_ptr = 44, rs2 = 56, rs2_as = 1
+   instr   4:   ADD rd_ptr = 44, rs1_ptr = 44, rs2 = 16777215, rs2_as = 0
+   instr   5:   STOREW rd_rs2_ptr = 52, rs1_ptr = 40, imm = 232, mem_as = 2, needs_write = 1, imm_sign = 0
+   instr   6:   STOREW rd_rs2_ptr = 44, rs1_ptr = 40, imm = 236, mem_as = 2, needs_write = 1, imm_sign = 0
+   instr   7:   BEQ 48 0 16 1 1
+])
+
+Apc(opcode: 7746, execution_frequency: 36781, cells_saved_per_row: 250, cells_per_row_after_saving: 116, percent_saved: 68.31%)
+BasicBlock(start_idx: 142824, statements: [
+   instr   0:   LOADW rd_rs2_ptr = 44, rs1_ptr = 40, imm = 236, mem_as = 2, needs_write = 1, imm_sign = 0
+   instr   1:   LOADW rd_rs2_ptr = 48, rs1_ptr = 40, imm = 232, mem_as = 2, needs_write = 1, imm_sign = 0
+   instr   2:   SLTU rd_ptr = 52, rs1_ptr = 44, rs2 = 1, rs2_as = 0
+   instr   3:   SLTU rd_ptr = 56, rs1_ptr = 48, rs2 = 3, rs2_as = 0
+   instr   4:   AND rd_ptr = 52, rs1_ptr = 52, rs2 = 56, rs2_as = 1
+   instr   5:   BEQ 52 0 16 1 1
+])
+
+Apc(opcode: 6050, execution_frequency: 42794, cells_saved_per_row: 654, cells_per_row_after_saving: 355, percent_saved: 64.82%)
+BasicBlock(start_idx: 98300, statements: [
+   instr   0:   LOADW rd_rs2_ptr = 4, rs1_ptr = 8, imm = 252, mem_as = 2, needs_write = 1, imm_sign = 0
+   instr   1:   LOADW rd_rs2_ptr = 32, rs1_ptr = 8, imm = 248, mem_as = 2, needs_write = 1, imm_sign = 0
+   instr   2:   LOADW rd_rs2_ptr = 36, rs1_ptr = 8, imm = 244, mem_as = 2, needs_write = 1, imm_sign = 0
+   instr   3:   LOADW rd_rs2_ptr = 72, rs1_ptr = 8, imm = 240, mem_as = 2, needs_write = 1, imm_sign = 0
+   instr   4:   LOADW rd_rs2_ptr = 76, rs1_ptr = 8, imm = 236, mem_as = 2, needs_write = 1, imm_sign = 0
+   instr   5:   LOADW rd_rs2_ptr = 80, rs1_ptr = 8, imm = 232, mem_as = 2, needs_write = 1, imm_sign = 0
+   instr   6:   LOADW rd_rs2_ptr = 84, rs1_ptr = 8, imm = 228, mem_as = 2, needs_write = 1, imm_sign = 0
+   instr   7:   LOADW rd_rs2_ptr = 88, rs1_ptr = 8, imm = 224, mem_as = 2, needs_write = 1, imm_sign = 0
+   instr   8:   LOADW rd_rs2_ptr = 92, rs1_ptr = 8, imm = 220, mem_as = 2, needs_write = 1, imm_sign = 0
+   instr   9:   LOADW rd_rs2_ptr = 96, rs1_ptr = 8, imm = 216, mem_as = 2, needs_write = 1, imm_sign = 0
+   instr  10:   LOADW rd_rs2_ptr = 100, rs1_ptr = 8, imm = 212, mem_as = 2, needs_write = 1, imm_sign = 0
+   instr  11:   LOADW rd_rs2_ptr = 104, rs1_ptr = 8, imm = 208, mem_as = 2, needs_write = 1, imm_sign = 0
+   instr  12:   LOADW rd_rs2_ptr = 108, rs1_ptr = 8, imm = 204, mem_as = 2, needs_write = 1, imm_sign = 0
+   instr  13:   ADD rd_ptr = 8, rs1_ptr = 8, rs2 = 256, rs2_as = 0
+   instr  14:   JALR 0 4 0 1 0
+])
+
+Apc(opcode: 11723, execution_frequency: 30622, cells_saved_per_row: 214, cells_per_row_after_saving: 84, percent_saved: 71.81%)
+BasicBlock(start_idx: 257143, statements: [
+   instr   0:   ADD rd_ptr = 40, rs1_ptr = 0, rs2 = 1, rs2_as = 0
+   instr   1:   ADD rd_ptr = 72, rs1_ptr = 40, rs2 = 72, rs2_as = 1
+   instr   2:   ADD rd_ptr = 80, rs1_ptr = 80, rs2 = 16777215, rs2_as = 0
+   instr   3:   ADD rd_ptr = 76, rs1_ptr = 76, rs2 = 4, rs2_as = 0
+   instr   4:   BNE 80 0 2013265813 1 1
+])
+
+Apc(opcode: 6493, execution_frequency: 15926, cells_saved_per_row: 494, cells_per_row_after_saving: 101, percent_saved: 83.03%)
+BasicBlock(start_idx: 108546, statements: [
+   instr   0:   AND rd_ptr = 40, rs1_ptr = 72, rs2 = 3, rs2_as = 0
+   instr   1:   SLTU rd_ptr = 44, rs1_ptr = 40, rs2 = 1, rs2_as = 0
+   instr   2:   ADD rd_ptr = 48, rs1_ptr = 0, rs2 = 4, rs2_as = 0
+   instr   3:   SUB rd_ptr = 48, rs1_ptr = 48, rs2 = 40, rs2_as = 1
+   instr   4:   ADD rd_ptr = 44, rs1_ptr = 44, rs2 = 16777215, rs2_as = 0
+   instr   5:   AND rd_ptr = 44, rs1_ptr = 44, rs2 = 48, rs2_as = 1
+   instr   6:   ADD rd_ptr = 72, rs1_ptr = 44, rs2 = 72, rs2_as = 1
+   instr   7:   LUI 40 0 131072 1 0
+   instr   8:   ADD rd_ptr = 40, rs1_ptr = 40, rs2 = 16777109, rs2_as = 0
+   instr   9:   BLTU 72 40 44 1 1
+])
+
+Apc(opcode: 4778, execution_frequency: 33760, cells_saved_per_row: 362, cells_per_row_after_saving: 158, percent_saved: 69.62%)
+BasicBlock(start_idx: 9646, statements: [
+   instr   0:   ADD rd_ptr = 56, rs1_ptr = 44, rs2 = 0, rs2_as = 0
+   instr   1:   LOADW rd_rs2_ptr = 44, rs1_ptr = 44, imm = 0, mem_as = 2, needs_write = 1, imm_sign = 0
+   instr   2:   STOREW rd_rs2_ptr = 0, rs1_ptr = 8, imm = 56, mem_as = 2, needs_write = 1, imm_sign = 0
+   instr   3:   LOADW rd_rs2_ptr = 52, rs1_ptr = 44, imm = 0, mem_as = 2, needs_write = 1, imm_sign = 0
+   instr   4:   ADD rd_ptr = 48, rs1_ptr = 48, rs2 = 16777215, rs2_as = 0
+   instr   5:   ADD rd_ptr = 60, rs1_ptr = 0, rs2 = 4, rs2_as = 0
+   instr   6:   STOREW rd_rs2_ptr = 48, rs1_ptr = 56, imm = 4, mem_as = 2, needs_write = 1, imm_sign = 0
+   instr   7:   BGEU 52 60 36 1 1
+])
+
+Apc(opcode: 11768, execution_frequency: 36281, cells_saved_per_row: 386, cells_per_row_after_saving: 183, percent_saved: 67.84%)
+BasicBlock(start_idx: 257515, statements: [
+   instr   0:   LOADW rd_rs2_ptr = 40, rs1_ptr = 8, imm = 4, mem_as = 2, needs_write = 1, imm_sign = 0
+   instr   1:   AND rd_ptr = 44, rs1_ptr = 88, rs2 = 15, rs2_as = 0
+   instr   2:   ADD rd_ptr = 76, rs1_ptr = 40, rs2 = 76, rs2_as = 1
+   instr   3:   STOREB rd_rs2_ptr = 44, rs1_ptr = 76, imm = 1, mem_as = 2, needs_write = 1, imm_sign = 0
+   instr   4:   ADD rd_ptr = 76, rs1_ptr = 92, rs2 = 1, rs2_as = 0
+   instr   5:   STOREW rd_rs2_ptr = 76, rs1_ptr = 8, imm = 8, mem_as = 2, needs_write = 1, imm_sign = 0
+   instr   6:   ADD rd_ptr = 80, rs1_ptr = 80, rs2 = 16777215, rs2_as = 0
+   instr   7:   ADD rd_ptr = 84, rs1_ptr = 84, rs2 = 1, rs2_as = 0
+   instr   8:   BEQ 80 0 84 1 1
+])
+
+Apc(opcode: 11586, execution_frequency: 61159, cells_saved_per_row: 100, cells_per_row_after_saving: 80, percent_saved: 55.56%)
+BasicBlock(start_idx: 255769, statements: [
+   instr   0:   LOADW rd_rs2_ptr = 44, rs1_ptr = 36, imm = 8, mem_as = 2, needs_write = 1, imm_sign = 0
+   instr   1:   LOADW rd_rs2_ptr = 40, rs1_ptr = 36, imm = 0, mem_as = 2, needs_write = 1, imm_sign = 0
+   instr   2:   BEQ 40 44 192 1 1
+])
+
+Apc(opcode: 6491, execution_frequency: 15926, cells_saved_per_row: 2566, cells_per_row_after_saving: 540, percent_saved: 82.61%)
+BasicBlock(start_idx: 108476, statements: [
+   instr   0:   LOADBU rd_rs2_ptr = 40, rs1_ptr = 8, imm = 139, mem_as = 2, needs_write = 1, imm_sign = 0
+   instr   1:   LOADBU rd_rs2_ptr = 44, rs1_ptr = 8, imm = 138, mem_as = 2, needs_write = 1, imm_sign = 0
+   instr   2:   LOADBU rd_rs2_ptr = 48, rs1_ptr = 8, imm = 137, mem_as = 2, needs_write = 1, imm_sign = 0
+   instr   3:   STOREB rd_rs2_ptr = 40, rs1_ptr = 8, imm = 122, mem_as = 2, needs_write = 1, imm_sign = 0
+   instr   4:   SLL rd_ptr = 44, rs1_ptr = 44, rs2 = 8, rs2_as = 0
+   instr   5:   OR rd_ptr = 44, rs1_ptr = 44, rs2 = 48, rs2_as = 1
+   instr   6:   STOREH rd_rs2_ptr = 44, rs1_ptr = 8, imm = 120, mem_as = 2, needs_write = 1, imm_sign = 0
+   instr   7:   LOADBU rd_rs2_ptr = 40, rs1_ptr = 8, imm = 134, mem_as = 2, needs_write = 1, imm_sign = 0
+   instr   8:   LOADBU rd_rs2_ptr = 44, rs1_ptr = 8, imm = 133, mem_as = 2, needs_write = 1, imm_sign = 0
+   instr   9:   LOADBU rd_rs2_ptr = 48, rs1_ptr = 8, imm = 135, mem_as = 2, needs_write = 1, imm_sign = 0
+   instr  10:   LOADBU rd_rs2_ptr = 52, rs1_ptr = 8, imm = 136, mem_as = 2, needs_write = 1, imm_sign = 0
+   instr  11:   SLL rd_ptr = 40, rs1_ptr = 40, rs2 = 8, rs2_as = 0
+   instr  12:   OR rd_ptr = 40, rs1_ptr = 40, rs2 = 44, rs2_as = 1
+   instr  13:   SLL rd_ptr = 48, rs1_ptr = 48, rs2 = 16, rs2_as = 0
+   instr  14:   SLL rd_ptr = 52, rs1_ptr = 52, rs2 = 24, rs2_as = 0
+   instr  15:   OR rd_ptr = 48, rs1_ptr = 52, rs2 = 48, rs2_as = 1
+   instr  16:   OR rd_ptr = 40, rs1_ptr = 48, rs2 = 40, rs2_as = 1
+   instr  17:   STOREW rd_rs2_ptr = 40, rs1_ptr = 8, imm = 116, mem_as = 2, needs_write = 1, imm_sign = 0
+   instr  18:   LOADBU rd_rs2_ptr = 40, rs1_ptr = 8, imm = 130, mem_as = 2, needs_write = 1, imm_sign = 0
+   instr  19:   LOADBU rd_rs2_ptr = 44, rs1_ptr = 8, imm = 129, mem_as = 2, needs_write = 1, imm_sign = 0
+   instr  20:   LOADBU rd_rs2_ptr = 48, rs1_ptr = 8, imm = 131, mem_as = 2, needs_write = 1, imm_sign = 0
+   instr  21:   LOADBU rd_rs2_ptr = 52, rs1_ptr = 8, imm = 132, mem_as = 2, needs_write = 1, imm_sign = 0
+   instr  22:   SLL rd_ptr = 40, rs1_ptr = 40, rs2 = 8, rs2_as = 0
+   instr  23:   OR rd_ptr = 40, rs1_ptr = 40, rs2 = 44, rs2_as = 1
+   instr  24:   SLL rd_ptr = 48, rs1_ptr = 48, rs2 = 16, rs2_as = 0
+   instr  25:   SLL rd_ptr = 52, rs1_ptr = 52, rs2 = 24, rs2_as = 0
+   instr  26:   OR rd_ptr = 48, rs1_ptr = 52, rs2 = 48, rs2_as = 1
+   instr  27:   OR rd_ptr = 40, rs1_ptr = 48, rs2 = 40, rs2_as = 1
+   instr  28:   STOREW rd_rs2_ptr = 40, rs1_ptr = 8, imm = 112, mem_as = 2, needs_write = 1, imm_sign = 0
+   instr  29:   LOADBU rd_rs2_ptr = 40, rs1_ptr = 8, imm = 126, mem_as = 2, needs_write = 1, imm_sign = 0
+   instr  30:   LOADBU rd_rs2_ptr = 44, rs1_ptr = 8, imm = 125, mem_as = 2, needs_write = 1, imm_sign = 0
+   instr  31:   LOADBU rd_rs2_ptr = 48, rs1_ptr = 8, imm = 127, mem_as = 2, needs_write = 1, imm_sign = 0
+   instr  32:   LOADBU rd_rs2_ptr = 52, rs1_ptr = 8, imm = 128, mem_as = 2, needs_write = 1, imm_sign = 0
+   instr  33:   SLL rd_ptr = 40, rs1_ptr = 40, rs2 = 8, rs2_as = 0
+   instr  34:   OR rd_ptr = 40, rs1_ptr = 40, rs2 = 44, rs2_as = 1
+   instr  35:   SLL rd_ptr = 48, rs1_ptr = 48, rs2 = 16, rs2_as = 0
+   instr  36:   SLL rd_ptr = 52, rs1_ptr = 52, rs2 = 24, rs2_as = 0
+   instr  37:   OR rd_ptr = 48, rs1_ptr = 52, rs2 = 48, rs2_as = 1
+   instr  38:   OR rd_ptr = 40, rs1_ptr = 48, rs2 = 40, rs2_as = 1
+   instr  39:   STOREW rd_rs2_ptr = 40, rs1_ptr = 8, imm = 108, mem_as = 2, needs_write = 1, imm_sign = 0
+   instr  40:   ADD rd_ptr = 44, rs1_ptr = 8, rs2 = 140, rs2_as = 0
+   instr  41:   ADD rd_ptr = 40, rs1_ptr = 8, rs2 = 8, rs2_as = 0
+   instr  42:   ADD rd_ptr = 48, rs1_ptr = 0, rs2 = 52, rs2_as = 0
+   instr  43:   AUIPC 4 0 16775520 1 0
+   instr  44:   JALR 4 4 348 1 0
+])
+
+Apc(opcode: 11713, execution_frequency: 43299, cells_saved_per_row: 509, cells_per_row_after_saving: 293, percent_saved: 63.47%)
+BasicBlock(start_idx: 256806, statements: [
+   instr   0:   STOREB rd_rs2_ptr = 48, rs1_ptr = 32, imm = 0, mem_as = 2, needs_write = 1, imm_sign = 0
+   instr   1:   LOADW rd_rs2_ptr = 4, rs1_ptr = 8, imm = 60, mem_as = 2, needs_write = 1, imm_sign = 0
+   instr   2:   LOADW rd_rs2_ptr = 32, rs1_ptr = 8, imm = 56, mem_as = 2, needs_write = 1, imm_sign = 0
+   instr   3:   LOADW rd_rs2_ptr = 36, rs1_ptr = 8, imm = 52, mem_as = 2, needs_write = 1, imm_sign = 0
+   instr   4:   LOADW rd_rs2_ptr = 72, rs1_ptr = 8, imm = 48, mem_as = 2, needs_write = 1, imm_sign = 0
+   instr   5:   LOADW rd_rs2_ptr = 76, rs1_ptr = 8, imm = 44, mem_as = 2, needs_write = 1, imm_sign = 0
+   instr   6:   LOADW rd_rs2_ptr = 80, rs1_ptr = 8, imm = 40, mem_as = 2, needs_write = 1, imm_sign = 0
+   instr   7:   LOADW rd_rs2_ptr = 84, rs1_ptr = 8, imm = 36, mem_as = 2, needs_write = 1, imm_sign = 0
+   instr   8:   LOADW rd_rs2_ptr = 88, rs1_ptr = 8, imm = 32, mem_as = 2, needs_write = 1, imm_sign = 0
+   instr   9:   LOADW rd_rs2_ptr = 92, rs1_ptr = 8, imm = 28, mem_as = 2, needs_write = 1, imm_sign = 0
+   instr  10:   ADD rd_ptr = 8, rs1_ptr = 8, rs2 = 64, rs2_as = 0
+   instr  11:   JALR 0 4 0 1 0
+])
+
+Apc(opcode: 7866, execution_frequency: 17830, cells_saved_per_row: 2991, cells_per_row_after_saving: 711, percent_saved: 80.79%)
+BasicBlock(start_idx: 146184, statements: [
+   instr   0:   ADD rd_ptr = 8, rs1_ptr = 8, rs2 = 16777184, rs2_as = 0
+   instr   1:   LOADW rd_rs2_ptr = 40, rs1_ptr = 40, imm = 360, mem_as = 2, needs_write = 1, imm_sign = 0
+   instr   2:   SLL rd_ptr = 44, rs1_ptr = 44, rs2 = 5, rs2_as = 0
+   instr   3:   ADD rd_ptr = 40, rs1_ptr = 40, rs2 = 44, rs2_as = 1
+   instr   4:   LOADW rd_rs2_ptr = 44, rs1_ptr = 40, imm = 65532, mem_as = 2, needs_write = 1, imm_sign = 1
+   instr   5:   LOADW rd_rs2_ptr = 48, rs1_ptr = 40, imm = 65528, mem_as = 2, needs_write = 1, imm_sign = 1
+   instr   6:   LOADW rd_rs2_ptr = 52, rs1_ptr = 40, imm = 65524, mem_as = 2, needs_write = 1, imm_sign = 1
+   instr   7:   LOADW rd_rs2_ptr = 56, rs1_ptr = 40, imm = 65520, mem_as = 2, needs_write = 1, imm_sign = 1
+   instr   8:   STOREW rd_rs2_ptr = 44, rs1_ptr = 8, imm = 28, mem_as = 2, needs_write = 1, imm_sign = 0
+   instr   9:   STOREW rd_rs2_ptr = 48, rs1_ptr = 8, imm = 24, mem_as = 2, needs_write = 1, imm_sign = 0
+   instr  10:   STOREW rd_rs2_ptr = 52, rs1_ptr = 8, imm = 20, mem_as = 2, needs_write = 1, imm_sign = 0
+   instr  11:   STOREW rd_rs2_ptr = 56, rs1_ptr = 8, imm = 16, mem_as = 2, needs_write = 1, imm_sign = 0
+   instr  12:   LOADW rd_rs2_ptr = 44, rs1_ptr = 40, imm = 65516, mem_as = 2, needs_write = 1, imm_sign = 1
+   instr  13:   LOADW rd_rs2_ptr = 48, rs1_ptr = 40, imm = 65512, mem_as = 2, needs_write = 1, imm_sign = 1
+   instr  14:   LOADW rd_rs2_ptr = 52, rs1_ptr = 40, imm = 65508, mem_as = 2, needs_write = 1, imm_sign = 1
+   instr  15:   LOADW rd_rs2_ptr = 56, rs1_ptr = 40, imm = 65504, mem_as = 2, needs_write = 1, imm_sign = 1
+   instr  16:   STOREW rd_rs2_ptr = 44, rs1_ptr = 8, imm = 12, mem_as = 2, needs_write = 1, imm_sign = 0
+   instr  17:   STOREW rd_rs2_ptr = 48, rs1_ptr = 8, imm = 8, mem_as = 2, needs_write = 1, imm_sign = 0
+   instr  18:   STOREW rd_rs2_ptr = 52, rs1_ptr = 8, imm = 4, mem_as = 2, needs_write = 1, imm_sign = 0
+   instr  19:   STOREW rd_rs2_ptr = 56, rs1_ptr = 8, imm = 0, mem_as = 2, needs_write = 1, imm_sign = 0
+   instr  20:   LOADW rd_rs2_ptr = 44, rs1_ptr = 40, imm = 65472, mem_as = 2, needs_write = 1, imm_sign = 1
+   instr  21:   LOADW rd_rs2_ptr = 48, rs1_ptr = 40, imm = 65476, mem_as = 2, needs_write = 1, imm_sign = 1
+   instr  22:   LOADW rd_rs2_ptr = 52, rs1_ptr = 40, imm = 65480, mem_as = 2, needs_write = 1, imm_sign = 1
+   instr  23:   LOADW rd_rs2_ptr = 56, rs1_ptr = 40, imm = 65484, mem_as = 2, needs_write = 1, imm_sign = 1
+   instr  24:   STOREW rd_rs2_ptr = 44, rs1_ptr = 40, imm = 65504, mem_as = 2, needs_write = 1, imm_sign = 1
+   instr  25:   STOREW rd_rs2_ptr = 48, rs1_ptr = 40, imm = 65508, mem_as = 2, needs_write = 1, imm_sign = 1
+   instr  26:   STOREW rd_rs2_ptr = 52, rs1_ptr = 40, imm = 65512, mem_as = 2, needs_write = 1, imm_sign = 1
+   instr  27:   STOREW rd_rs2_ptr = 56, rs1_ptr = 40, imm = 65516, mem_as = 2, needs_write = 1, imm_sign = 1
+   instr  28:   LOADW rd_rs2_ptr = 44, rs1_ptr = 40, imm = 65488, mem_as = 2, needs_write = 1, imm_sign = 1
+   instr  29:   LOADW rd_rs2_ptr = 48, rs1_ptr = 40, imm = 65492, mem_as = 2, needs_write = 1, imm_sign = 1
+   instr  30:   LOADW rd_rs2_ptr = 52, rs1_ptr = 40, imm = 65496, mem_as = 2, needs_write = 1, imm_sign = 1
+   instr  31:   LOADW rd_rs2_ptr = 56, rs1_ptr = 40, imm = 65500, mem_as = 2, needs_write = 1, imm_sign = 1
+   instr  32:   STOREW rd_rs2_ptr = 44, rs1_ptr = 40, imm = 65520, mem_as = 2, needs_write = 1, imm_sign = 1
+   instr  33:   STOREW rd_rs2_ptr = 48, rs1_ptr = 40, imm = 65524, mem_as = 2, needs_write = 1, imm_sign = 1
+   instr  34:   STOREW rd_rs2_ptr = 52, rs1_ptr = 40, imm = 65528, mem_as = 2, needs_write = 1, imm_sign = 1
+   instr  35:   STOREW rd_rs2_ptr = 56, rs1_ptr = 40, imm = 65532, mem_as = 2, needs_write = 1, imm_sign = 1
+   instr  36:   LOADW rd_rs2_ptr = 44, rs1_ptr = 8, imm = 28, mem_as = 2, needs_write = 1, imm_sign = 0
+   instr  37:   LOADW rd_rs2_ptr = 48, rs1_ptr = 8, imm = 24, mem_as = 2, needs_write = 1, imm_sign = 0
+   instr  38:   LOADW rd_rs2_ptr = 52, rs1_ptr = 8, imm = 20, mem_as = 2, needs_write = 1, imm_sign = 0
+   instr  39:   LOADW rd_rs2_ptr = 56, rs1_ptr = 8, imm = 16, mem_as = 2, needs_write = 1, imm_sign = 0
+   instr  40:   STOREW rd_rs2_ptr = 44, rs1_ptr = 40, imm = 65500, mem_as = 2, needs_write = 1, imm_sign = 1
+   instr  41:   STOREW rd_rs2_ptr = 48, rs1_ptr = 40, imm = 65496, mem_as = 2, needs_write = 1, imm_sign = 1
+   instr  42:   STOREW rd_rs2_ptr = 52, rs1_ptr = 40, imm = 65492, mem_as = 2, needs_write = 1, imm_sign = 1
+   instr  43:   STOREW rd_rs2_ptr = 56, rs1_ptr = 40, imm = 65488, mem_as = 2, needs_write = 1, imm_sign = 1
+   instr  44:   LOADW rd_rs2_ptr = 44, rs1_ptr = 8, imm = 12, mem_as = 2, needs_write = 1, imm_sign = 0
+   instr  45:   LOADW rd_rs2_ptr = 48, rs1_ptr = 8, imm = 8, mem_as = 2, needs_write = 1, imm_sign = 0
+   instr  46:   LOADW rd_rs2_ptr = 52, rs1_ptr = 8, imm = 4, mem_as = 2, needs_write = 1, imm_sign = 0
+   instr  47:   LOADW rd_rs2_ptr = 56, rs1_ptr = 8, imm = 0, mem_as = 2, needs_write = 1, imm_sign = 0
+   instr  48:   STOREW rd_rs2_ptr = 44, rs1_ptr = 40, imm = 65484, mem_as = 2, needs_write = 1, imm_sign = 1
+   instr  49:   STOREW rd_rs2_ptr = 48, rs1_ptr = 40, imm = 65480, mem_as = 2, needs_write = 1, imm_sign = 1
+   instr  50:   STOREW rd_rs2_ptr = 52, rs1_ptr = 40, imm = 65476, mem_as = 2, needs_write = 1, imm_sign = 1
+   instr  51:   STOREW rd_rs2_ptr = 56, rs1_ptr = 40, imm = 65472, mem_as = 2, needs_write = 1, imm_sign = 1
+   instr  52:   ADD rd_ptr = 8, rs1_ptr = 8, rs2 = 32, rs2_as = 0
+   instr  53:   JALR 0 4 0 1 0
+])
+
+Apc(opcode: 11958, execution_frequency: 37952, cells_saved_per_row: 304, cells_per_row_after_saving: 154, percent_saved: 66.38%)
+BasicBlock(start_idx: 259817, statements: [
+   instr   0:   SRL rd_ptr = 44, rs1_ptr = 88, rs2 = 4, rs2_as = 0
+   instr   1:   ADD rd_ptr = 40, rs1_ptr = 40, rs2 = 84, rs2_as = 1
+   instr   2:   STOREB rd_rs2_ptr = 44, rs1_ptr = 40, imm = 0, mem_as = 2, needs_write = 1, imm_sign = 0
+   instr   3:   LOADW rd_rs2_ptr = 40, rs1_ptr = 8, imm = 0, mem_as = 2, needs_write = 1, imm_sign = 0
+   instr   4:   ADD rd_ptr = 92, rs1_ptr = 84, rs2 = 1, rs2_as = 0
+   instr   5:   STOREW rd_rs2_ptr = 92, rs1_ptr = 8, imm = 8, mem_as = 2, needs_write = 1, imm_sign = 0
+   instr   6:   BNE 92 40 2013265829 1 1
+])
+
+Apc(opcode: 7649, execution_frequency: 21704, cells_saved_per_row: 512, cells_per_row_after_saving: 150, percent_saved: 77.34%)
+BasicBlock(start_idx: 140769, statements: [
+   instr   0:   LOADW rd_rs2_ptr = 48, rs1_ptr = 48, imm = 8, mem_as = 2, needs_write = 1, imm_sign = 0
+   instr   1:   AND rd_ptr = 52, rs1_ptr = 52, rs2 = 7, rs2_as = 0
+   instr   2:   ADD rd_ptr = 52, rs1_ptr = 52, rs2 = 44, rs2_as = 1
+   instr   3:   SRL rd_ptr = 56, rs1_ptr = 52, rs2 = 3, rs2_as = 0
+   instr   4:   ADD rd_ptr = 48, rs1_ptr = 48, rs2 = 56, rs2_as = 1
+   instr   5:   LOADBU rd_rs2_ptr = 48, rs1_ptr = 48, imm = 0, mem_as = 2, needs_write = 1, imm_sign = 0
+   instr   6:   AND rd_ptr = 52, rs1_ptr = 52, rs2 = 7, rs2_as = 0
+   instr   7:   SRL rd_ptr = 48, rs1_ptr = 48, rs2 = 52, rs2_as = 1
+   instr   8:   AND rd_ptr = 48, rs1_ptr = 48, rs2 = 1, rs2_as = 0
+   instr   9:   BEQ 48 0 20 1 1
+])
+
+Apc(opcode: 6456, execution_frequency: 38765, cells_saved_per_row: 64, cells_per_row_after_saving: 34, percent_saved: 65.31%)
+BasicBlock(start_idx: 107714, statements: [
+   instr   0:   ADD rd_ptr = 36, rs1_ptr = 0, rs2 = 0, rs2_as = 0
+   instr   1:   JAL 0 0 2013265769 1 0
+])
+
+Apc(opcode: 6047, execution_frequency: 40203, cells_saved_per_row: 161, cells_per_row_after_saving: 89, percent_saved: 64.40%)
+BasicBlock(start_idx: 97014, statements: [
+   instr   0:   LOADW rd_rs2_ptr = 4, rs1_ptr = 8, imm = 12, mem_as = 2, needs_write = 1, imm_sign = 0
+   instr   1:   LOADW rd_rs2_ptr = 32, rs1_ptr = 8, imm = 8, mem_as = 2, needs_write = 1, imm_sign = 0
+   instr   2:   ADD rd_ptr = 8, rs1_ptr = 8, rs2 = 16, rs2_as = 0
+   instr   3:   JALR 0 4 0 1 0
+])
+
+Apc(opcode: 6066, execution_frequency: 38382, cells_saved_per_row: 64, cells_per_row_after_saving: 34, percent_saved: 65.31%)
+BasicBlock(start_idx: 98416, statements: [
+   instr   0:   ADD rd_ptr = 40, rs1_ptr = 0, rs2 = 4, rs2_as = 0
+   instr   1:   JAL 0 0 2013265449 1 0
+])
+
+Apc(opcode: 6450, execution_frequency: 38765, cells_saved_per_row: 89, cells_per_row_after_saving: 48, percent_saved: 64.96%)
+BasicBlock(start_idx: 107659, statements: [
+   instr   0:   LUI 56 0 1123 1 0
+   instr   1:   STOREW rd_rs2_ptr = 40, rs1_ptr = 56, imm = 1368, mem_as = 2, needs_write = 1, imm_sign = 0
+   instr   2:   JAL 0 0 40 1 0
+])
+
+Apc(opcode: 11770, execution_frequency: 36281, cells_saved_per_row: 304, cells_per_row_after_saving: 154, percent_saved: 66.38%)
+BasicBlock(start_idx: 257532, statements: [
+   instr   0:   SRL rd_ptr = 44, rs1_ptr = 88, rs2 = 4, rs2_as = 0
+   instr   1:   ADD rd_ptr = 40, rs1_ptr = 40, rs2 = 76, rs2_as = 1
+   instr   2:   STOREB rd_rs2_ptr = 44, rs1_ptr = 40, imm = 0, mem_as = 2, needs_write = 1, imm_sign = 0
+   instr   3:   LOADW rd_rs2_ptr = 40, rs1_ptr = 8, imm = 0, mem_as = 2, needs_write = 1, imm_sign = 0
+   instr   4:   ADD rd_ptr = 92, rs1_ptr = 76, rs2 = 1, rs2_as = 0
+   instr   5:   STOREW rd_rs2_ptr = 92, rs1_ptr = 8, imm = 8, mem_as = 2, needs_write = 1, imm_sign = 0
+   instr   6:   BNE 92 40 2013265829 1 1
+])
+
+Apc(opcode: 7726, execution_frequency: 32999, cells_saved_per_row: 250, cells_per_row_after_saving: 116, percent_saved: 68.31%)
+BasicBlock(start_idx: 142358, statements: [
+   instr   0:   LOADW rd_rs2_ptr = 44, rs1_ptr = 40, imm = 236, mem_as = 2, needs_write = 1, imm_sign = 0
+   instr   1:   LOADW rd_rs2_ptr = 48, rs1_ptr = 40, imm = 232, mem_as = 2, needs_write = 1, imm_sign = 0
+   instr   2:   SLTU rd_ptr = 52, rs1_ptr = 44, rs2 = 1, rs2_as = 0
+   instr   3:   SLTU rd_ptr = 56, rs1_ptr = 48, rs2 = 3, rs2_as = 0
+   instr   4:   AND rd_ptr = 52, rs1_ptr = 52, rs2 = 56, rs2_as = 1
+   instr   5:   BEQ 52 0 16 1 1
+])
+
+Apc(opcode: 6451, execution_frequency: 38765, cells_saved_per_row: 429, cells_per_row_after_saving: 235, percent_saved: 64.61%)
+BasicBlock(start_idx: 107677, statements: [
+   instr   0:   STOREB rd_rs2_ptr = 36, rs1_ptr = 32, imm = 0, mem_as = 2, needs_write = 1, imm_sign = 0
+   instr   1:   LOADW rd_rs2_ptr = 4, rs1_ptr = 8, imm = 76, mem_as = 2, needs_write = 1, imm_sign = 0
+   instr   2:   LOADW rd_rs2_ptr = 32, rs1_ptr = 8, imm = 72, mem_as = 2, needs_write = 1, imm_sign = 0
+   instr   3:   LOADW rd_rs2_ptr = 36, rs1_ptr = 8, imm = 68, mem_as = 2, needs_write = 1, imm_sign = 0
+   instr   4:   LOADW rd_rs2_ptr = 72, rs1_ptr = 8, imm = 64, mem_as = 2, needs_write = 1, imm_sign = 0
+   instr   5:   LOADW rd_rs2_ptr = 76, rs1_ptr = 8, imm = 60, mem_as = 2, needs_write = 1, imm_sign = 0
+   instr   6:   LOADW rd_rs2_ptr = 80, rs1_ptr = 8, imm = 56, mem_as = 2, needs_write = 1, imm_sign = 0
+   instr   7:   LOADW rd_rs2_ptr = 84, rs1_ptr = 8, imm = 52, mem_as = 2, needs_write = 1, imm_sign = 0
+   instr   8:   ADD rd_ptr = 8, rs1_ptr = 8, rs2 = 80, rs2_as = 0
+   instr   9:   JALR 0 4 0 1 0
+])
+
+Apc(opcode: 7711, execution_frequency: 32158, cells_saved_per_row: 250, cells_per_row_after_saving: 116, percent_saved: 68.31%)
+BasicBlock(start_idx: 142024, statements: [
+   instr   0:   LOADW rd_rs2_ptr = 44, rs1_ptr = 40, imm = 236, mem_as = 2, needs_write = 1, imm_sign = 0
+   instr   1:   LOADW rd_rs2_ptr = 48, rs1_ptr = 40, imm = 232, mem_as = 2, needs_write = 1, imm_sign = 0
+   instr   2:   SLTU rd_ptr = 52, rs1_ptr = 44, rs2 = 1, rs2_as = 0
+   instr   3:   SLTU rd_ptr = 56, rs1_ptr = 48, rs2 = 2, rs2_as = 0
+   instr   4:   AND rd_ptr = 52, rs1_ptr = 52, rs2 = 56, rs2_as = 1
+   instr   5:   BEQ 52 0 16 1 1
+])
+
+Apc(opcode: 11956, execution_frequency: 37952, cells_saved_per_row: 322, cells_per_row_after_saving: 183, percent_saved: 63.76%)
+BasicBlock(start_idx: 259800, statements: [
+   instr   0:   LOADW rd_rs2_ptr = 40, rs1_ptr = 8, imm = 4, mem_as = 2, needs_write = 1, imm_sign = 0
+   instr   1:   AND rd_ptr = 44, rs1_ptr = 88, rs2 = 15, rs2_as = 0
+   instr   2:   ADD rd_ptr = 48, rs1_ptr = 40, rs2 = 84, rs2_as = 1
+   instr   3:   STOREB rd_rs2_ptr = 44, rs1_ptr = 48, imm = 1, mem_as = 2, needs_write = 1, imm_sign = 0
+   instr   4:   ADD rd_ptr = 44, rs1_ptr = 92, rs2 = 1, rs2_as = 0
+   instr   5:   STOREW rd_rs2_ptr = 44, rs1_ptr = 8, imm = 8, mem_as = 2, needs_write = 1, imm_sign = 0
+   instr   6:   ADD rd_ptr = 36, rs1_ptr = 36, rs2 = 1, rs2_as = 0
+   instr   7:   BEQ 84 80 88 1 1
+])
+
+Apc(opcode: 9867, execution_frequency: 34048, cells_saved_per_row: 292, cells_per_row_after_saving: 149, percent_saved: 66.21%)
+BasicBlock(start_idx: 211257, statements: [
+   instr   0:   LOADBU rd_rs2_ptr = 44, rs1_ptr = 76, imm = 0, mem_as = 2, needs_write = 1, imm_sign = 0
+   instr   1:   LOADBU rd_rs2_ptr = 48, rs1_ptr = 40, imm = 0, mem_as = 2, needs_write = 1, imm_sign = 0
+   instr   2:   OR rd_ptr = 44, rs1_ptr = 48, rs2 = 44, rs2_as = 1
+   instr   3:   STOREB rd_rs2_ptr = 44, rs1_ptr = 40, imm = 0, mem_as = 2, needs_write = 1, imm_sign = 0
+   instr   4:   ADD rd_ptr = 40, rs1_ptr = 40, rs2 = 1, rs2_as = 0
+   instr   5:   ADD rd_ptr = 76, rs1_ptr = 76, rs2 = 1, rs2_as = 0
+   instr   6:   BNE 40 72 2013265897 1 1
+])
+
+Apc(opcode: 9853, execution_frequency: 34048, cells_saved_per_row: 292, cells_per_row_after_saving: 149, percent_saved: 66.21%)
+BasicBlock(start_idx: 210916, statements: [
+   instr   0:   LOADBU rd_rs2_ptr = 48, rs1_ptr = 40, imm = 0, mem_as = 2, needs_write = 1, imm_sign = 0
+   instr   1:   LOADBU rd_rs2_ptr = 52, rs1_ptr = 44, imm = 0, mem_as = 2, needs_write = 1, imm_sign = 0
+   instr   2:   OR rd_ptr = 48, rs1_ptr = 52, rs2 = 48, rs2_as = 1
+   instr   3:   STOREB rd_rs2_ptr = 48, rs1_ptr = 44, imm = 0, mem_as = 2, needs_write = 1, imm_sign = 0
+   instr   4:   ADD rd_ptr = 44, rs1_ptr = 44, rs2 = 1, rs2_as = 0
+   instr   5:   ADD rd_ptr = 40, rs1_ptr = 40, rs2 = 1, rs2_as = 0
+   instr   6:   BNE 44 72 2013265897 1 1
+])
+
+Apc(opcode: 4364, execution_frequency: 53834, cells_saved_per_row: 58, cells_per_row_after_saving: 48, percent_saved: 54.72%)
+BasicBlock(start_idx: 86, statements: [
+   instr   0:   ADD rd_ptr = 60, rs1_ptr = 0, rs2 = 3, rs2_as = 0
+   instr   1:   BEQ 44 60 300 1 1
+])
+
+Apc(opcode: 7620, execution_frequency: 31339, cells_saved_per_row: 253, cells_per_row_after_saving: 122, percent_saved: 67.47%)
+BasicBlock(start_idx: 140431, statements: [
+   instr   0:   SLTU rd_ptr = 52, rs1_ptr = 44, rs2 = 1, rs2_as = 0
+   instr   1:   SUB rd_ptr = 48, rs1_ptr = 48, rs2 = 52, rs2_as = 1
+   instr   2:   ADD rd_ptr = 44, rs1_ptr = 44, rs2 = 16777215, rs2_as = 0
+   instr   3:   STOREW rd_rs2_ptr = 44, rs1_ptr = 40, imm = 232, mem_as = 2, needs_write = 1, imm_sign = 0
+   instr   4:   STOREW rd_rs2_ptr = 48, rs1_ptr = 40, imm = 236, mem_as = 2, needs_write = 1, imm_sign = 0
+   instr   5:   JALR 0 4 0 1 0
+])
+
+Apc(opcode: 9099, execution_frequency: 13252, cells_saved_per_row: 6575, cells_per_row_after_saving: 1393, percent_saved: 82.52%)
+BasicBlock(start_idx: 189701, statements: [
+   instr   0:   STOREW rd_rs2_ptr = 112, rs1_ptr = 44, imm = 0, mem_as = 2, needs_write = 1, imm_sign = 0
+   instr   1:   STOREW rd_rs2_ptr = 64, rs1_ptr = 44, imm = 4, mem_as = 2, needs_write = 1, imm_sign = 0
+   instr   2:   STOREW rd_rs2_ptr = 20, rs1_ptr = 44, imm = 8, mem_as = 2, needs_write = 1, imm_sign = 0
+   instr   3:   STOREW rd_rs2_ptr = 68, rs1_ptr = 44, imm = 12, mem_as = 2, needs_write = 1, imm_sign = 0
+   instr   4:   STOREB rd_rs2_ptr = 60, rs1_ptr = 44, imm = 56, mem_as = 2, needs_write = 1, imm_sign = 0
+   instr   5:   SRL rd_ptr = 60, rs1_ptr = 28, rs2 = 20, rs2_as = 0
+   instr   6:   SLL rd_ptr = 28, rs1_ptr = 28, rs2 = 12, rs2_as = 0
+   instr   7:   OR rd_ptr = 68, rs1_ptr = 28, rs2 = 60, rs2_as = 1
+   instr   8:   SRL rd_ptr = 60, rs1_ptr = 24, rs2 = 20, rs2_as = 0
+   instr   9:   LOADW rd_rs2_ptr = 64, rs1_ptr = 44, imm = 32, mem_as = 2, needs_write = 1, imm_sign = 0
+   instr  10:   SLL rd_ptr = 24, rs1_ptr = 24, rs2 = 12, rs2_as = 0
+   instr  11:   LOADW rd_rs2_ptr = 28, rs1_ptr = 44, imm = 36, mem_as = 2, needs_write = 1, imm_sign = 0
+   instr  12:   OR rd_ptr = 20, rs1_ptr = 24, rs2 = 60, rs2_as = 1
+   instr  13:   ADD rd_ptr = 60, rs1_ptr = 68, rs2 = 64, rs2_as = 1
+   instr  14:   SLTU rd_ptr = 64, rs1_ptr = 60, rs2 = 68, rs2_as = 1
+   instr  15:   ADD rd_ptr = 28, rs1_ptr = 20, rs2 = 28, rs2_as = 1
+   instr  16:   ADD rd_ptr = 64, rs1_ptr = 28, rs2 = 64, rs2_as = 1
+   instr  17:   LOADBU rd_rs2_ptr = 24, rs1_ptr = 40, imm = 1, mem_as = 2, needs_write = 1, imm_sign = 0
+   instr  18:   LOADBU rd_rs2_ptr = 28, rs1_ptr = 40, imm = 0, mem_as = 2, needs_write = 1, imm_sign = 0
+   instr  19:   LOADBU rd_rs2_ptr = 112, rs1_ptr = 40, imm = 2, mem_as = 2, needs_write = 1, imm_sign = 0
+   instr  20:   LOADBU rd_rs2_ptr = 116, rs1_ptr = 40, imm = 3, mem_as = 2, needs_write = 1, imm_sign = 0
+   instr  21:   SLL rd_ptr = 24, rs1_ptr = 24, rs2 = 8, rs2_as = 0
+   instr  22:   OR rd_ptr = 24, rs1_ptr = 24, rs2 = 28, rs2_as = 1
+   instr  23:   SLL rd_ptr = 112, rs1_ptr = 112, rs2 = 16, rs2_as = 0
+   instr  24:   SLL rd_ptr = 116, rs1_ptr = 116, rs2 = 24, rs2_as = 0
+   instr  25:   OR rd_ptr = 28, rs1_ptr = 116, rs2 = 112, rs2_as = 1
+   instr  26:   OR rd_ptr = 28, rs1_ptr = 28, rs2 = 24, rs2_as = 1
+   instr  27:   LOADBU rd_rs2_ptr = 24, rs1_ptr = 40, imm = 9, mem_as = 2, needs_write = 1, imm_sign = 0
+   instr  28:   LOADBU rd_rs2_ptr = 112, rs1_ptr = 40, imm = 8, mem_as = 2, needs_write = 1, imm_sign = 0
+   instr  29:   LOADBU rd_rs2_ptr = 116, rs1_ptr = 40, imm = 10, mem_as = 2, needs_write = 1, imm_sign = 0
+   instr  30:   LOADBU rd_rs2_ptr = 120, rs1_ptr = 40, imm = 11, mem_as = 2, needs_write = 1, imm_sign = 0
+   instr  31:   SLL rd_ptr = 24, rs1_ptr = 24, rs2 = 8, rs2_as = 0
+   instr  32:   OR rd_ptr = 24, rs1_ptr = 24, rs2 = 112, rs2_as = 1
+   instr  33:   SLL rd_ptr = 116, rs1_ptr = 116, rs2 = 16, rs2_as = 0
+   instr  34:   SLL rd_ptr = 120, rs1_ptr = 120, rs2 = 24, rs2_as = 0
+   instr  35:   OR rd_ptr = 112, rs1_ptr = 120, rs2 = 116, rs2_as = 1
+   instr  36:   OR rd_ptr = 24, rs1_ptr = 112, rs2 = 24, rs2_as = 1
+   instr  37:   LOADBU rd_rs2_ptr = 112, rs1_ptr = 40, imm = 5, mem_as = 2, needs_write = 1, imm_sign = 0
+   instr  38:   LOADBU rd_rs2_ptr = 116, rs1_ptr = 40, imm = 4, mem_as = 2, needs_write = 1, imm_sign = 0
+   instr  39:   LOADBU rd_rs2_ptr = 120, rs1_ptr = 40, imm = 6, mem_as = 2, needs_write = 1, imm_sign = 0
+   instr  40:   LOADBU rd_rs2_ptr = 124, rs1_ptr = 40, imm = 7, mem_as = 2, needs_write = 1, imm_sign = 0
+   instr  41:   SLL rd_ptr = 112, rs1_ptr = 112, rs2 = 8, rs2_as = 0
+   instr  42:   OR rd_ptr = 112, rs1_ptr = 112, rs2 = 116, rs2_as = 1
+   instr  43:   SLL rd_ptr = 120, rs1_ptr = 120, rs2 = 16, rs2_as = 0
+   instr  44:   SLL rd_ptr = 124, rs1_ptr = 124, rs2 = 24, rs2_as = 0
+   instr  45:   OR rd_ptr = 116, rs1_ptr = 124, rs2 = 120, rs2_as = 1
+   instr  46:   OR rd_ptr = 112, rs1_ptr = 116, rs2 = 112, rs2_as = 1
+   instr  47:   LOADBU rd_rs2_ptr = 116, rs1_ptr = 40, imm = 17, mem_as = 2, needs_write = 1, imm_sign = 0
+   instr  48:   LOADBU rd_rs2_ptr = 120, rs1_ptr = 40, imm = 16, mem_as = 2, needs_write = 1, imm_sign = 0
+   instr  49:   LOADBU rd_rs2_ptr = 124, rs1_ptr = 40, imm = 18, mem_as = 2, needs_write = 1, imm_sign = 0
+   instr  50:   LOADBU rd_rs2_ptr = 32, rs1_ptr = 40, imm = 19, mem_as = 2, needs_write = 1, imm_sign = 0
+   instr  51:   SLL rd_ptr = 116, rs1_ptr = 116, rs2 = 8, rs2_as = 0
+   instr  52:   OR rd_ptr = 116, rs1_ptr = 116, rs2 = 120, rs2_as = 1
+   instr  53:   SLL rd_ptr = 124, rs1_ptr = 124, rs2 = 16, rs2_as = 0
+   instr  54:   SLL rd_ptr = 32, rs1_ptr = 32, rs2 = 24, rs2_as = 0
+   instr  55:   OR rd_ptr = 120, rs1_ptr = 32, rs2 = 124, rs2_as = 1
+   instr  56:   OR rd_ptr = 116, rs1_ptr = 120, rs2 = 116, rs2_as = 1
+   instr  57:   LOADBU rd_rs2_ptr = 120, rs1_ptr = 40, imm = 13, mem_as = 2, needs_write = 1, imm_sign = 0
+   instr  58:   LOADBU rd_rs2_ptr = 124, rs1_ptr = 40, imm = 12, mem_as = 2, needs_write = 1, imm_sign = 0
+   instr  59:   LOADBU rd_rs2_ptr = 32, rs1_ptr = 40, imm = 14, mem_as = 2, needs_write = 1, imm_sign = 0
+   instr  60:   LOADBU rd_rs2_ptr = 40, rs1_ptr = 40, imm = 15, mem_as = 2, needs_write = 1, imm_sign = 0
+   instr  61:   SLL rd_ptr = 120, rs1_ptr = 120, rs2 = 8, rs2_as = 0
+   instr  62:   OR rd_ptr = 120, rs1_ptr = 120, rs2 = 124, rs2_as = 1
+   instr  63:   SLL rd_ptr = 32, rs1_ptr = 32, rs2 = 16, rs2_as = 0
+   instr  64:   SLL rd_ptr = 40, rs1_ptr = 40, rs2 = 24, rs2_as = 0
+   instr  65:   OR rd_ptr = 40, rs1_ptr = 40, rs2 = 32, rs2_as = 1
+   instr  66:   OR rd_ptr = 40, rs1_ptr = 40, rs2 = 120, rs2_as = 1
+   instr  67:   XOR rd_ptr = 20, rs1_ptr = 112, rs2 = 20, rs2_as = 1
+   instr  68:   XOR rd_ptr = 68, rs1_ptr = 28, rs2 = 68, rs2_as = 1
+   instr  69:   XOR rd_ptr = 28, rs1_ptr = 24, rs2 = 52, rs2_as = 1
+   instr  70:   XOR rd_ptr = 112, rs1_ptr = 112, rs2 = 48, rs2_as = 1
+   instr  71:   AND rd_ptr = 68, rs1_ptr = 68, rs2 = 56, rs2_as = 1
+   instr  72:   AND rd_ptr = 112, rs1_ptr = 112, rs2 = 56, rs2_as = 1
+   instr  73:   MULHU 120 112 68 1 0
+   instr  74:   MUL 124 112 68 1 0
+   instr  75:   MUL 32 28 68 1 0
+   instr  76:   MULHU 68 28 68 1 0
+   instr  77:   MUL 36 112 20 1 0
+   instr  78:   MULHU 112 112 20 1 0
+   instr  79:   MULHU 72 28 20 1 0
+   instr  80:   MUL 20 28 20 1 0
+   instr  81:   XOR rd_ptr = 20, rs1_ptr = 20, rs2 = 124, rs2_as = 1
+   instr  82:   XOR rd_ptr = 28, rs1_ptr = 72, rs2 = 120, rs2_as = 1
+   instr  83:   XOR rd_ptr = 68, rs1_ptr = 112, rs2 = 68, rs2_as = 1
+   instr  84:   XOR rd_ptr = 32, rs1_ptr = 36, rs2 = 32, rs2_as = 1
+   instr  85:   XOR rd_ptr = 28, rs1_ptr = 28, rs2 = 32, rs2_as = 1
+   instr  86:   XOR rd_ptr = 68, rs1_ptr = 20, rs2 = 68, rs2_as = 1
+   instr  87:   XOR rd_ptr = 64, rs1_ptr = 40, rs2 = 64, rs2_as = 1
+   instr  88:   XOR rd_ptr = 60, rs1_ptr = 24, rs2 = 60, rs2_as = 1
+   instr  89:   XOR rd_ptr = 52, rs1_ptr = 116, rs2 = 52, rs2_as = 1
+   instr  90:   XOR rd_ptr = 40, rs1_ptr = 40, rs2 = 48, rs2_as = 1
+   instr  91:   AND rd_ptr = 60, rs1_ptr = 60, rs2 = 56, rs2_as = 1
+   instr  92:   AND rd_ptr = 40, rs1_ptr = 40, rs2 = 56, rs2_as = 1
+   instr  93:   MULHU 48 40 60 1 0
+   instr  94:   MUL 56 40 60 1 0
+   instr  95:   MUL 20 52 60 1 0
+   instr  96:   MULHU 60 52 60 1 0
+   instr  97:   MUL 24 40 64 1 0
+   instr  98:   MULHU 40 40 64 1 0
+   instr  99:   MULHU 112 52 64 1 0
+   instr 100:   MUL 52 52 64 1 0
+   instr 101:   XOR rd_ptr = 52, rs1_ptr = 52, rs2 = 56, rs2_as = 1
+   instr 102:   XOR rd_ptr = 48, rs1_ptr = 112, rs2 = 48, rs2_as = 1
+   instr 103:   XOR rd_ptr = 40, rs1_ptr = 40, rs2 = 60, rs2_as = 1
+   instr 104:   XOR rd_ptr = 56, rs1_ptr = 24, rs2 = 20, rs2_as = 1
+   instr 105:   XOR rd_ptr = 48, rs1_ptr = 48, rs2 = 56, rs2_as = 1
+   instr 106:   XOR rd_ptr = 40, rs1_ptr = 52, rs2 = 40, rs2_as = 1
+   instr 107:   XOR rd_ptr = 40, rs1_ptr = 68, rs2 = 40, rs2_as = 1
+   instr 108:   XOR rd_ptr = 48, rs1_ptr = 28, rs2 = 48, rs2_as = 1
+   instr 109:   STOREW rd_rs2_ptr = 48, rs1_ptr = 44, imm = 20, mem_as = 2, needs_write = 1, imm_sign = 0
+   instr 110:   STOREW rd_rs2_ptr = 40, rs1_ptr = 44, imm = 16, mem_as = 2, needs_write = 1, imm_sign = 0
+   instr 111:   LOADW rd_rs2_ptr = 32, rs1_ptr = 8, imm = 44, mem_as = 2, needs_write = 1, imm_sign = 0
+   instr 112:   LOADW rd_rs2_ptr = 36, rs1_ptr = 8, imm = 40, mem_as = 2, needs_write = 1, imm_sign = 0
+   instr 113:   LOADW rd_rs2_ptr = 72, rs1_ptr = 8, imm = 36, mem_as = 2, needs_write = 1, imm_sign = 0
+   instr 114:   ADD rd_ptr = 8, rs1_ptr = 8, rs2 = 48, rs2_as = 0
+   instr 115:   JALR 0 4 0 1 0
+])
+
+Apc(opcode: 7865, execution_frequency: 17830, cells_saved_per_row: 498, cells_per_row_after_saving: 142, percent_saved: 77.81%)
+BasicBlock(start_idx: 146174, statements: [
+   instr   0:   ADD rd_ptr = 52, rs1_ptr = 48, rs2 = 16777213, rs2_as = 0
+   instr   1:   SLTU rd_ptr = 48, rs1_ptr = 52, rs2 = 48, rs2_as = 1
+   instr   2:   ADD rd_ptr = 44, rs1_ptr = 44, rs2 = 48, rs2_as = 1
+   instr   3:   ADD rd_ptr = 48, rs1_ptr = 44, rs2 = 16777215, rs2_as = 0
+   instr   4:   LOADW rd_rs2_ptr = 44, rs1_ptr = 40, imm = 364, mem_as = 2, needs_write = 1, imm_sign = 0
+   instr   5:   STOREW rd_rs2_ptr = 52, rs1_ptr = 40, imm = 232, mem_as = 2, needs_write = 1, imm_sign = 0
+   instr   6:   STOREW rd_rs2_ptr = 48, rs1_ptr = 40, imm = 236, mem_as = 2, needs_write = 1, imm_sign = 0
+   instr   7:   ADD rd_ptr = 48, rs1_ptr = 0, rs2 = 2, rs2_as = 0
+   instr   8:   ADD rd_ptr = 52, rs1_ptr = 0, rs2 = 93, rs2_as = 0
+   instr   9:   BLTU 44 48 220 1 1
+])
+
+Apc(opcode: 11720, execution_frequency: 43206, cells_saved_per_row: 163, cells_per_row_after_saving: 113, percent_saved: 59.06%)
+BasicBlock(start_idx: 257127, statements: [
+   instr   0:   ADD rd_ptr = 36, rs1_ptr = 32, rs2 = 72, rs2_as = 0
+   instr   1:   ADD rd_ptr = 40, rs1_ptr = 8, rs2 = 12, rs2_as = 0
+   instr   2:   ADD rd_ptr = 44, rs1_ptr = 32, rs2 = 0, rs2_as = 0
+   instr   3:   AUIPC 4 0 16777200 1 0
+   instr   4:   JALR 4 4 64484 1 0
+])
+
+Apc(opcode: 4784, execution_frequency: 26532, cells_saved_per_row: 681, cells_per_row_after_saving: 292, percent_saved: 69.99%)
+BasicBlock(start_idx: 9693, statements: [
+   instr   0:   LOADBU rd_rs2_ptr = 40, rs1_ptr = 8, imm = 59, mem_as = 2, needs_write = 1, imm_sign = 0
+   instr   1:   LOADBU rd_rs2_ptr = 44, rs1_ptr = 8, imm = 58, mem_as = 2, needs_write = 1, imm_sign = 0
+   instr   2:   STOREB rd_rs2_ptr = 40, rs1_ptr = 8, imm = 54, mem_as = 2, needs_write = 1, imm_sign = 0
+   instr   3:   SLL rd_ptr = 44, rs1_ptr = 44, rs2 = 8, rs2_as = 0
+   instr   4:   LOADBU rd_rs2_ptr = 40, rs1_ptr = 8, imm = 57, mem_as = 2, needs_write = 1, imm_sign = 0
+   instr   5:   LOADW rd_rs2_ptr = 84, rs1_ptr = 8, imm = 60, mem_as = 2, needs_write = 1, imm_sign = 0
+   instr   6:   LOADW rd_rs2_ptr = 88, rs1_ptr = 8, imm = 64, mem_as = 2, needs_write = 1, imm_sign = 0
+   instr   7:   LOADW rd_rs2_ptr = 92, rs1_ptr = 8, imm = 68, mem_as = 2, needs_write = 1, imm_sign = 0
+   instr   8:   OR rd_ptr = 40, rs1_ptr = 44, rs2 = 40, rs2_as = 1
+   instr   9:   STOREH rd_rs2_ptr = 40, rs1_ptr = 8, imm = 52, mem_as = 2, needs_write = 1, imm_sign = 0
+   instr  10:   ADD rd_ptr = 44, rs1_ptr = 8, rs2 = 72, rs2_as = 0
+   instr  11:   ADD rd_ptr = 40, rs1_ptr = 8, rs2 = 0, rs2_as = 0
+   instr  12:   ADD rd_ptr = 48, rs1_ptr = 0, rs2 = 52, rs2_as = 0
+   instr  13:   AUIPC 4 0 16777072 1 0
+   instr  14:   JALR 4 4 63824 1 0
+])
+
+Apc(opcode: 4791, execution_frequency: 33760, cells_saved_per_row: 474, cells_per_row_after_saving: 259, percent_saved: 64.67%)
+BasicBlock(start_idx: 9762, statements: [
+   instr   0:   LOADW rd_rs2_ptr = 4, rs1_ptr = 8, imm = 156, mem_as = 2, needs_write = 1, imm_sign = 0
+   instr   1:   LOADW rd_rs2_ptr = 32, rs1_ptr = 8, imm = 152, mem_as = 2, needs_write = 1, imm_sign = 0
+   instr   2:   LOADW rd_rs2_ptr = 36, rs1_ptr = 8, imm = 148, mem_as = 2, needs_write = 1, imm_sign = 0
+   instr   3:   LOADW rd_rs2_ptr = 72, rs1_ptr = 8, imm = 144, mem_as = 2, needs_write = 1, imm_sign = 0
+   instr   4:   LOADW rd_rs2_ptr = 76, rs1_ptr = 8, imm = 140, mem_as = 2, needs_write = 1, imm_sign = 0
+   instr   5:   LOADW rd_rs2_ptr = 80, rs1_ptr = 8, imm = 136, mem_as = 2, needs_write = 1, imm_sign = 0
+   instr   6:   LOADW rd_rs2_ptr = 84, rs1_ptr = 8, imm = 132, mem_as = 2, needs_write = 1, imm_sign = 0
+   instr   7:   LOADW rd_rs2_ptr = 88, rs1_ptr = 8, imm = 128, mem_as = 2, needs_write = 1, imm_sign = 0
+   instr   8:   LOADW rd_rs2_ptr = 92, rs1_ptr = 8, imm = 124, mem_as = 2, needs_write = 1, imm_sign = 0
+   instr   9:   ADD rd_ptr = 8, rs1_ptr = 8, rs2 = 160, rs2_as = 0
+   instr  10:   JALR 0 4 0 1 0
+])
+
+Apc(opcode: 4785, execution_frequency: 26532, cells_saved_per_row: 173, cells_per_row_after_saving: 75, percent_saved: 69.76%)
+BasicBlock(start_idx: 9708, statements: [
+   instr   0:   LUI 40 0 1123 1 0
+   instr   1:   LOADBU rd_rs2_ptr = 0, rs1_ptr = 40, imm = 1472, mem_as = 2, needs_write = 0, imm_sign = 0
+   instr   2:   LUI 40 0 1123 1 0
+   instr   3:   LOADW rd_rs2_ptr = 76, rs1_ptr = 40, imm = 1368, mem_as = 2, needs_write = 1, imm_sign = 0
+   instr   4:   BNE 76 0 12 1 1
+])
+
+Apc(opcode: 4369, execution_frequency: 45558, cells_saved_per_row: 56, cells_per_row_after_saving: 42, percent_saved: 57.14%)
+BasicBlock(start_idx: 126, statements: [
+   instr   0:   ADD rd_ptr = 56, rs1_ptr = 52, rs2 = 16777203, rs2_as = 0
+   instr   1:   JAL 0 0 400 1 0
+])
+
+Apc(opcode: 11721, execution_frequency: 43206, cells_saved_per_row: 161, cells_per_row_after_saving: 115, percent_saved: 58.33%)
+BasicBlock(start_idx: 257132, statements: [
+   instr   0:   ADD rd_ptr = 44, rs1_ptr = 8, rs2 = 12, rs2_as = 0
+   instr   1:   ADD rd_ptr = 48, rs1_ptr = 0, rs2 = 36, rs2_as = 0
+   instr   2:   ADD rd_ptr = 40, rs1_ptr = 36, rs2 = 0, rs2_as = 0
+   instr   3:   AUIPC 4 0 16773200 1 0
+   instr   4:   JALR 4 4 65340 1 0
+])
+
+Apc(opcode: 4779, execution_frequency: 33760, cells_saved_per_row: 123, cells_per_row_after_saving: 69, percent_saved: 64.06%)
+BasicBlock(start_idx: 9662, statements: [
+   instr   0:   ADD rd_ptr = 52, rs1_ptr = 52, rs2 = 16777212, rs2_as = 0
+   instr   1:   ADD rd_ptr = 48, rs1_ptr = 8, rs2 = 56, rs2_as = 0
+   instr   2:   ADD rd_ptr = 32, rs1_ptr = 0, rs2 = 1, rs2_as = 0
+])
+
+Apc(opcode: 4777, execution_frequency: 33760, cells_saved_per_row: 506, cells_per_row_after_saving: 290, percent_saved: 63.57%)
+BasicBlock(start_idx: 9634, statements: [
+   instr   0:   ADD rd_ptr = 8, rs1_ptr = 8, rs2 = 16777056, rs2_as = 0
+   instr   1:   STOREW rd_rs2_ptr = 4, rs1_ptr = 8, imm = 156, mem_as = 2, needs_write = 1, imm_sign = 0
+   instr   2:   STOREW rd_rs2_ptr = 32, rs1_ptr = 8, imm = 152, mem_as = 2, needs_write = 1, imm_sign = 0
+   instr   3:   STOREW rd_rs2_ptr = 36, rs1_ptr = 8, imm = 148, mem_as = 2, needs_write = 1, imm_sign = 0
+   instr   4:   STOREW rd_rs2_ptr = 72, rs1_ptr = 8, imm = 144, mem_as = 2, needs_write = 1, imm_sign = 0
+   instr   5:   STOREW rd_rs2_ptr = 76, rs1_ptr = 8, imm = 140, mem_as = 2, needs_write = 1, imm_sign = 0
+   instr   6:   STOREW rd_rs2_ptr = 80, rs1_ptr = 8, imm = 136, mem_as = 2, needs_write = 1, imm_sign = 0
+   instr   7:   STOREW rd_rs2_ptr = 84, rs1_ptr = 8, imm = 132, mem_as = 2, needs_write = 1, imm_sign = 0
+   instr   8:   STOREW rd_rs2_ptr = 88, rs1_ptr = 8, imm = 128, mem_as = 2, needs_write = 1, imm_sign = 0
+   instr   9:   STOREW rd_rs2_ptr = 92, rs1_ptr = 8, imm = 124, mem_as = 2, needs_write = 1, imm_sign = 0
+   instr  10:   LOADW rd_rs2_ptr = 48, rs1_ptr = 44, imm = 4, mem_as = 2, needs_write = 1, imm_sign = 0
+   instr  11:   BEQ 48 0 48 1 1
+])
+
+Apc(opcode: 4790, execution_frequency: 33760, cells_saved_per_row: 172, cells_per_row_after_saving: 99, percent_saved: 63.47%)
+BasicBlock(start_idx: 9758, statements: [
+   instr   0:   STOREW rd_rs2_ptr = 32, rs1_ptr = 40, imm = 4, mem_as = 2, needs_write = 1, imm_sign = 0
+   instr   1:   STOREW rd_rs2_ptr = 76, rs1_ptr = 40, imm = 8, mem_as = 2, needs_write = 1, imm_sign = 0
+   instr   2:   ADD rd_ptr = 36, rs1_ptr = 36, rs2 = 7, rs2_as = 0
+   instr   3:   STOREW rd_rs2_ptr = 36, rs1_ptr = 40, imm = 0, mem_as = 2, needs_write = 1, imm_sign = 0
+])
+
+Apc(opcode: 6051, execution_frequency: 42794, cells_saved_per_row: 73, cells_per_row_after_saving: 55, percent_saved: 57.03%)
+BasicBlock(start_idx: 98315, statements: [
+   instr   0:   ADD rd_ptr = 56, rs1_ptr = 8, rs2 = 32, rs2_as = 0
+   instr   1:   ADD rd_ptr = 52, rs1_ptr = 0, rs2 = 1, rs2_as = 0
+])
+
