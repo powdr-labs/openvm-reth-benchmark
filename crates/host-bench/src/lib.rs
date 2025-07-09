@@ -501,9 +501,12 @@ mod powdr {
             }
         };
 
-        let config = PowdrConfig::new(apc as u64, apc_skip as u64)
-            .with_degree_bound(DegreeBound { identities: 3, bus_interactions: 2 })
-            .with_apc_candidates_dir(std::env::var("POWDR_APC_CANDIDATES_DIR"));
+        let mut config = PowdrConfig::new(apc as u64, apc_skip as u64)
+            .with_degree_bound(DegreeBound { identities: 3, bus_interactions: 2 });
+
+        if let Ok(path) = std::env::var("POWDR_APC_CANDIDATES_DIR") {
+            config = config.with_apc_candidates_dir(path);
+        }
 
         compile_exe_with_elf(original_program, elf, config, pgo_config).unwrap()
     }
