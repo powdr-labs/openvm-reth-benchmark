@@ -319,7 +319,9 @@ pub async fn run_reth_benchmark<E: StarkFriEngine<SC>>(
     let CompiledProgram { exe, vm_config } = {
         // We do this in a separate scope so the log initialization does not conflict with OpenVM's.
         // The powdr log is enabled during the scope of `_guard`.
-        let subscriber = tracing_subscriber::FmtSubscriber::builder().with_max_level(tracing::Level::DEBUG).finish();
+        let subscriber = tracing_subscriber::FmtSubscriber::builder()
+            .with_max_level(tracing::Level::DEBUG)
+            .finish();
         let _guard = tracing::subscriber::set_default(subscriber);
 
         powdr::apc(
@@ -499,8 +501,12 @@ mod powdr {
             }
         };
 
-        let config = PowdrConfig::new(apc as u64, apc_skip as u64)
+        let mut config = PowdrConfig::new(apc as u64, apc_skip as u64)
             .with_degree_bound(DegreeBound { identities: 3, bus_interactions: 2 });
+
+        if let Ok(path) = std::env::var("POWDR_APC_CANDIDATES_DIR") {
+            config = config.with_apc_candidates_dir(path);
+        }
 
         compile_exe_with_elf(original_program, elf, config, pgo_config).unwrap()
     }

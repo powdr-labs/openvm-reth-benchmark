@@ -34,7 +34,10 @@ PARAMS_DIR="params"
 : "${APC_SKIP:=0}"
 : "${PGO_TYPE:=cell}"
 
-RUST_LOG="debug" OUTPUT_PATH="metrics.json" ./target/$PROFILE/openvm-reth-benchmark-bin \
+# Create apcs directory if it doesn't exist
+mkdir -p apcs
+
+POWDR_APC_CANDIDATES_DIR=apcs RUST_LOG="debug" OUTPUT_PATH="metrics.json" ./target/$PROFILE/openvm-reth-benchmark-bin \
   --kzg-params-dir "$PARAMS_DIR" \
   --mode "$MODE" \
   --block-number "$BLOCK_NUMBER" \
