@@ -473,8 +473,7 @@ fn try_load_input_from_cache(
 mod powdr {
     use openvm_sdk::StdIn;
     use powdr_openvm::{
-        compile_exe_with_elf, execution_profile, CompiledProgram, DegreeBound,
-        OriginalCompiledProgram, PgoConfig, PgoType, PowdrConfig,
+        compile_exe_with_elf, default_powdr_openvm_config, execution_profile, CompiledProgram, DegreeBound, OriginalCompiledProgram, PgoConfig, PgoType, PrecompileImplementation
     };
 
     /// This function is used to generate the specialized program for the Powdr APC.
@@ -501,13 +500,13 @@ mod powdr {
             }
         };
 
-        let mut config = PowdrConfig::new(apc as u64, apc_skip as u64)
+        let mut config = default_powdr_openvm_config(apc as u64, apc_skip as u64)
             .with_degree_bound(DegreeBound { identities: 3, bus_interactions: 2 });
 
         if let Ok(path) = std::env::var("POWDR_APC_CANDIDATES_DIR") {
             config = config.with_apc_candidates_dir(path);
         }
 
-        compile_exe_with_elf(original_program, elf, config, pgo_config).unwrap()
+        compile_exe_with_elf(original_program, elf, config, PrecompileImplementation::SingleRowChip, pgo_config).unwrap()
     }
 }
