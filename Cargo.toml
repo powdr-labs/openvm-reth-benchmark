@@ -139,10 +139,10 @@ openvm-native-compiler = { git = "https://github.com/openvm-org/openvm.git", tag
 openvm-native-recursion = { git = "https://github.com/openvm-org/openvm.git", tag = "v1.2.1-rc.1", default-features = false }
 
 # powdr
-powdr-openvm = { git = "https://github.com/powdr-labs/powdr.git", rev = "4b3441d", default-features = false }
-powdr-riscv-elf = { git = "https://github.com/powdr-labs/powdr.git", rev = "4b3441d", default-features = false }
-powdr-number = { git = "https://github.com/powdr-labs/powdr.git", rev = "4b3441d", default-features = false }
-powdr-autoprecompiles = { git = "https://github.com/powdr-labs/powdr.git", rev = "4b3441d", default-features = false }
+powdr-openvm = { git = "https://github.com/powdr-labs/powdr.git", rev = "d9fa4f2", default-features = false }
+powdr-riscv-elf = { git = "https://github.com/powdr-labs/powdr.git", rev = "d9fa4f2", default-features = false }
+powdr-number = { git = "https://github.com/powdr-labs/powdr.git", rev = "d9fa4f2", default-features = false }
+powdr-autoprecompiles = { git = "https://github.com/powdr-labs/powdr.git", rev = "d9fa4f2", default-features = false }
 
 [workspace.lints]
 rust.missing_debug_implementations = "warn"
