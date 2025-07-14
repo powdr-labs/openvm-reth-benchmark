@@ -500,7 +500,7 @@ mod powdr {
             }
         };
 
-        let mut config = default_powdr_openvm_config(apc as u64, apc_skip as u64)
+        let mut config = default_powdr_openvm_config(apc as u64, apc_skip as u64);
 
         config.degree_bound = DegreeBound { identities: 3, bus_interactions: 2 };
 
