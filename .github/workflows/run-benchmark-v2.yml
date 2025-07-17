@@ -13,9 +13,135 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Prepare benchmark
+        id: prepare
         run: |
-          curl -X POST \
+          response=$(curl -X POST \
             -H "Axiom-API-Key: ${{ secrets.PROVING_SERVICE_API_KEY }}" \
             -H "Content-Type: application/json" \
             -d '{"openvm_commit": "${{ inputs.openvm_version }}"}' \
-            https://api.staging.app.axiom.xyz/v1/internal/benchmark_jobs
+            https://api.staging.app.axiom.xyz/v1/internal/benchmark_jobs)
+          echo "Response: $response"
+          benchmark_id=$(echo "$response" | jq -r '.id')
+          echo "benchmark_id=$benchmark_id" >> $GITHUB_OUTPUT
+          
+      - name: Wait for benchmark preparation
+        run: |
+          benchmark_id="${{ steps.prepare.outputs.benchmark_id }}"
+          echo "Waiting for benchmark $benchmark_id to be ready..."
+          
+          max_iterations=50 # 25min
+          iteration=0
+          
+          while [ $iteration -lt $max_iterations ]; do
+            response=$(curl -H "Axiom-API-Key: ${{ secrets.PROVING_SERVICE_API_KEY }}" \
+              https://api.staging.app.axiom.xyz/v1/internal/benchmark_jobs/$benchmark_id)
+            echo "Response: $response"
+            
+            status=$(echo "$response" | jq -r '.status')
+            echo "Status: $status (iteration $((iteration + 1))/$max_iterations)"
+            
+            if [ "$status" = "ready" ]; then
+              echo "Benchmark is ready!"
+              break
+            fi
+            
+            iteration=$((iteration + 1))
+            
+            if [ $iteration -lt $max_iterations ]; then
+              echo "Waiting 30 seconds before next check..."
+              sleep 30
+            fi
+          done
+          
+          if [ $iteration -eq $max_iterations ]; then
+            echo "Timeout: Benchmark preparation did not complete within 10 minutes (20 iterations)"
+            exit 1
+          fi
+          
+      - name: prove
+        id: prove
+        run: |
+          benchmark_id="${{ steps.prepare.outputs.benchmark_id }}"
+          echo "Getting program_uuid for benchmark $benchmark_id..."
+
+          sleep 180  # wait 3 min to make sure the prove service is ready
+          
+          response=$(curl -H "Axiom-API-Key: ${{ secrets.PROVING_SERVICE_API_KEY }}" \
+            https://api.staging.app.axiom.xyz/v1/internal/benchmark_jobs/$benchmark_id)
+          echo "Response: $response"
+          
+          program_uuid=$(echo "$response" | jq -r '.program_uuid')
+          echo "Program UUID: $program_uuid"
+          
+          echo "Downloading JSON data from S3..."
+          curl -o input.json "https://axiom-public-data-sandbox-us-east-1.s3.us-east-1.amazonaws.com/reth/input/21000000.json"
+          
+          echo "Submitting proof with JSON data..."
+          response=$(curl -X POST \
+            -H "Axiom-API-Key: ${{ secrets.PROVING_SERVICE_API_KEY }}" \
+            -H "Content-Type: application/json" \
+            -d @input.json \
+            "https://api.staging.app.axiom.xyz/v1/proofs?program_id=$program_uuid")
+          echo "Response: $response"
+          proof_id=$(echo "$response" | jq -r '.id')
+          echo "proof_id=$proof_id" >> $GITHUB_OUTPUT
+          
+      - name: Wait for proof
+        run: |
+          proof_id="${{ steps.prove.outputs.proof_id }}"
+          echo "Waiting for proof $proof_id to complete..."
+          
+          max_iterations=20 # 10min
+          iteration=0
+          
+          while [ $iteration -lt $max_iterations ]; do
+            response=$(curl -H "Axiom-API-Key: ${{ secrets.PROVING_SERVICE_API_KEY }}" \
+              https://api.staging.app.axiom.xyz/v1/proofs/$proof_id)
+            echo "Response: $response"
+            
+            status=$(echo "$response" | jq -r '.state')
+            echo "Status: $status (iteration $((iteration + 1))/$max_iterations)"
+            
+            if [ "$status" = "Succeeded" ] || [ "$status" = "Failed" ]; then
+              echo "Proof completed with status: $status"
+              break
+            fi
+            
+            iteration=$((iteration + 1))
+            
+            if [ $iteration -lt $max_iterations ]; then
+              echo "Waiting 30 seconds before next check..."
+              sleep 30
+            fi
+          done
+          
+          if [ $iteration -eq $max_iterations ]; then
+            echo "Timeout: Proof did not complete within 10 minutes (20 iterations)"
+            echo "WORKFLOW_FAILED=true" >> $GITHUB_ENV
+          fi
+      
+      - name: Cleanup
+        run: |
+          benchmark_id="${{ steps.prepare.outputs.benchmark_id }}"
+          echo "Deleting benchmark $benchmark_id..."
+          response=$(curl -X DELETE \
+            -H "Axiom-API-Key: ${{ secrets.PROVING_SERVICE_API_KEY }}" \
+            "https://api.staging.app.axiom.xyz/v1/internal/benchmark_jobs/$benchmark_id")
+          echo "Response: $response"
+      
+      - name: Command to download the metrics
+        run: |
+          if [ "$WORKFLOW_FAILED" = "true" ]; then
+            echo "skipping metrics download"
+          else
+            echo "todo"
+          fi
+      
+      - name: Check workflow status
+        run: |
+          if [ "$WORKFLOW_FAILED" = "true" ]; then
+            echo "Workflow failed due to timeout or proof failure"
+            exit 1
+          else
+            echo "Workflow completed successfully"
+          fi
