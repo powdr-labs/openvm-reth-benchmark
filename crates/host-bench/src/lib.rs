@@ -471,9 +471,12 @@ fn try_load_input_from_cache(
 }
 
 mod powdr {
-    use openvm_sdk::StdIn;
+    use openvm_sdk::{Sdk, StdIn};
+    use powdr_autoprecompiles::execution_profile::execution_profile;
     use powdr_openvm::{
-        compile_exe_with_elf, default_powdr_openvm_config, execution_profile, CompiledProgram, DegreeBound, OriginalCompiledProgram, PgoConfig, PgoType, PrecompileImplementation
+        compile_exe_with_elf, default_powdr_openvm_config, BabyBearOpenVmApcAdapter,
+        CompiledProgram, DegreeBound, OriginalCompiledProgram, PgoConfig, PgoType,
+        PrecompileImplementation, Prog,
     };
 
     /// This function is used to generate the specialized program for the Powdr APC.
@@ -490,14 +493,28 @@ mod powdr {
         pgo_type: PgoType,
         stdin: StdIn,
     ) -> CompiledProgram {
+        let sdk = Sdk::default();
+
+        let execute = || {
+            sdk.execute(
+                original_program.exe.clone(),
+                original_program.sdk_vm_config.clone(),
+                stdin.clone(),
+            )
+            .unwrap();
+        };
+
+        let program = Prog::from(&original_program.exe.program);
+
         let pgo_config = match pgo_type {
             PgoType::None => PgoConfig::None,
-            PgoType::Instruction => {
-                PgoConfig::Instruction(execution_profile(original_program.clone(), stdin))
-            }
-            PgoType::Cell(_) => {
-                PgoConfig::Cell(execution_profile(original_program.clone(), stdin), None)
-            }
+            PgoType::Instruction => PgoConfig::Instruction(execution_profile::<
+                BabyBearOpenVmApcAdapter,
+            >(&program, execute)),
+            PgoType::Cell(_) => PgoConfig::Cell(
+                execution_profile::<BabyBearOpenVmApcAdapter>(&program, execute),
+                None,
+            ),
         };
 
         let mut config = default_powdr_openvm_config(apc as u64, apc_skip as u64);
@@ -508,6 +525,13 @@ mod powdr {
             config = config.with_apc_candidates_dir(path);
         }
 
-        compile_exe_with_elf(original_program, elf, config, PrecompileImplementation::SingleRowChip, pgo_config).unwrap()
+        compile_exe_with_elf(
+            original_program,
+            elf,
+            config,
+            PrecompileImplementation::SingleRowChip,
+            pgo_config,
+        )
+        .unwrap()
     }
 }
