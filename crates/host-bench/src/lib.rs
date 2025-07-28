@@ -493,26 +493,28 @@ mod powdr {
         pgo_type: PgoType,
         stdin: StdIn,
     ) -> CompiledProgram {
+        let sdk = Sdk::default();
+
+        let execute = || {
+            sdk.execute(
+                original_program.exe.clone(),
+                original_program.sdk_vm_config.clone(),
+                stdin.clone(),
+            )
+            .unwrap();
+        };
+
+        let program = Prog::from(&original_program.exe.program);
+
         let pgo_config = match pgo_type {
             PgoType::None => PgoConfig::None,
-            PgoType::Instruction | PgoType::Cell(_) => {
-                let program = Prog::from(&original_program.exe.program);
-                let sdk = Sdk::default();
-                let pc_index_count =
-                    execution_profile::<BabyBearOpenVmApcAdapter>(&program, || {
-                        sdk.execute(
-                            original_program.exe.clone(),
-                            original_program.sdk_vm_config.clone(),
-                            stdin.clone(),
-                        )
-                        .unwrap();
-                    });
-                match pgo_type {
-                    PgoType::Instruction => PgoConfig::Instruction(pc_index_count),
-                    PgoType::Cell(_) => PgoConfig::Cell(pc_index_count, None),
-                    _ => unreachable!(),
-                }
-            }
+            PgoType::Instruction => PgoConfig::Instruction(execution_profile::<
+                BabyBearOpenVmApcAdapter,
+            >(&program, execute)),
+            PgoType::Cell(_) => PgoConfig::Cell(
+                execution_profile::<BabyBearOpenVmApcAdapter>(&program, execute),
+                None,
+            ),
         };
 
         let mut config = default_powdr_openvm_config(apc as u64, apc_skip as u64);
