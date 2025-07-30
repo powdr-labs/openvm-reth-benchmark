@@ -27,7 +27,7 @@ use openvm_sdk::{
 };
 use openvm_stark_sdk::engine::StarkFriEngine;
 use openvm_transpiler::{elf::Elf, openvm_platform::memory::MEM_SIZE, FromElf};
-use powdr_openvm::{CompiledProgram, OriginalCompiledProgram, PgoType};
+use powdr_openvm::{CompiledProgram, ExtendedVmConfig, OriginalCompiledProgram, PgoType};
 pub use reth_primitives;
 use serde_json::json;
 use std::{fs, path::PathBuf, sync::Arc};
@@ -325,7 +325,7 @@ pub async fn run_reth_benchmark<E: StarkFriEngine<SC>>(
         let _guard = tracing::subscriber::set_default(subscriber);
 
         powdr::apc(
-            OriginalCompiledProgram { exe, sdk_vm_config },
+            OriginalCompiledProgram { exe, vm_config: ExtendedVmConfig { sdk_vm_config } },
             openvm_client_eth_elf,
             args.apc,
             args.apc_skip,
@@ -498,7 +498,7 @@ mod powdr {
         let execute = || {
             sdk.execute(
                 original_program.exe.clone(),
-                original_program.sdk_vm_config.clone(),
+                original_program.vm_config.clone(),
                 stdin.clone(),
             )
             .unwrap();
@@ -513,7 +513,8 @@ mod powdr {
             >(&program, execute)),
             PgoType::Cell(_) => PgoConfig::Cell(
                 execution_profile::<BabyBearOpenVmApcAdapter>(&program, execute),
-                None,
+                None, // max total columns
+                None, // max instructions per block
             ),
         };
 
