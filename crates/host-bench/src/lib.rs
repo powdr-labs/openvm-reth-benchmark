@@ -27,7 +27,7 @@ use openvm_sdk::{
 };
 use openvm_stark_sdk::engine::StarkFriEngine;
 use openvm_transpiler::{elf::Elf, openvm_platform::memory::MEM_SIZE, FromElf};
-use powdr_openvm::{CompiledProgram, OriginalCompiledProgram, PgoType, ExtendedVmConfig};
+use powdr_openvm::{CompiledProgram, ExtendedVmConfig, OriginalCompiledProgram, PgoType};
 pub use reth_primitives;
 use serde_json::json;
 use std::{fs, path::PathBuf, sync::Arc};
