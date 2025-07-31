@@ -514,6 +514,7 @@ mod powdr {
             PgoType::Cell(_) => PgoConfig::Cell(
                 execution_profile::<BabyBearOpenVmApcAdapter>(&program, execute),
                 None,
+                None,
             ),
         };
 
