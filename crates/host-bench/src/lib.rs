@@ -27,7 +27,8 @@ use openvm_sdk::{
 };
 use openvm_stark_sdk::engine::StarkFriEngine;
 use openvm_transpiler::{elf::Elf, openvm_platform::memory::MEM_SIZE, FromElf};
-use powdr_openvm::{CompiledProgram, ExtendedVmConfig, OriginalCompiledProgram, PgoType};
+use powdr_autoprecompiles::PgoType;
+use powdr_openvm::{CompiledProgram, ExtendedVmConfig, OriginalCompiledProgram};
 pub use reth_primitives;
 use serde_json::json;
 use std::{fs, path::PathBuf, sync::Arc};
@@ -472,10 +473,10 @@ fn try_load_input_from_cache(
 
 mod powdr {
     use openvm_sdk::{Sdk, StdIn};
-    use powdr_autoprecompiles::execution_profile::execution_profile;
+    use powdr_autoprecompiles::{execution_profile::execution_profile, PgoType};
     use powdr_openvm::{
         compile_exe_with_elf, default_powdr_openvm_config, BabyBearOpenVmApcAdapter,
-        CompiledProgram, DegreeBound, OriginalCompiledProgram, PgoConfig, PgoType,
+        CompiledProgram, DegreeBound, OriginalCompiledProgram, PgoConfig,
         PrecompileImplementation, Prog,
     };
 
@@ -511,10 +512,9 @@ mod powdr {
             PgoType::Instruction => PgoConfig::Instruction(execution_profile::<
                 BabyBearOpenVmApcAdapter,
             >(&program, execute)),
-            PgoType::Cell(_) => PgoConfig::Cell(
+            PgoType::Cell => PgoConfig::Cell(
                 execution_profile::<BabyBearOpenVmApcAdapter>(&program, execute),
                 None, // max total columns
-                None, // max instructions per block
             ),
         };
 
