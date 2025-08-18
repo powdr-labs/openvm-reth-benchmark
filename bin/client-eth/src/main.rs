@@ -5,7 +5,6 @@ use openvm_client_executor::{io::ClientExecutorInput, ClientExecutor};
 use {
     k256::Secp256k1Point,
     openvm_algebra_guest::IntMod,
-    openvm_keccak256_guest, // trigger extern native-keccak256
     openvm_pairing::{bls12_381::Bls12_381G1Affine, bn254::Bn254G1Affine},
 };
 
