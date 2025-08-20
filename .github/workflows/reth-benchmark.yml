@@ -44,7 +44,7 @@ on:
         description: Running mode
         options:
           - execute
-          - tracegen
+          - execute-metered
           - prove-app
           - prove-stark
           - prove-evm
@@ -66,8 +66,8 @@ on:
       segment_max_cells:
         type: string # number might have u32 limit
         required: false
-        description: Total main trace cells (excluding memory)
-        default: "1200000000" # 1.2B
+        description: Total main+perm trace cells
+        default: "2700000000" # 2.7B
       # num_children_leaf:
       #   type: number
       #   required: false
@@ -122,7 +122,7 @@ on:
       mode:
         type: string
         required: false
-        description: Running mode, one of {execute, tracegen, prove-app, prove-stark, prove-evm}
+        description: Running mode, one of {execute, execute-metered, prove-app, prove-stark, prove-evm}
         default: prove-evm
       profiling:
         type: string
@@ -138,7 +138,7 @@ on:
         type: string
         required: false
         description: Total main trace cells (excluding memory)
-        default: "1200000000" # 1.2B
+        default: "2700000000" # 2.7B
       num_children_leaf:
         type: number
         required: false
@@ -198,6 +198,16 @@ jobs:
       - uses: Swatinem/rust-cache@v2
         with:
           cache-on-failure: true
+
+      - name: Add workflow inputs to summary
+        run: |
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### Workflow Inputs" >> $GITHUB_STEP_SUMMARY
+          echo '```json' >> $GITHUB_STEP_SUMMARY
+          echo '${{ toJSON(inputs || github.event.inputs) }}' >> $GITHUB_STEP_SUMMARY
+          echo '```' >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+
       - name: Display workflow inputs
         run: |
           if [[ "${{ inputs.manual_call }}" == "true" ]]; then
@@ -205,8 +215,10 @@ jobs:
           else
             echo "${{ toJSON(github.event.inputs) }}"
           fi
+
       - name: Get current commit hash
         run: echo "current_sha=$(git rev-parse HEAD)" >> $GITHUB_ENV
+
       - name: Set metric name
         id: set-metric-name
         run: |
@@ -237,9 +249,9 @@ jobs:
       - name: Set build args
         id: set-build-args
         run: |
-          FEATURES="bench-metrics,evm-verify,nightly-features,${{ inputs.memory_allocator || github.event.inputs.memory_allocator || 'jemalloc' }}"
+          FEATURES="metrics,evm-verify,nightly-features,${{ inputs.memory_allocator || github.event.inputs.memory_allocator || 'jemalloc' }}"
           if [[ "${{ inputs.profiling || github.event.inputs.profiling }}" == "guest" ]]; then
-            FEATURES="${FEATURES},profiling"
+            FEATURES="${FEATURES},perf-metrics"
           fi
           arch=$(uname -m)
           case $arch in
@@ -283,12 +295,19 @@ jobs:
           ssh-private-key: |
             ${{ secrets.GH_ACTIONS_DEPLOY_PRIVATE_KEY }}
 
+      - name: Get openvm REV
+        id: get-openvm-rev
+        run: |
+          RESULT=$(cargo metadata --format-version=1 | jq -r '.packages[] | select(.name=="openvm-sdk") | .source | split("#") | .[1]')
+          echo "result=${RESULT}" >> "$GITHUB_OUTPUT"
+
       - name: Install openvm-prof
         run: |
-          cargo install --git https://github.com/openvm-org/openvm.git --profile=dev --force openvm-prof
+          cargo install --git https://github.com/openvm-org/openvm.git --rev ${{ steps.get-openvm-rev.outputs.result }} --profile=dev --force openvm-prof
+
       - name: Checkout openvm (for scripts)
         run: |
-          git clone --depth=1 https://github.com/openvm-org/openvm.git
+          git clone --rev ${{ steps.get-openvm-rev.outputs.result }} --depth=1 https://github.com/openvm-org/openvm.git
 
       - name: Install architecture specific tools
         run: |
@@ -302,7 +321,7 @@ jobs:
         if: ${{ (github.event.inputs.mode == 'prove-evm') || (inputs.mode == 'prove-evm') }}
         run: |
           bash openvm/extensions/native/recursion/trusted_setup_s3.sh
-          PARAMS_DIR=$(pwd)/params
+          PARAMS_DIR="$HOME/.openvm/params/"
           echo "PARAMS_DIR=$PARAMS_DIR" >> $GITHUB_ENV
           OPTIONAL_ARGS="--kzg-params-dir $PARAMS_DIR --halo2-outer-k 22"
           echo "OPTIONAL_ARGS=${OPTIONAL_ARGS}" >> $GITHUB_ENV
@@ -317,7 +336,7 @@ jobs:
       - name: Install cargo-openvm
         if: steps.cache-guest-elf-restore.outputs.cache-hit != 'true'
         run: |
-          cargo install --git https://github.com/openvm-org/openvm.git --locked --force cargo-openvm
+          cargo install --git https://github.com/openvm-org/openvm.git --rev ${{ steps.get-openvm-rev.outputs.result }} --locked --force cargo-openvm
       - name: Build Guest ELF
         if: steps.cache-guest-elf-restore.outputs.cache-hit != 'true'
         working-directory: bin/client-eth
@@ -408,6 +427,7 @@ jobs:
           name: ${{ steps.set-metric-name.outputs.name }}
           path: ${{ env.METRIC_PATH }}
           retention-days: 1
+
       - name: Upload memory usage graph
         if: ${{ (inputs.profiling || github.event.inputs.profiling) == 'none' }}
         uses: actions/upload-artifact@v4
@@ -473,6 +493,41 @@ jobs:
           echo "</details>" >> $MD_PATH
           echo "" >> $MD_PATH
 
+      - name: Generate samply profile artifacts
+        if: ${{ inputs.profiling == 'host' || github.event.inputs.profiling == 'host' }}
+        run: |
+          cargo install --git https://github.com/mstange/samply.git samply --force
+
+          mkdir -p samply_profile
+          SAMPLY_PROFILE_PATH=samply_profile
+
+          samply import perf.data --presymbolicate --save-only --output $SAMPLY_PROFILE_PATH/profile.json.gz
+          echo "SAMPLY_PROFILE_PATH=${SAMPLY_PROFILE_PATH}" >> $GITHUB_ENV
+
+          s5cmd cp $SAMPLY_PROFILE_PATH/profile.json.gz ${{ env.S3_SAMPLY_PROFILE_PATH }}/${METRIC_NAME}/profile.json.gz
+
+          MODE=${{ inputs.mode || github.event.inputs.mode }}
+          if [[ "$MODE" == "execute" || "$MODE" == "execute-metered" ]]; then
+            FIREFOX_PROFILER_TOKEN=$(curl 'https://api.profiler.firefox.com/compressed-store' -X POST -H 'Accept: application/vnd.firefox-profiler+json;version=1.0' --data-binary @"$SAMPLY_PROFILE_PATH/profile.json.gz" | python3 -c "import sys,base64,json; t=sys.stdin.read().strip().split('.')[1]; t+='='*(4-len(t)%4)if len(t)%4 else''; print(json.loads(base64.urlsafe_b64decode(t))['profileToken'])")
+
+            if [ -n "$FIREFOX_PROFILER_TOKEN" ]; then
+              FIREFOX_PROFILER_URL="https://profiler.firefox.com/public/$FIREFOX_PROFILER_TOKEN"
+              echo "FIREFOX_PROFILER_URL=$FIREFOX_PROFILER_URL" >> $GITHUB_ENV
+              echo "" >> $MD_PATH
+              echo "**[Firefox Profiler]($FIREFOX_PROFILER_URL)**" >> $MD_PATH
+            fi
+          fi
+          echo "S3_SAMPLY_PROFILE_PATH=${S3_SAMPLY_PROFILE_PATH}" >> $GITHUB_ENV
+
+      - name: Upload samply profile artifacts
+        if: ${{ inputs.profiling == 'host' || github.event.inputs.profiling == 'host' }}
+        id: upload-samply-profile-artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ steps.set-metric-name.outputs.name }}-samply-profile
+          path: ${{ env.SAMPLY_PROFILE_PATH }}
+          retention-days: 1
+
       - name: Add benchmark metadata to markdown
         run: |
           COMMIT_URL=https://github.com/${{ github.repository }}/commit/${current_sha}
@@ -492,30 +547,6 @@ jobs:
           S3_MD_PATH="${{ env.S3_PATH }}/${METRIC_NAME}.md"
           s5cmd cp $MD_PATH $S3_MD_PATH
           echo "S3_MD_PATH=${S3_MD_PATH}" >> $GITHUB_ENV
-
-      - name: Generate samply profile artifacts
-        if: ${{ inputs.profiling == 'host' || github.event.inputs.profiling == 'host' }}
-        run: |
-          cargo install --git https://github.com/mstange/samply.git samply --force
-
-          mkdir -p samply_profile
-          SAMPLY_PROFILE_PATH=samply_profile
-
-          samply import perf.data --unstable-presymbolicate --save-only --output $SAMPLY_PROFILE_PATH/profile.json
-          echo "SAMPLY_PROFILE_PATH=${SAMPLY_PROFILE_PATH}" >> $GITHUB_ENV
-
-          s5cmd cp $SAMPLY_PROFILE_PATH/profile.json ${{ env.S3_SAMPLY_PROFILE_PATH }}/${METRIC_NAME}/profile.json
-          s5cmd cp $SAMPLY_PROFILE_PATH/profile.syms.json ${{ env.S3_SAMPLY_PROFILE_PATH }}/${METRIC_NAME}/profile.syms.json
-          echo "S3_SAMPLY_PROFILE_PATH=${S3_SAMPLY_PROFILE_PATH}" >> $GITHUB_ENV
-
-      - name: Upload samply profile artifacts
-        if: ${{ inputs.profiling == 'host' || github.event.inputs.profiling == 'host' }}
-        id: upload-samply-profile-artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: ${{ steps.set-metric-name.outputs.name }}-samply-profile
-          path: ${{ env.SAMPLY_PROFILE_PATH }}
-          retention-days: 1
 
       ### Update gh-pages
       - uses: actions/checkout@v4
@@ -557,6 +588,15 @@ jobs:
               echo "PUSH_FAILED"
               exit 1
           fi
+
+      - name: Update summary with results
+        run: |
+          RESULT_URL="https://github.com/axiom-crypto/openvm-reth-benchmark/blob/gh-pages/${GH_PAGES_PATH}/${METRIC_NAME}.md"
+          echo "### Results" >> $GITHUB_STEP_SUMMARY
+          echo "[${METRIC_NAME}](${RESULT_URL})" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          cat "${GH_PAGES_PATH}/${METRIC_NAME}.md" >> $GITHUB_STEP_SUMMARY
+
       - name: Path to result
         run: |
           echo "https://github.com/axiom-crypto/openvm-reth-benchmark/blob/gh-pages/${GH_PAGES_PATH}/${METRIC_NAME}.md"
