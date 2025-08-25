@@ -12,7 +12,7 @@ on:
         type: string
         required: false
         description: The family of the instance, can be multiple ones concat with "+" e.g. r8g+r7g
-        default: m8g.24xlarge
+        default: g6e.8xlarge
       block_number:
         type: number
         required: false
@@ -48,7 +48,7 @@ on:
           - prove-app
           - prove-stark
           - prove-evm
-        default: prove-evm
+        default: prove-stark
       profiling:
         type: choice
         required: false
@@ -61,13 +61,13 @@ on:
       max_segment_length:
         type: number
         required: false
-        description: Max segment length for continuations, must be larger than 524288
-        default: 8388508 # 2**23 - 100
+        description: Max segment length for continuations
+        default: 4194204 # 2**22 - 100, but the main criteria should be segment_max_cells
       segment_max_cells:
-        type: string # number might have u32 limit
+        type: string
         required: false
-        description: Total main+perm trace cells
-        default: "2700000000" # 2.7B
+        description: Total main trace cells (excluding memory)
+        default: "700000000"
       # num_children_leaf:
       #   type: number
       #   required: false
@@ -88,7 +88,7 @@ on:
         type: string
         required: false
         description: The family of the instance, can be multiple ones concat with "+" e.g. r8g+r7g
-        default: m8g.24xlarge
+        default: g6e.8xlarge
       memory_allocator:
         type: string
         required: false
@@ -123,7 +123,7 @@ on:
         type: string
         required: false
         description: Running mode, one of {execute, execute-metered, prove-app, prove-stark, prove-evm}
-        default: prove-evm
+        default: prove-stark
       profiling:
         type: string
         required: false
@@ -132,13 +132,13 @@ on:
       max_segment_length:
         type: number
         required: false
-        description: Max segment length for continuations, must be larger than 524288
-        default: 8388508
+        description: Max segment length for continuations
+        default: 4194204 # 2**22 - 100, but the main criteria should be segment_max_cells
       segment_max_cells:
         type: string
         required: false
         description: Total main trace cells (excluding memory)
-        default: "2700000000" # 2.7B
+        default: "700000000"
       num_children_leaf:
         type: number
         required: false
@@ -186,12 +186,12 @@ jobs:
       - disk=large
       - tag=bench-reth-${{ github.run_id }}-${{ github.run_number }}-${{ github.run_attempt }}
       - extras=s3-cache
-      - image=${{ contains(inputs.instance_family || github.event.inputs.instance_family, 'g.') && 'ubuntu22-full-arm64' || 'ubuntu22-full-x64' }}
+      - image=${{ startsWith(github.event.inputs.instance_family || inputs.instance_family, 'g') && 'ubuntu24-gpu-x64' || contains(github.event.inputs.instance_family || inputs.instance_family, 'g.') && 'ubuntu24-full-arm64' || 'ubuntu24-full-x64' }}
     outputs:
       metric_name: ${{ steps.set-metric-name.outputs.name }}
     steps:
-      - uses: runs-on/action@v1
-      - uses: actions/checkout@v4
+      - uses: runs-on/action@v2
+      - uses: actions/checkout@v5
         with:
           ref: ${{ inputs.ref || github.head_ref || github.ref }}
       - uses: dtolnay/rust-toolchain@nightly
@@ -249,9 +249,19 @@ jobs:
       - name: Set build args
         id: set-build-args
         run: |
-          FEATURES="metrics,evm-verify,nightly-features,tco,${{ inputs.memory_allocator || github.event.inputs.memory_allocator || 'jemalloc' }}"
+          FEATURES="metrics,tco,${{ inputs.memory_allocator || github.event.inputs.memory_allocator || 'jemalloc' }}"
           if [[ "${{ inputs.profiling || github.event.inputs.profiling }}" == "guest" ]]; then
             FEATURES="${FEATURES},perf-metrics"
+          fi
+          if [[ ! "${{ inputs.instance_family || github.event.inputs.instance_family }}" =~ ^g ]]; then
+            FEATURES="${FEATURES},nightly-features"
+            JEMALLOC_SYS_WITH_MALLOC_CONF="retain:true,background_thread:true,metadata_thp:always,thp:always,dirty_decay_ms:-1,muzzy_decay_ms:-1,abort_conf:true"
+          else
+            FEATURES="${FEATURES},cuda"
+            JEMALLOC_SYS_WITH_MALLOC_CONF="retain:true,background_thread:true,metadata_thp:always,thp:always,dirty_decay_ms:10000,muzzy_decay_ms:10000,abort_conf:true"
+          fi
+          if [[ "${{ inputs.mode || github.event.inputs.mode }}" == "prove-evm" ]]; then
+            FEATURES="${FEATURES},evm-verify"
           fi
           arch=$(uname -m)
           case $arch in
@@ -259,7 +269,10 @@ jobs:
               RUSTFLAGS="-Ctarget-cpu=native"
               ;;
             x86_64|amd64)
-              RUSTFLAGS="-Ctarget-cpu=native -C target-feature=+avx512f"
+              if [[ ! "${{ inputs.instance_family || github.event.inputs.instance_family }}" =~ ^g ]]; then
+                # Cuda impl currently does not work with plonky3 avx
+                RUSTFLAGS="-Ctarget-cpu=native"
+              fi
               FEATURES="${FEATURES},halo2-asm"
               ;;
             *)
@@ -270,7 +283,6 @@ jobs:
           if [[ "${{ inputs.profiling || github.event.inputs.profiling }}" == "host" ]]; then
             RUSTFLAGS="${RUSTFLAGS} -C force-frame-pointers=yes"
           fi
-          JEMALLOC_SYS_WITH_MALLOC_CONF="retain:true,background_thread:true,metadata_thp:always,thp:always,dirty_decay_ms:-1,muzzy_decay_ms:-1,abort_conf:true"
           echo "RUSTFLAGS=${RUSTFLAGS}" >> $GITHUB_ENV
           echo "JEMALLOC_SYS_WITH_MALLOC_CONF=${JEMALLOC_SYS_WITH_MALLOC_CONF}" >> $GITHUB_ENV
           echo "FEATURES=${FEATURES}" >> $GITHUB_ENV
@@ -539,7 +551,7 @@ jobs:
           add_metadata $MD_PATH \
             ${{ inputs.max_segment_length || github.event.inputs.max_segment_length }} \
             ${{ inputs.instance_family || github.event.inputs.instance_family }} \
-            ${{ inputs.memory_allocator || github.event.inputs.memory_allocator }} \
+            ${{ inputs.memory_allocator || github.event.inputs.memory_allocator || 'jemalloc' }} \
             $COMMIT_URL \
             $BENCHMARK_WORKFLOW_URL
 

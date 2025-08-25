@@ -14,12 +14,12 @@ use openvm_circuit::{
 };
 use openvm_client_executor::{io::ClientExecutorInput, CHAIN_ID_ETH_MAINNET};
 use openvm_host_executor::HostExecutor;
-pub use openvm_native_circuit::{NativeConfig, NativeCpuBuilder};
-pub use openvm_sdk::config::SdkVmCpuBuilder;
+pub use openvm_native_circuit::NativeConfig;
+
 use openvm_sdk::{
-    config::{AppConfig, SdkVmConfig},
+    config::{AppConfig, SdkVmBuilder, SdkVmConfig},
     prover::verify_app_proof,
-    GenericSdk, StdIn, F, SC,
+    DefaultStarkEngine, Sdk, StdIn,
 };
 use openvm_stark_sdk::engine::StarkFriEngine;
 use openvm_transpiler::{elf::Elf, openvm_platform::memory::MEM_SIZE};
@@ -111,20 +111,7 @@ pub fn reth_vm_config(app_log_blowup: usize) -> SdkVmConfig {
 pub const RETH_DEFAULT_APP_LOG_BLOWUP: usize = 1;
 pub const RETH_DEFAULT_LEAF_LOG_BLOWUP: usize = 1;
 
-pub async fn run_reth_benchmark<E, VB, NativeBuilder>(
-    args: HostArgs,
-    openvm_client_eth_elf: &[u8],
-    vm_builder: VB,
-) -> eyre::Result<()>
-where
-    E: StarkFriEngine<SC = SC>,
-    VB: VmBuilder<E, VmConfig = SdkVmConfig> + Clone + Default,
-    <VB::VmConfig as VmExecutionConfig<F>>::Executor:
-        Executor<F> + MeteredExecutor<F> + PreflightExecutor<F, VB::RecordArena>,
-    NativeBuilder: VmBuilder<E, VmConfig = NativeConfig> + Clone + Default,
-    <NativeConfig as VmExecutionConfig<F>>::Executor:
-        PreflightExecutor<F, <NativeBuilder as VmBuilder<E>>::RecordArena>,
-{
+pub async fn run_reth_benchmark(args: HostArgs, openvm_client_eth_elf: &[u8]) -> eyre::Result<()> {
     // Initialize the environment variables.
     dotenv::dotenv().ok();
 
@@ -212,7 +199,9 @@ where
     let vm_config = reth_vm_config(app_log_blowup);
     let app_config = args.benchmark.app_config(vm_config);
 
-    let sdk = GenericSdk::<E, VB, NativeBuilder>::new(app_config.clone())?
+    #[cfg(feature = "cuda")]
+    println!("CUDA Backend Enabled");
+    let sdk = Sdk::new(app_config.clone())?
         .with_agg_config(args.benchmark.agg_config())
         .with_agg_tree_config(args.benchmark.agg_tree_config);
     let elf = Elf::decode(openvm_client_eth_elf, MEM_SIZE as u32)?;
@@ -235,10 +224,10 @@ where
                 match args.mode {
                     BenchMode::Execute => {}
                     BenchMode::ExecuteMetered => {
-                        let engine = E::new(app_config.app_fri_params.fri_params);
+                        let engine = DefaultStarkEngine::new(app_config.app_fri_params.fri_params);
                         let (vm, _) = VirtualMachine::new_with_keygen(
                             engine,
-                            vm_builder,
+                            SdkVmBuilder,
                             app_config.app_vm_config,
                         )?;
                         let executor_idx_to_air_idx = vm.executor_idx_to_air_idx();
