@@ -1519,9 +1519,9 @@ checksum = "b4ae4235e6dac0694637c763029ecea1a2ec9e4e06ec2729bd21ba4d9c863eb7"
 
 [[package]]
 name = "bumpalo"
-version = "3.18.1"
+version = "3.19.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "793db76d6187cd04dff33004d8e6c9cc4e05cd330500379d2394209271b4aeee"
+checksum = "46c5e41b57b8bba42a04676d81cb89e9ee8e859a1a66f80a5a72e1cb76b34d43"
 
 [[package]]
 name = "byte-slice-cast"
@@ -4103,6 +4103,22 @@ dependencies = [
 ]
 
 [[package]]
+name = "mptnew"
+version = "0.1.0"
+dependencies = [
+ "alloy-rlp",
+ "bumpalo",
+ "bytes",
+ "hex-literal 1.0.0",
+ "reth-trie",
+ "revm",
+ "revm-primitives 19.2.0",
+ "serde",
+ "smallvec",
+ "thiserror 2.0.12",
+]
+
+[[package]]
 name = "new_debug_unreachable"
 version = "1.0.6"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -4673,8 +4689,10 @@ version = "0.1.0"
 dependencies = [
  "alloy-consensus",
  "alloy-primitives 1.2.0",
+ "bumpalo",
  "eyre",
  "itertools 0.14.0",
+ "mptnew",
  "openvm-mpt",
  "openvm-primitives",
  "openvm-witness-db",
@@ -4859,6 +4877,7 @@ dependencies = [
  "bincode 2.0.1",
  "dotenv",
  "eyre",
+ "mptnew",
  "openvm-client-executor",
  "openvm-mpt",
  "openvm-primitives",
@@ -5017,6 +5036,7 @@ dependencies = [
  "dhat",
  "dotenv",
  "eyre",
+ "mptnew",
  "openvm-client-executor",
  "openvm-host-executor",
  "openvm-mpt",

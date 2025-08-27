@@ -3,7 +3,7 @@ static ALLOC: dhat::Alloc = dhat::Alloc;
 
 use bincode::config::standard;
 use dhat::Profiler;
-use openvm_client_executor::io::ClientExecutorInput;
+use openvm_client_executor::io::{ClientExecutorInput, ClientExecutorInputWithState};
 use openvm_primitives::chain_spec::mainnet;
 use reth_evm::execute::{BasicBlockExecutor, Executor};
 use reth_evm_ethereum::EthEvmConfig;
@@ -47,18 +47,19 @@ fn main() {
     let bincode_config = standard();
 
     // Pre-compute the post-state once
-    let (client_input, _): (ClientExecutorInput, _) =
+    let (pre_input, _): (ClientExecutorInput, _) =
         bincode::serde::decode_from_slice(&buffer, bincode_config).unwrap();
+    let client_input = ClientExecutorInputWithState::build(pre_input.clone()).unwrap();
     let witness_db = client_input.witness_db().unwrap();
     let cache_db = CacheDB::new(&witness_db);
     let spec = Arc::new(mainnet());
-    let current_block = client_input.current_block.clone().try_into_recovered().unwrap();
+    let current_block = client_input.input.current_block.clone().try_into_recovered().unwrap();
     let block_executor = BasicBlockExecutor::new(EthEvmConfig::new(spec), cache_db);
     let executor_output = block_executor.execute(&current_block).unwrap();
     let executor_outcome = ExecutionOutcome::new(
         executor_output.state,
         vec![executor_output.result.receipts],
-        client_input.current_block.header.number,
+        client_input.input.current_block.header.number,
         vec![executor_output.result.requests],
     );
 
@@ -75,15 +76,15 @@ fn main() {
         }
         "witness" => {
             println!("Profiling: Witness DB creation only");
-            profile_witness_db(&client_input);
+            profile_witness_db(pre_input);
         }
         "update" => {
             println!("Profiling: MPT update only");
-            profile_update(client_input.parent_state, &executor_outcome);
+            profile_update(client_input.state, &executor_outcome);
         }
         "state-root" => {
             println!("Profiling: Update and state root computation only");
-            profile_state_root(client_input.parent_state, &executor_outcome);
+            profile_state_root(client_input.state, &executor_outcome);
         }
         _ => {
             println!("Unknown operation: {}", operation);
@@ -100,15 +101,17 @@ fn profile_end_to_end(buffer: &[u8], executor_outcome: &ExecutionOutcome) {
     let bincode_config = standard();
 
     // Deserialize
-    let (mut client_input, _): (ClientExecutorInput, _) =
+    let (pre_input, _): (ClientExecutorInput, _) =
         bincode::serde::decode_from_slice(buffer, bincode_config).unwrap();
+
+    let mut client_input = ClientExecutorInputWithState::build(pre_input).unwrap();
 
     // Create witness DB
     let _witness_db = client_input.witness_db().unwrap();
 
     // Update MPT with pre-computed post-state
-    client_input.parent_state.update_from_bundle_state(&executor_outcome.bundle);
-    let _state_root = client_input.parent_state.state_root();
+    client_input.state.update_from_bundle_state(&executor_outcome.bundle).unwrap();
+    let _state_root = client_input.state.state_trie.hash();
 }
 
 fn profile_deserialize(buffer: &[u8]) {
@@ -119,29 +122,28 @@ fn profile_deserialize(buffer: &[u8]) {
         bincode::serde::decode_from_slice(buffer, bincode_config).unwrap();
 }
 
-fn profile_witness_db(client_input: &ClientExecutorInput) {
+fn profile_witness_db(client_input: ClientExecutorInput) {
     let _profiler = Profiler::new_heap();
 
-    let _witness_db = client_input.witness_db().unwrap();
+    let input = ClientExecutorInputWithState::build(client_input).unwrap();
+
+    let _witness_db = input.witness_db().unwrap();
 }
 
-fn profile_update(
-    mut parent_state: openvm_mpt::EthereumState,
-    executor_outcome: &ExecutionOutcome,
-) {
+fn profile_update(mut parent_state: mptnew::EthereumState, executor_outcome: &ExecutionOutcome) {
     let _profiler = Profiler::new_heap();
 
-    parent_state.update_from_bundle_state(&executor_outcome.bundle);
+    parent_state.update_from_bundle_state(&executor_outcome.bundle).unwrap();
 }
 
 fn profile_state_root(
-    mut parent_state: openvm_mpt::EthereumState,
+    mut parent_state: mptnew::EthereumState,
     executor_outcome: &ExecutionOutcome,
 ) {
     let _profiler = Profiler::new_heap();
 
-    parent_state.update_from_bundle_state(&executor_outcome.bundle);
-    let _state_root = parent_state.state_root();
+    parent_state.update_from_bundle_state(&executor_outcome.bundle).unwrap();
+    let _state_root = parent_state.state_trie.hash();
 }
 
 fn print_usage() {

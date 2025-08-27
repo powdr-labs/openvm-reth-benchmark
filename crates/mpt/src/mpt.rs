@@ -859,6 +859,41 @@ impl<'a> MptTrie<'a> {
     }
 }
 
+impl MptTrie<'_> {
+    pub fn num_nodes(&self) -> usize {
+        self.nodes.len()
+    }
+
+    pub fn encode_trie(&self) -> Vec<u8> {
+        let mut payload = Vec::new();
+        self.encode_trie_internal(self.root_id, &mut payload);
+
+        let mut encoded = Vec::new();
+        alloy_rlp::Header { list: true, payload_length: payload.len() }.encode(&mut encoded);
+        encoded.append(&mut payload);
+        encoded
+    }
+
+    fn encode_trie_internal(&self, id: NodeId, out: &mut dyn alloy_rlp::BufMut) {
+        let payload_length = self.payload_length_id(id);
+        self.encode_id_with_payload_len(id, payload_length, out);
+
+        match self.nodes[id as usize] {
+            NodeData::Branch(childs) => childs.iter().for_each(|c| {
+                if let Some(node) = c {
+                    self.encode_trie_internal(*node, out);
+                } else {
+                    out.put_u8(alloy_rlp::EMPTY_STRING_CODE)
+                }
+            }),
+            NodeData::Extension(_, node) => {
+                self.encode_trie_internal(node, out);
+            }
+            _ => {}
+        }
+    }
+}
+
 // Serialization. Not performance critical.
 impl MptTrie<'_> {
     /// Returns the RLP-encoded bytes with ALL children inlined (never replaced by digest).

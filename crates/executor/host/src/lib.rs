@@ -187,11 +187,34 @@ impl<P: Provider<Ethereum> + Clone> HostExecutor<P> {
             ancestor_headers.push(block.header.into());
         }
 
+        let state_bytes = {
+            let state_num_nodes = state.state_trie.num_nodes();
+            let state_bytes = state.state_trie.encode_trie();
+            let mut storage_bytes: Vec<_> = state
+                .storage_tries
+                .0
+                .iter()
+                .map(|(addr, trie)| {
+                    (
+                        *addr,
+                        trie.num_nodes(),
+                        alloy_primitives::bytes::Bytes::from(trie.encode_trie()),
+                    )
+                })
+                .collect();
+            storage_bytes.sort_by_key(|(addr, _, _)| *addr);
+
+            mptnew::EthereumStateBytes {
+                state_trie: (state_num_nodes, alloy_primitives::bytes::Bytes::from(state_bytes)),
+                storage_tries: storage_bytes,
+            }
+        };
+
         // Create the client input.
         let client_input = ClientExecutorInput {
             current_block,
             ancestor_headers,
-            parent_state: state,
+            parent_state_bytes: state_bytes,
             state_requests,
             bytecodes: rpc_db.get_bytecodes(),
         };

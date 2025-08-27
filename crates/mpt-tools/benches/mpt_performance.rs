@@ -1,6 +1,6 @@
 use bincode::config::standard;
 use criterion::{criterion_group, criterion_main, Criterion};
-use openvm_client_executor::io::ClientExecutorInput;
+use openvm_client_executor::io::{ClientExecutorInput, ClientExecutorInputWithState};
 use openvm_primitives::chain_spec::mainnet;
 use reth_evm::execute::{BasicBlockExecutor, Executor};
 use reth_evm_ethereum::EthEvmConfig;
@@ -24,18 +24,19 @@ fn benchmark_mpt_operations(c: &mut Criterion) {
     let bincode_config = standard();
 
     // Pre-compute the post-state once for the MPT benchmarks (not timed)
-    let (client_input, _): (ClientExecutorInput, _) =
+    let (pre_input, _): (ClientExecutorInput, _) =
         bincode::serde::decode_from_slice(&buffer, bincode_config).unwrap();
+    let client_input = ClientExecutorInputWithState::build(pre_input.clone()).unwrap();
     let witness_db = client_input.witness_db().unwrap();
     let cache_db = CacheDB::new(&witness_db);
     let spec = Arc::new(mainnet());
-    let current_block = client_input.current_block.clone().try_into_recovered().unwrap();
+    let current_block = client_input.input.current_block.clone().try_into_recovered().unwrap();
     let block_executor = BasicBlockExecutor::new(EthEvmConfig::new(spec), cache_db);
     let executor_output = block_executor.execute(&current_block).unwrap();
     let executor_outcome = ExecutionOutcome::new(
         executor_output.state,
         vec![executor_output.result.receipts],
-        client_input.current_block.header.number,
+        client_input.input.current_block.header.number,
         vec![executor_output.result.requests],
     );
 
@@ -44,8 +45,10 @@ fn benchmark_mpt_operations(c: &mut Criterion) {
     c.bench_function("end_to_end_without_execution", |b| {
         b.iter(|| {
             // Deserialize (this happens in production)
-            let (mut client_input, _): (ClientExecutorInput, _) =
+            let (pre_input, _): (ClientExecutorInput, _) =
                 bincode::serde::decode_from_slice(black_box(&buffer), bincode_config).unwrap();
+
+            let mut client_input = ClientExecutorInputWithState::build(pre_input.clone()).unwrap();
 
             // Create witness DB (this happens in production)
             let _witness_db = client_input.witness_db().unwrap();
@@ -53,16 +56,23 @@ fn benchmark_mpt_operations(c: &mut Criterion) {
             // Update MPT with pre-computed post-state (this happens in production)
             // Note: In production, the post-state comes from block execution, but we're
             // using pre-computed data to exclude execution time from the benchmark
-            client_input.parent_state.update_from_bundle_state(&executor_outcome.bundle);
-            let state_root = client_input.parent_state.state_root();
+            client_input.state.update_from_bundle_state(&executor_outcome.bundle).unwrap();
+            let state_root = client_input.state.state_trie.hash();
             black_box(state_root)
         })
     });
 
     c.bench_function("deserialize only", |b| {
         b.iter(|| {
-            let (client_input, _): (ClientExecutorInput, _) =
+            let (pre_input, _): (ClientExecutorInput, _) =
                 bincode::serde::decode_from_slice(black_box(&buffer), bincode_config).unwrap();
+            black_box(pre_input)
+        })
+    });
+
+    c.bench_function("resolve only", |b| {
+        b.iter(|| {
+            let client_input = ClientExecutorInputWithState::build(pre_input.clone());
             black_box(client_input)
         })
     });
@@ -78,7 +88,7 @@ fn benchmark_mpt_operations(c: &mut Criterion) {
         b.iter_with_setup(
             || {
                 // Setup: This part is NOT timed
-                client_input.parent_state.clone()
+                client_input.state.clone()
             },
             |mut parent_state| {
                 // Routine: This part IS timed
@@ -91,13 +101,13 @@ fn benchmark_mpt_operations(c: &mut Criterion) {
         b.iter_with_setup(
             || {
                 // Setup: This part is NOT timed
-                let mut parent_state = client_input.parent_state.clone();
-                parent_state.update_from_bundle_state(&executor_outcome.bundle);
+                let mut parent_state = client_input.state.clone();
+                parent_state.update_from_bundle_state(&executor_outcome.bundle).unwrap();
                 parent_state
             },
             |parent_state| {
                 // Routine: This part IS timed
-                let state_root = parent_state.state_root();
+                let state_root = parent_state.state_trie.hash();
                 black_box(state_root)
             },
         )
