@@ -1807,13 +1807,14 @@ dependencies = [
 [[package]]
 name = "k256"
 version = "0.13.4"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "f6e3919bbaa2945715f0bb6d3934a173d1e9a59ac23767fbaaef277265a7411b"
+source = "git+https://github.com/powdr-labs/elliptic-curves-k256?tag=k256%2Fpowdr%2Fv0.13.4-2025.08.22#20e7e58e26c04130a9669b0ee076ee81f84cc795"
 dependencies = [
  "cfg-if",
  "ecdsa",
  "elliptic-curve",
  "once_cell",
+ "openvm 1.2.1-rc.0",
+ "powdr-openvm-hints-guest",
  "serdect",
  "sha2",
  "signature",
@@ -2108,6 +2109,20 @@ dependencies = [
 
 [[package]]
 name = "openvm"
+version = "1.2.1-rc.0"
+source = "git+https://github.com/powdr-labs/openvm.git?rev=dcf8ee6#dcf8ee6c5d6fd61fb8ce32c9cb836ac39e4e4fa8"
+dependencies = [
+ "bytemuck",
+ "getrandom 0.3.3",
+ "num-bigint 0.4.6",
+ "openvm-custom-insn 0.1.0 (git+https://github.com/powdr-labs/openvm.git?rev=dcf8ee6)",
+ "openvm-platform 1.2.1-rc.0",
+ "openvm-rv32im-guest 1.2.1-rc.0",
+ "serde",
+]
+
+[[package]]
+name = "openvm"
 version = "1.3.0"
 source = "git+https://github.com/openvm-org/openvm.git?tag=v1.3.0#5368d4756993fc1e51092499a816867cf4808de0"
 dependencies = [
@@ -2115,9 +2130,9 @@ dependencies = [
  "getrandom 0.2.16",
  "getrandom 0.3.3",
  "num-bigint 0.4.6",
- "openvm-custom-insn",
- "openvm-platform",
- "openvm-rv32im-guest",
+ "openvm-custom-insn 0.1.0 (git+https://github.com/openvm-org/openvm.git?tag=v1.3.0)",
+ "openvm-platform 1.3.0",
+ "openvm-rv32im-guest 1.3.0",
  "serde",
 ]
 
@@ -2127,7 +2142,7 @@ version = "0.0.0"
 dependencies = [
  "k256",
  "log",
- "openvm",
+ "openvm 1.3.0",
  "openvm-client-executor",
  "revm-precompile",
  "tracing",
@@ -2171,6 +2186,16 @@ dependencies = [
 ]
 
 [[package]]
+name = "openvm-custom-insn"
+version = "0.1.0"
+source = "git+https://github.com/powdr-labs/openvm.git?rev=dcf8ee6#dcf8ee6c5d6fd61fb8ce32c9cb836ac39e4e4fa8"
+dependencies = [
+ "proc-macro2",
+ "quote",
+ "syn 2.0.101",
+]
+
+[[package]]
 name = "openvm-mpt"
 version = "0.1.0"
 dependencies = [
@@ -2195,14 +2220,24 @@ dependencies = [
 
 [[package]]
 name = "openvm-platform"
+version = "1.2.1-rc.0"
+source = "git+https://github.com/powdr-labs/openvm.git?rev=dcf8ee6#dcf8ee6c5d6fd61fb8ce32c9cb836ac39e4e4fa8"
+dependencies = [
+ "libm",
+ "openvm-custom-insn 0.1.0 (git+https://github.com/powdr-labs/openvm.git?rev=dcf8ee6)",
+ "openvm-rv32im-guest 1.2.1-rc.0",
+]
+
+[[package]]
+name = "openvm-platform"
 version = "1.3.0"
 source = "git+https://github.com/openvm-org/openvm.git?tag=v1.3.0#5368d4756993fc1e51092499a816867cf4808de0"
 dependencies = [
  "critical-section",
  "embedded-alloc",
  "libm",
- "openvm-custom-insn",
- "openvm-rv32im-guest",
+ "openvm-custom-insn 0.1.0 (git+https://github.com/openvm-org/openvm.git?tag=v1.3.0)",
+ "openvm-rv32im-guest 1.3.0",
 ]
 
 [[package]]
@@ -2226,10 +2261,20 @@ dependencies = [
 
 [[package]]
 name = "openvm-rv32im-guest"
+version = "1.2.1-rc.0"
+source = "git+https://github.com/powdr-labs/openvm.git?rev=dcf8ee6#dcf8ee6c5d6fd61fb8ce32c9cb836ac39e4e4fa8"
+dependencies = [
+ "openvm-custom-insn 0.1.0 (git+https://github.com/powdr-labs/openvm.git?rev=dcf8ee6)",
+ "p3-field 0.1.0",
+ "strum_macros 0.26.4",
+]
+
+[[package]]
+name = "openvm-rv32im-guest"
 version = "1.3.0"
 source = "git+https://github.com/openvm-org/openvm.git?tag=v1.3.0#5368d4756993fc1e51092499a816867cf4808de0"
 dependencies = [
- "openvm-custom-insn",
+ "openvm-custom-insn 0.1.0 (git+https://github.com/openvm-org/openvm.git?tag=v1.3.0)",
  "p3-field 0.1.0",
  "strum_macros 0.26.4",
 ]
@@ -2530,6 +2575,17 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "e5a7c30837279ca13e7c867e9e40053bc68740f988cb07f7ca6df43cc734b585"
 dependencies = [
  "zerovec",
+]
+
+[[package]]
+name = "powdr-openvm-hints-guest"
+version = "0.1.4"
+source = "git+https://github.com/powdr-labs/powdr.git?rev=3422658#3422658efd39d94ec5e5fe20752a32c18136dad8"
+dependencies = [
+ "openvm-custom-insn 0.1.0 (git+https://github.com/powdr-labs/openvm.git?rev=dcf8ee6)",
+ "openvm-platform 1.2.1-rc.0",
+ "openvm-rv32im-guest 1.2.1-rc.0",
+ "strum_macros 0.27.1",
 ]
 
 [[package]]
