@@ -12,7 +12,7 @@ use openvm_circuit::{
         bench::run_with_metric_collection, openvm_stark_backend::p3_field::PrimeField32,
     },
 };
-use openvm_client_executor::{io::ClientExecutorInput, CHAIN_ID_ETH_MAINNET};
+use openvm_client_executor::{io::ClientExecutorInput, ClientExecutor, CHAIN_ID_ETH_MAINNET};
 use openvm_host_executor::HostExecutor;
 pub use openvm_native_circuit::NativeConfig;
 
@@ -36,6 +36,8 @@ use cli::ProviderArgs;
 /// Enum representing the execution mode of the host executable.
 #[derive(Debug, Clone, clap::ValueEnum)]
 pub enum BenchMode {
+    /// Execute natively on host.
+    ExecuteHost,
     /// Execute the VM without generating a proof.
     Execute,
     /// Execute the VM with metering to get segments information.
@@ -56,6 +58,7 @@ pub enum BenchMode {
 impl std::fmt::Display for BenchMode {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
+            Self::ExecuteHost => write!(f, "execute_host"),
             Self::Execute => write!(f, "execute"),
             Self::ExecuteMetered => write!(f, "execute_metered"),
             Self::ProveApp => write!(f, "prove_app"),
@@ -221,13 +224,35 @@ pub async fn run_reth_benchmark(args: HostArgs, openvm_client_eth_elf: &[u8]) ->
     run_with_metric_collection("OUTPUT_PATH", || {
         info_span!("reth-block", block_number = args.block_number).in_scope(
             || -> eyre::Result<()> {
-                // Always execute_e1 for benchmarking:
+                // Always run host execution for comparison
+                {
+                    let block_hash = info_span!("host.execute", group = program_name).in_scope(
+                        || -> eyre::Result<_> {
+                            let executor = ClientExecutor;
+                            // Create a child span to get the group label propagated
+                            let header = info_span!("client.execute")
+                                .in_scope(|| executor.execute(client_input.clone()))?;
+                            let block_hash =
+                                info_span!("header.hash_slow").in_scope(|| header.hash_slow());
+                            Ok(block_hash)
+                        },
+                    )?;
+                    println!("block_hash (execute-host): {}", ToHexExt::encode_hex(&block_hash));
+                }
+
+                // For ExecuteHost mode, only do host execution
+                if matches!(args.mode, BenchMode::ExecuteHost) {
+                    return Ok(());
+                }
+
+                // Always execute for benchmarking:
                 {
                     let pvs = info_span!("sdk.execute", group = program_name)
                         .in_scope(|| sdk.execute(elf.clone(), stdin.clone()))?;
                     let block_hash = pvs;
-                    println!("block_hash: {}", ToHexExt::encode_hex(&block_hash));
+                    println!("block_hash (execute): {}", ToHexExt::encode_hex(&block_hash));
                 }
+
                 match args.mode {
                     BenchMode::Execute => {}
                     BenchMode::ExecuteMetered => {
@@ -260,7 +285,7 @@ pub async fn run_reth_benchmark(args: HostArgs, openvm_client_eth_elf: &[u8]) ->
                             .iter()
                             .map(|pv| pv.as_canonical_u32() as u8)
                             .collect::<Vec<u8>>();
-                        println!("block_hash: {}", ToHexExt::encode_hex(&block_hash));
+                        println!("block_hash (prove_stark): {}", ToHexExt::encode_hex(&block_hash));
                     }
                     #[cfg(feature = "evm-verify")]
                     BenchMode::ProveEvm => {
@@ -276,11 +301,7 @@ pub async fn run_reth_benchmark(args: HostArgs, openvm_client_eth_elf: &[u8]) ->
                         );
                         let proof = prover.prove_evm(stdin)?;
                         let block_hash = &proof.user_public_values;
-                        println!("block_hash: {}", ToHexExt::encode_hex(block_hash));
-                    }
-                    BenchMode::MakeInput => {
-                        // This case is handled earlier and should not reach here
-                        unreachable!();
+                        println!("block_hash (prove_evm): {}", ToHexExt::encode_hex(block_hash));
                     }
                     BenchMode::GenerateFixtures => {
                         let mut prover = sdk.prover(elf)?.with_program_name(program_name);
@@ -303,6 +324,10 @@ pub async fn run_reth_benchmark(args: HostArgs, openvm_client_eth_elf: &[u8]) ->
                         let mut agg_pk_path = fixture_path.clone();
                         agg_pk_path.push("agg_pk.bitcode");
                         fs::write(agg_pk_path, bitcode::serialize(sdk.agg_pk())?)?;
+                    }
+                    _ => {
+                        // This case is handled earlier and should not reach here
+                        unreachable!();
                     }
                 }
 

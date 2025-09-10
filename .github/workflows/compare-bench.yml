@@ -17,6 +17,7 @@ on:
         required: false
         description: Running mode
         options:
+          - execute-host
           - execute
           - execute-metered
           - prove-app

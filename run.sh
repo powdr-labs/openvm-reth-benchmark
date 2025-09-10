@@ -6,6 +6,11 @@ if [ "$1" == "cuda" ]; then
 fi
 
 set -e
+
+mkdir -p rpc-cache
+source .env
+MODE=execute # can be execute-host, execute, execute-metered, prove-app, prove-stark, or prove-evm (needs "evm-verify" feature)
+
 cd bin/client-eth
 cargo openvm build
 mkdir -p ../host/elf
@@ -17,9 +22,6 @@ if [ ! -f "$DEST" ] || ! cmp -s "$SRC" "$DEST"; then
 fi
 cd ../..
 
-mkdir -p rpc-cache
-source .env
-MODE=execute # can be execute, execute-metered, prove-app, prove-stark, or prove-evm (needs "evm-verify" feature)
 PROFILE="release"
 FEATURES="metrics,jemalloc,tco,unprotected"
 BLOCK_NUMBER=23100006
@@ -30,7 +32,6 @@ MAX_SEGMENT_LENGTH=4194204
 SEGMENT_MAX_CELLS=700000000
 VPMM_PAGE_SIZE=$((4<<20))
 VPMM_PAGES=$((12 * $MAX_SEGMENT_LENGTH/ $VPMM_PAGE_SIZE))
-
 
 if [ "$USE_CUDA" = "true" ]; then
     FEATURES="$FEATURES,cuda"
