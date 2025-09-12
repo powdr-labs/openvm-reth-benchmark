@@ -12,7 +12,10 @@ revm-precompile = { version = "21.0.0", default-features = false, features = [
 ] }
 
 # openvm
-openvm = { git = "https://github.com/openvm-org/openvm.git", tag = "v1.3.0", features = [
+# openvm = { git = "https://github.com/openvm-org/openvm.git", tag = "v1.3.0", features = [
+#   "std",
+# ] }
+openvm = { git = "https://github.com/powdr-labs/openvm.git", rev = "62c5d26", features = [
   "std",
 ] }
 # openvm-keccak256-guest = { git = "https://github.com/openvm-org/openvm.git", tag = "v1.3.0" }
@@ -49,13 +52,14 @@ revm-state = { git = "https://github.com/bluealloy/revm.git", branch = "release/
 revm-bytecode = { git = "https://github.com/bluealloy/revm.git", branch = "release/v75" }
 # k256 = { git = "https://github.com/openvm-org/openvm.git", tag = "v1.3.0" }
 # ruint = { git = "https://github.com/openvm-org/openvm.git", tag = "v1.3.0" }
-k256 = { git = "https://github.com/powdr-labs/elliptic-curves-k256", tag = "k256/powdr/v0.13.4-2025.08.22", default-features = false, features = [
-  "expose-field",
-  "arithmetic",
-  "ecdsa",
-] }
+# k256 = { git = "https://github.com/powdr-labs/elliptic-curves-k256", tag = "k256/powdr/v0.13.4-2025.09.10", default-features = false, features = [
+#   "expose-field",
+#   "arithmetic",
+#   "ecdsa",
+# ] }
 
-sp1_bls12_381 = { path = "../../../bls12_381" }
+# sp1_bls12_381 = { path = "../../../bls12_381" }
+sp1_bls12_381 = { git = "https://github.com/leonardoalt/bls12_381", branch = "patch-0.8.0-sp1-5.0.0-soft" }
 
 # Local Patching:
 # revm = { path = "../../../revm/crates/revm" }

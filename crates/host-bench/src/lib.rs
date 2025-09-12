@@ -29,6 +29,7 @@ use openvm_stark_sdk::engine::StarkFriEngine;
 use openvm_transpiler::{elf::Elf, openvm_platform::memory::MEM_SIZE, FromElf};
 use powdr_autoprecompiles::PgoType;
 use powdr_openvm::{CompiledProgram, ExtendedVmConfig, OriginalCompiledProgram};
+use powdr_openvm_hints_transpiler::HintsTranspilerExtension;
 pub use reth_primitives;
 use serde_json::json;
 use std::{fs, path::PathBuf, sync::Arc};
@@ -315,7 +316,11 @@ pub async fn run_reth_benchmark<E: StarkFriEngine<SC>>(
     );
     let sdk = GenericSdk::<E>::default().with_agg_tree_config(args.benchmark.agg_tree_config);
     let elf = Elf::decode(openvm_client_eth_elf, MEM_SIZE as u32)?;
-    let exe = VmExe::from_elf(elf, sdk_vm_config.transpiler()).unwrap();
+
+    let mut transpiler = sdk_vm_config.transpiler();
+    transpiler = transpiler.with_extension(HintsTranspilerExtension {});
+
+    let exe = VmExe::from_elf(elf, transpiler).unwrap();
 
     let CompiledProgram { exe, vm_config } = {
         // We do this in a separate scope so the log initialization does not conflict with OpenVM's.
@@ -476,8 +481,8 @@ mod powdr {
     use powdr_autoprecompiles::{execution_profile::execution_profile, PgoType};
     use powdr_openvm::{
         compile_exe_with_elf, default_powdr_openvm_config, BabyBearOpenVmApcAdapter,
-        CompiledProgram, DegreeBound, OriginalCompiledProgram, PgoConfig,
-        PrecompileImplementation, Prog,
+        CompiledProgram, DegreeBound, OriginalCompiledProgram, PgoConfig, PrecompileImplementation,
+        Prog,
     };
 
     /// This function is used to generate the specialized program for the Powdr APC.
