@@ -52,11 +52,11 @@ revm-state = { git = "https://github.com/bluealloy/revm.git", branch = "release/
 revm-bytecode = { git = "https://github.com/bluealloy/revm.git", branch = "release/v75" }
 # k256 = { git = "https://github.com/openvm-org/openvm.git", tag = "v1.3.0" }
 # ruint = { git = "https://github.com/openvm-org/openvm.git", tag = "v1.3.0" }
-# k256 = { git = "https://github.com/powdr-labs/elliptic-curves-k256", tag = "k256/powdr/v0.13.4-2025.09.10", default-features = false, features = [
-#   "expose-field",
-#   "arithmetic",
-#   "ecdsa",
-# ] }
+k256 = { git = "https://github.com/powdr-labs/elliptic-curves-k256", tag = "k256/powdr/v0.13.4-2025.09.10", default-features = false, features = [
+  "expose-field",
+  "arithmetic",
+  "ecdsa",
+] }
 
 # sp1_bls12_381 = { path = "../../../bls12_381" }
 sp1_bls12_381 = { git = "https://github.com/leonardoalt/bls12_381", branch = "patch-0.8.0-sp1-5.0.0-soft" }

@@ -29,6 +29,8 @@ fi
 # new version
 export JEMALLOC_SYS_WITH_MALLOC_CONF="retain:true,background_thread:true,metadata_thp:always,dirty_decay_ms:10000,muzzy_decay_ms:10000,abort_conf:true"
 
+export POWDR_OPENVM_SEGMENT_DELTA=50000
+
 RUSTFLAGS=$RUSTFLAGS cargo build --bin openvm-reth-benchmark-bin --profile=$PROFILE --no-default-features --features=$FEATURES
 PARAMS_DIR="params"
 

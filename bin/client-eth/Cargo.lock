@@ -1807,13 +1807,14 @@ dependencies = [
 [[package]]
 name = "k256"
 version = "0.13.4"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "f6e3919bbaa2945715f0bb6d3934a173d1e9a59ac23767fbaaef277265a7411b"
+source = "git+https://github.com/powdr-labs/elliptic-curves-k256?tag=k256%2Fpowdr%2Fv0.13.4-2025.09.10#f9108e21acc842abd7d3744f410b8f0abc369e9f"
 dependencies = [
  "cfg-if",
  "ecdsa",
  "elliptic-curve",
  "once_cell",
+ "openvm",
+ "powdr-openvm-hints-guest",
  "serdect",
  "sha2",
  "signature",
@@ -2530,6 +2531,17 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "e5a7c30837279ca13e7c867e9e40053bc68740f988cb07f7ca6df43cc734b585"
 dependencies = [
  "zerovec",
+]
+
+[[package]]
+name = "powdr-openvm-hints-guest"
+version = "0.1.4"
+source = "git+https://github.com/powdr-labs/powdr.git?rev=b0d4178#b0d41784779ce74da3ab3fdbdb887021d44638b8"
+dependencies = [
+ "openvm-custom-insn",
+ "openvm-platform",
+ "openvm-rv32im-guest",
+ "strum_macros 0.27.1",
 ]
 
 [[package]]
