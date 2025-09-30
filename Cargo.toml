@@ -85,7 +85,10 @@ revm-primitives = { version = "19.0.0", features = [
 ], default-features = false }
 revm-inspectors = "0.23.0"
 revm-interpreter = { version = "20.0.0", default-features = false }
-revm-precompile = { version = "21.0.0", default-features = false }
+#revm-precompile = { version = "21.0.0", default-features = false }
+revm-precompile = { version = "21.0.0", default-features = false, features = [
+  "kzg-rs",
+] }
 
 # alloy
 alloy-consensus = { version = "1.0.9", default-features = false, features = [

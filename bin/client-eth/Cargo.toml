@@ -5,6 +5,8 @@ description = ""
 edition = "2021"
 
 [dependencies]
+getrandom = { version = "0.2", features = ["js"] }
+
 # workspace
 openvm-client-executor = { path = "../../crates/executor/client" }
 revm-precompile = { version = "21.0.0", default-features = false, features = [
@@ -12,9 +14,9 @@ revm-precompile = { version = "21.0.0", default-features = false, features = [
 ] }
 
 # openvm
-openvm = { git = "https://github.com/openvm-org/openvm.git", tag = "v1.3.0", features = [
-  "std",
-] }
+# openvm = { git = "https://github.com/openvm-org/openvm.git", tag = "v1.3.0", features = [
+#   "std",
+# ] }
 # openvm-keccak256-guest = { git = "https://github.com/openvm-org/openvm.git", tag = "v1.3.0" }
 # openvm-algebra-guest = { git = "https://github.com/openvm-org/openvm.git", tag = "v1.3.0" }
 # openvm-ecc-guest = { git = "https://github.com/openvm-org/openvm.git", tag = "v1.3.0" }
@@ -36,7 +38,7 @@ tracing = { version = "0.1", features = [
 # getrandom = "=0.3.3"
 
 [features]
-heap-embedded-alloc = ["openvm/heap-embedded-alloc"]
+# heap-embedded-alloc = ["openvm/heap-embedded-alloc"]
 
 [patch.crates-io]
 revm = { git = "https://github.com/bluealloy/revm.git", branch = "release/v75" }
@@ -49,11 +51,11 @@ revm-state = { git = "https://github.com/bluealloy/revm.git", branch = "release/
 revm-bytecode = { git = "https://github.com/bluealloy/revm.git", branch = "release/v75" }
 # k256 = { git = "https://github.com/openvm-org/openvm.git", tag = "v1.3.0" }
 # ruint = { git = "https://github.com/openvm-org/openvm.git", tag = "v1.3.0" }
-k256 = { git = "https://github.com/powdr-labs/elliptic-curves-k256", tag = "k256/powdr/v0.13.4-2025.08.22", default-features = false, features = [
-  "expose-field",
-  "arithmetic",
-  "ecdsa",
-] }
+# k256 = { git = "https://github.com/powdr-labs/elliptic-curves-k256", tag = "k256/powdr/v0.13.4-2025.08.22", default-features = false, features = [
+#   "expose-field",
+#   "arithmetic",
+#   "ecdsa",
+# ] }
 
 sp1_bls12_381 = { path = "../../../bls12_381" }
 

@@ -22,5 +22,5 @@ pub fn main() {
     let block_hash = header.hash_slow();
 
     // Reveal the block hash.
-    reveal_bytes32(*block_hash);
+    // reveal_bytes32(*block_hash);
 }
