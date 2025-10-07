@@ -1,5 +1,16 @@
 #!/bin/bash
+
+USE_CUDA=false
+if [ "$1" == "cuda" ]; then
+    USE_CUDA=true
+fi
+
 set -e
+
+mkdir -p rpc-cache
+source .env
+MODE=execute # can be execute-host, execute, execute-metered, prove-app, prove-stark, or prove-evm (needs "evm-verify" feature)
+
 cd bin/client-eth
 RUSTFLAGS="-Clink-arg=--emit-relocs" cargo openvm build --no-transpile
 mkdir -p ../host/elf
@@ -15,8 +26,24 @@ mkdir -p rpc-cache
 source .env
 # MODE=execute # can be compile, execute, tracegen, prove-app, prove-stark, or prove-evm
 PROFILE="release"
-FEATURES="bench-metrics,nightly-features,jemalloc"
-BLOCK_NUMBER=21882667
+FEATURES="metrics,jemalloc,tco,unprotected"
+BLOCK_NUMBER=23100006
+# switch to +nightly-2025-08-19 if using tco
+TOOLCHAIN="+nightly-2025-08-19" # "+stable"
+BIN_NAME="openvm-reth-benchmark-bin"
+MAX_SEGMENT_LENGTH=$((1 << 22))
+SEGMENT_MAX_CELLS=1200000000
+VPMM_PAGE_SIZE=$((4 << 20))
+VPMM_PAGES=$((12 * $MAX_SEGMENT_LENGTH/ $VPMM_PAGE_SIZE))
+
+if [ "$USE_CUDA" = "true" ]; then
+    FEATURES="$FEATURES,cuda"
+else
+    FEATURES="$FEATURES,nightly-features"
+fi
+if [ "$MODE" = "prove-evm" ]; then
+    FEATURES="$FEATURES,evm-verify"
+fi
 
 if grep -m1 -q 'avx512f' /proc/cpuinfo; then
   RUSTFLAGS="-Ctarget-cpu=native -C target-feature=+avx512f"
@@ -37,13 +64,20 @@ PARAMS_DIR="params"
 # Create apcs directory if it doesn't exist
 mkdir -p apcs
 
-POWDR_APC_CANDIDATES_DIR=apcs RUST_LOG="debug" OUTPUT_PATH="metrics.json" ./target/$PROFILE/openvm-reth-benchmark-bin \
-  --kzg-params-dir "$PARAMS_DIR" \
-  --mode "$MODE" \
-  --block-number "$BLOCK_NUMBER" \
-  --rpc-url "$RPC_1" \
-  --cache-dir "rpc-cache" \
-  --apc "$APC" \
-  --apc-skip "$APC_SKIP" \
-  --pgo-type "$PGO_TYPE"
-
+POWDR_APC_CANDIDATES_DIR=apcs RUST_LOG="info,p3_=warn" OUTPUT_PATH="metrics.json" VPMM_PAGES=$VPMM_PAGES VPMM_PAGE_SIZE=$VPMM_PAGE_SIZE ./target/$TARGET_DIR/$BIN_NAME \
+--kzg-params-dir $PARAMS_DIR \
+--mode $MODE \
+--block-number $BLOCK_NUMBER \
+--rpc-url $RPC_1 \
+--cache-dir rpc-cache \
+--app-log-blowup 1 \
+--leaf-log-blowup 1 \
+--internal-log-blowup 2 \
+--root-log-blowup 3 \
+--max-segment-length $MAX_SEGMENT_LENGTH \
+--segment-max-cells $SEGMENT_MAX_CELLS \
+--num-children-leaf 1 \
+--num-children-internal 3 \
+--apc "$APC" \
+--apc-skip "$APC_SKIP" \
+--pgo-type "$PGO_TYPE"

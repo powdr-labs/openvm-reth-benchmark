@@ -1,4 +1,5 @@
 name: "Compare Benchmarks"
+run-name: "Compare Benchmarks (block ${{ inputs.block_number || github.event.inputs.block_number }})"
 
 on:
   workflow_dispatch:
@@ -16,12 +17,18 @@ on:
         required: false
         description: Running mode
         options:
+          - execute-host
           - execute
-          - tracegen
+          - execute-metered
           - prove-app
           - prove-stark
           - prove-evm
-        default: prove-evm
+        default: prove-stark
+      block_number:
+        type: number
+        required: false
+        description: Block number to run the benchmark on
+        default: 23100006
       host_flamegraph:
         description: "Run target profiling benchmark for host flamegraph"
         type: boolean
@@ -36,7 +43,7 @@ on:
         description: "Instance family to use for benchmark"
         type: string
         required: false
-        default: m8g.24xlarge
+        default: g6e.8xlarge
 
 jobs:
   run-base-benchmark:
@@ -46,6 +53,7 @@ jobs:
       OPENVM_REV: ${{ github.event.inputs.base_rev }}
       run_benchmark: true
       benchmark_mode: ${{ github.event.inputs.benchmark_mode }}
+      benchmark_block_number: ${{ fromJSON(inputs.block_number || github.event.inputs.block_number || '23100006') }}
       instance_family: ${{ github.event.inputs.instance_family }}
     secrets: inherit
 
@@ -64,6 +72,7 @@ jobs:
     needs: patch-target
     with:
       mode: ${{ github.event.inputs.benchmark_mode }}
+      block_number: ${{ fromJSON(inputs.block_number || github.event.inputs.block_number || '23100006') }}
       instance_family: ${{ github.event.inputs.instance_family }}
       ref: ${{ needs.patch-target.outputs.branch_name }}
       tag: ${{ needs.patch-target.outputs.tag }}
@@ -77,6 +86,7 @@ jobs:
     needs: patch-target
     with:
       mode: ${{ github.event.inputs.benchmark_mode }}
+      block_number: ${{ fromJSON(inputs.block_number || github.event.inputs.block_number || '23100006') }}
       instance_family: ${{ github.event.inputs.instance_family }}
       ref: ${{ needs.patch-target.outputs.branch_name }}
       tag: ${{ needs.patch-target.outputs.tag }}
@@ -90,6 +100,7 @@ jobs:
     needs: patch-target
     with:
       mode: ${{ github.event.inputs.benchmark_mode }}
+      block_number: ${{ fromJSON(inputs.block_number || github.event.inputs.block_number || '23100006') }}
       instance_family: ${{ github.event.inputs.instance_family }}
       ref: ${{ needs.patch-target.outputs.branch_name }}
       tag: ${{ needs.patch-target.outputs.tag }}
@@ -138,3 +149,4 @@ jobs:
           echo "Target OpenVM Revision: ${{ github.event.inputs.target_rev }}" >> $GITHUB_STEP_SUMMARY
           echo "Instance Family: ${{ github.event.inputs.instance_family }}" >> $GITHUB_STEP_SUMMARY
           echo "Benchmark Mode: ${{ github.event.inputs.benchmark_mode }}" >> $GITHUB_STEP_SUMMARY
+          echo "Block Number: ${{ github.event.inputs.block_number }}" >> $GITHUB_STEP_SUMMARY

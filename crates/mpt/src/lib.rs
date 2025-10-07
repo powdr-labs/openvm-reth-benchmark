@@ -1,21 +1,23 @@
+<<<<<<< HEAD
 use eyre::Result;
 use mpt::{proofs_to_tries, transition_proofs_to_tries, MptNode};
 use reth_trie::{AccountProof, TrieAccount};
 use revm::primitives::{Address, HashMap, B256};
 use serde::{Deserialize, Serialize};
 use state::HashedPostState;
+=======
+mod trie;
+pub use trie::*;
+>>>>>>> d15946928217eeb3ccfb6d6718587840db12f28e
 
-/// Module containing MPT code adapted from `zeth`.
-pub mod mpt;
-pub mod state;
+mod state;
+pub use state::*;
 
-/// Ethereum state trie and account storage tries.
-#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
-pub struct EthereumState {
-    pub state_trie: MptNode,
-    pub storage_tries: StorageTries,
-}
+mod bump_bufmut;
+mod hp;
+mod node;
 
+<<<<<<< HEAD
 #[derive(Debug, Clone, PartialEq, Eq, Default, Serialize, Deserialize)]
 pub struct StorageTries(pub HashMap<B256, MptNode>);
 
@@ -82,3 +84,10 @@ impl EthereumState {
         self.state_trie.hash()
     }
 }
+=======
+#[cfg(feature = "host")]
+pub mod from_proof;
+
+#[cfg(test)]
+mod tests;
+>>>>>>> d15946928217eeb3ccfb6d6718587840db12f28e

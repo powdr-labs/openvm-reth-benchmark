@@ -4,6 +4,9 @@ git-fetch-with-cli = true
 [patch."https://github.com/openvm-org/stark-backend.git"]
 openvm-stark-backend = { git = "ssh://git@github.com/openvm-org/stark-backend.git", rev = "$STARK_BACKEND_REV" }
 openvm-stark-sdk = { git = "ssh://git@github.com/openvm-org/stark-backend.git", rev = "$STARK_BACKEND_REV" }
+openvm-cuda-builder = { git = "ssh://git@github.com/openvm-org/stark-backend.git", rev = "$STARK_BACKEND_REV" }
+openvm-cuda-common = { git = "ssh://git@github.com/openvm-org/stark-backend.git", rev = "$STARK_BACKEND_REV" }
+openvm-cuda-backend = { git = "ssh://git@github.com/openvm-org/stark-backend.git", rev = "$STARK_BACKEND_REV" }
 
 [patch."https://github.com/openvm-org/openvm.git"]
 openvm-benchmarks-prove = { git = "ssh://git@github.com/openvm-org/openvm.git", rev = "$OPENVM_REV" }
@@ -49,6 +52,14 @@ openvm-rv32-adapters = { git = "ssh://git@github.com/openvm-org/openvm.git", rev
 openvm-rv32im-circuit = { git = "ssh://git@github.com/openvm-org/openvm.git", rev = "$OPENVM_REV" }
 openvm-rv32im-transpiler = { git = "ssh://git@github.com/openvm-org/openvm.git", rev = "$OPENVM_REV" }
 openvm-rv32im-guest = { git = "ssh://git@github.com/openvm-org/openvm.git", rev = "$OPENVM_REV" }
+
+# Guest Libs
+k256 = { git = "ssh://git@github.com/openvm-org/openvm.git", rev = "$OPENVM_REV" }
+p256 = { git = "ssh://git@github.com/openvm-org/openvm.git", rev = "$OPENVM_REV" }
+ruint = { git = "ssh://git@github.com/openvm-org/openvm.git", rev = "$OPENVM_REV" }
+openvm-keccak256 = { git = "ssh://git@github.com/openvm-org/openvm.git", rev = "$OPENVM_REV" }
+openvm-sha2 = { git = "ssh://git@github.com/openvm-org/openvm.git", rev = "$OPENVM_REV" }
+openvm-pairing = { git = "ssh://git@github.com/openvm-org/openvm.git", rev = "$OPENVM_REV" }
 
 # OpenVM
 # Extensions

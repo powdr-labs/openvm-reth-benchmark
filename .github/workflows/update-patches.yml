@@ -28,17 +28,17 @@ on:
         description: "Benchmark mode (if running benchmark)"
         type: string
         required: false
-        default: prove-evm
+        default: prove-stark
       instance_family:
         description: "Instance family to use for benchmark"
         type: string
         required: false
-        default: m8g.24xlarge
+        default: g6e.8xlarge
       benchmark_block_number:
         description: "Block number to run the benchmark on"
         type: number
         required: false
-        default: 21000000
+        default: 23100006
   schedule:
     - cron: "0 */12 * * *" # Run every 12 hours
   workflow_call:
@@ -70,7 +70,7 @@ on:
         type: string
         required: false
         description: "Benchmark mode (if running benchmark)"
-        default: prove-evm
+        default: prove-stark
       instance_family:
         type: string
         required: false
@@ -80,7 +80,7 @@ on:
         type: number
         required: false
         description: "Block number to run the benchmark on"
-        default: 21000000
+        default: 23100006
       # https://github.com/actions/runner/discussions/1884
       manual_call:
         description: "To distinguish workflow_call from workflow_dispatch"
@@ -120,7 +120,7 @@ jobs:
         env:
           OPENVM_REV: "${{ inputs.OPENVM_REV || github.event.inputs.OPENVM_REV }}"
         run: |
-          echo "result=${OPENVM_REV:-$(git ls-remote https://github.com/powdr-labs/openvm.git refs/heads/main | cut -f1)}" >> "$GITHUB_OUTPUT"
+          echo "result=${OPENVM_REV:-$(git ls-remote https://github.com/powdr-labs/openvm.git HEAD | cut -f1)}" >> "$GITHUB_OUTPUT"
 
       - name: Check out openvm repository
         uses: actions/checkout@v4
@@ -151,6 +151,17 @@ jobs:
           sed "s|\$STARK_BACKEND_REV|${STARK_BACKEND_REV}|g" .cargo/config.template.toml > .cargo/config.tmp.toml
           sed "s|\$OPENVM_REV|${OPENVM_REV}|g" .cargo/config.tmp.toml > .cargo/config.toml
           rm .cargo/config.tmp.toml
+
+          # Update bin/client-eth/Cargo.toml patches
+          cd bin/client-eth
+          # Create a temporary file with the replacements
+          sed -e "/^\[patch\.crates-io\]/,/^\[/ {
+            s|^k256 = { git = \"https://github.com/powdr-labs/openvm.git\", branch = \"main\" }$|k256 = { git = \"ssh://git@github.com/powdr-labs/openvm.git\", rev = \"${OPENVM_REV}\" }|
+            s|^p256 = { git = \"https://github.com/powdr-labs/openvm.git\", branch = \"main\" }$|p256 = { git = \"ssh://git@github.com/powdr-labs/openvm.git\", rev = \"${OPENVM_REV}\" }|
+            s|^ruint = { git = \"https://github.com/powdr-labs/openvm.git\", branch = \"main\" }$|ruint = { git = \"ssh://git@github.com/powdr-labs/openvm.git\", rev = \"${OPENVM_REV}\" }|
+          }" Cargo.toml > Cargo.toml.tmp
+          mv Cargo.toml.tmp Cargo.toml
+          cd ../..
 
       - name: Load SSH key
         uses: webfactory/ssh-agent@v0.9.0
@@ -194,8 +205,9 @@ jobs:
 
           git add -f .cargo/config.toml
           git add -f Cargo.lock
+          git add -f bin/client-eth/Cargo.toml
           git add -f bin/client-eth/Cargo.lock
-          git commit -m "Patch openvm commits in .cargo/config.toml"
+          git commit -m "Patch openvm commits in .cargo/config.toml and bin/client-eth/Cargo.toml"
           git push -f origin "$BRANCH_NAME"
           echo "branch_name=$BRANCH_NAME" >> $GITHUB_OUTPUT
           echo "${{ github.event_name }}"
@@ -218,11 +230,11 @@ jobs:
     if: ${{ github.event.inputs.run_benchmark == 'true' || inputs.run_benchmark || github.event_name == 'schedule' }}
     uses: ./.github/workflows/reth-benchmark.yml
     with:
-      mode: ${{ inputs.benchmark_mode || github.event.inputs.benchmark_mode || 'prove-evm' }}
-      instance_family: ${{ inputs.instance_family || github.event.inputs.instance_family || 'm8g.24xlarge' }}
+      mode: ${{ inputs.benchmark_mode || github.event.inputs.benchmark_mode || 'prove-stark' }}
+      instance_family: ${{ inputs.instance_family || github.event.inputs.instance_family || 'g6e.8xlarge' }}
       ref: ${{ needs.patch.outputs.branch_name }}
       tag: ${{ needs.patch.outputs.tag }}
-      block_number: ${{ fromJSON(inputs.benchmark_block_number || github.event.inputs.benchmark_block_number || '21000000') }}
+      block_number: ${{ fromJSON(inputs.benchmark_block_number || github.event.inputs.benchmark_block_number || '23100006') }}
       profiling: none
     secrets: inherit
 
@@ -231,11 +243,11 @@ jobs:
     if: ${{ github.event.inputs.host_flamegraph == 'true' || inputs.host_flamegraph || github.event_name == 'schedule' }}
     uses: ./.github/workflows/reth-benchmark.yml
     with:
-      mode: ${{ inputs.benchmark_mode || github.event.inputs.benchmark_mode || 'prove-evm' }}
+      mode: ${{ inputs.benchmark_mode || github.event.inputs.benchmark_mode || 'prove-stark' }}
       instance_family: ${{ inputs.instance_family || github.event.inputs.instance_family || 'm8g.24xlarge' }}
       ref: ${{ needs.patch.outputs.branch_name }}
       tag: ${{ needs.patch.outputs.tag }}
-      block_number: ${{ fromJSON(inputs.benchmark_block_number || github.event.inputs.benchmark_block_number || '21000000') }}
+      block_number: ${{ fromJSON(inputs.benchmark_block_number || github.event.inputs.benchmark_block_number || '23100006') }}
       profiling: host
     secrets: inherit
 
@@ -244,11 +256,11 @@ jobs:
     if: ${{ github.event.inputs.guest_flamegraph == 'true' || inputs.guest_flamegraph || github.event_name == 'schedule' }}
     uses: ./.github/workflows/reth-benchmark.yml
     with:
-      mode: ${{ inputs.benchmark_mode || github.event.inputs.benchmark_mode || 'prove-evm' }}
+      mode: ${{ inputs.benchmark_mode || github.event.inputs.benchmark_mode || 'prove-stark' }}
       instance_family: ${{ inputs.instance_family || github.event.inputs.instance_family || 'm8g.24xlarge' }}
       ref: ${{ needs.patch.outputs.branch_name }}
       tag: ${{ needs.patch.outputs.tag }}
-      block_number: ${{ fromJSON(inputs.benchmark_block_number || github.event.inputs.benchmark_block_number || '21000000') }}
+      block_number: ${{ fromJSON(inputs.benchmark_block_number || github.event.inputs.benchmark_block_number || '23100006') }}
       profiling: guest
     secrets: inherit
 

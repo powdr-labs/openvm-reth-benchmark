@@ -25,3 +25,15 @@ elf
 
 # Metrics
 metrics.json
+
+# Local mpt benchmark data
+[0-9]*.bin
+
+# Dhat heap profile
+**/dhat-heap.json
+
+# Python cache
+**/__pycache__
+
+## Samply profiles
+**/profile.json*

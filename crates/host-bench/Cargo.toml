@@ -7,7 +7,6 @@ edition = "2021"
 path = "src/lib.rs"
 
 [dependencies]
-tokio.workspace = true
 eyre.workspace = true
 url.workspace = true
 tracing-subscriber = "0.3.18"
@@ -16,6 +15,7 @@ dotenv = "0.15.0"
 clap = { version = "4.5.7", features = ["derive", "env"] }
 serde.workspace = true
 bincode = { workspace = true, features = ["std"] }
+bitcode.workspace = true
 metrics = "0.23.0"
 hex = "0.4.3"
 serde_json.workspace = true
@@ -43,15 +43,17 @@ openvm-bigint-circuit = { workspace = true }
 openvm-ecc-circuit = { workspace = true }
 openvm-pairing-circuit = { workspace = true }
 openvm-circuit = { workspace = true }
-openvm-native-recursion = { workspace = true, features = ["static-verifier"] }
+openvm-native-circuit = { workspace = true }
+openvm-native-recursion = { workspace = true }
+openvm-native-compiler = { workspace = true }
 openvm-benchmarks-prove = { workspace = true, features = ["parallel"] }
 openvm-stark-sdk = { workspace = true }
 openvm-sdk = { workspace = true }
-openvm-native-compiler = { workspace = true }
-derive_more = "1.0.0"
+derive_more.workspace = true
+toml.workspace = true
 
 # halo2
-halo2-axiom = { version = "0.5.0", default-features = false }
+halo2-axiom = { version = "0.5.0", default-features = false, optional = true }
 
 # powdr
 powdr-openvm = { workspace = true }
@@ -60,13 +62,19 @@ powdr-number = { workspace = true }
 powdr-autoprecompiles = { workspace = true }
 
 [features]
-default = ["mimalloc", "bench-metrics", "evm-verify"]
-bench-metrics = ["openvm-benchmarks-prove/bench-metrics"]
-evm-prove = ["openvm-sdk/evm-prove"]
-evm-verify = ["evm-prove", "openvm-sdk/evm-verify"]
-profiling = ["openvm-sdk/profiling", "openvm-benchmarks-prove/profiling"]
+default = ["mimalloc", "metrics"]
+metrics = ["openvm-benchmarks-prove/metrics"]
+tco = ["openvm-sdk/tco"]
+evm-prove = ["openvm-sdk/evm-prove", "halo2-axiom"]
+evm-verify = ["evm-prove", "openvm-sdk/evm-verify", "halo2-axiom"]
+perf-metrics = ["openvm-sdk/perf-metrics", "openvm-benchmarks-prove/perf-metrics"]
 mimalloc = ["openvm-benchmarks-prove/mimalloc"]
 jemalloc = ["openvm-benchmarks-prove/jemalloc"]
 nightly-features = ["openvm-benchmarks-prove/nightly-features"]
 # x86 only:
-halo2-asm = ["halo2-axiom/asm"]
+halo2-asm = ["halo2-axiom?/asm"]
+cuda = [
+    "openvm-native-circuit/cuda",
+    "openvm-sdk/cuda",
+]
+unprotected = ["openvm-sdk/unprotected"]

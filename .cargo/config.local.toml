@@ -5,6 +5,9 @@ git-fetch-with-cli = true
 [patch."https://github.com/openvm-org/stark-backend.git"]
 openvm-stark-backend = { path = "../openvm-org/stark-backend/crates/stark-backend" }
 openvm-stark-sdk = { path = "../openvm-org/stark-backend/crates/stark-sdk" }
+openvm-cuda-builder = { path = "../openvm-org/stark-backend/crates/cuda-builder" }
+openvm-cuda-common = { path = "../openvm-org/stark-backend/crates/cuda-common" }
+openvm-cuda-backend = { path = "../openvm-org/stark-backend/crates/cuda-backend " }
 
 [patch."https://github.com/openvm-org/openvm.git"]
 openvm-benchmarks-prove = { path = "../openvm-org/openvm/benchmarks/prove" }
@@ -64,10 +67,11 @@ openvm-keccak256 = { path = "../openvm-org/openvm/guest-libs/keccak256" }
 openvm-sha2 = { path = "../openvm-org/openvm/guest-libs/sha2" }
 openvm-pairing = { path = "../openvm-org/openvm/guest-libs/pairing" }
 
-[patch.crates-io]
-k256 = { path = "../openvm-org/openvm/guest-libs/k256" }
-p256 = { path = "../openvm-org/openvm/guest-libs/p256" }
-ruint = { path = "../openvm-org/openvm/guest-libs/ruint" }
+# NOTE: do not patch k256 for host as it causes some issues
+# [patch.crates-io]
+# k256 = { path = "../openvm-org/openvm/guest-libs/k256" }
+# p256 = { path = "../openvm-org/openvm/guest-libs/p256" }
+# ruint = { path = "../openvm-org/openvm/guest-libs/ruint" }
 # revm = { path = "../revm/crates/revm" }
 # revm-primitives = { path = "../revm/crates/primitives" }
 # revm-interpreter = { path = "../revm/crates/interpreter" }

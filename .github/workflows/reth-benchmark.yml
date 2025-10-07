@@ -12,12 +12,12 @@ on:
         type: string
         required: false
         description: The family of the instance, can be multiple ones concat with "+" e.g. r8g+r7g
-        default: m8g.24xlarge
+        default: g6e.8xlarge
       block_number:
         type: number
         required: false
         description: Block number to run the benchmark on
-        default: 21000000
+        default: 23100006
       app_log_blowup:
         type: number
         required: false
@@ -43,12 +43,14 @@ on:
         required: false
         description: Running mode
         options:
+          - execute-host
           - execute
-          - tracegen
+          - execute-metered
           - prove-app
           - prove-stark
           - prove-evm
-        default: prove-evm
+          - generate-fixtures
+        default: prove-stark
       profiling:
         type: choice
         required: false
@@ -57,17 +59,18 @@ on:
           - none
           - host # host profiling (samply, flamegraphs, etc)
           - guest # guest profiling (circuit flamegraphs)
+          - nsys # nsys profiling (cuda)
         default: none
       max_segment_length:
         type: number
         required: false
-        description: Max segment length for continuations, must be larger than 524288
-        default: 8388508 # 2**23 - 100
+        description: Max segment length for continuations
+        default: 4194304 # 2^22, but the main criteria should be segment_max_cells
       segment_max_cells:
-        type: string # number might have u32 limit
+        type: string
         required: false
         description: Total main trace cells (excluding memory)
-        default: "1200000000" # 1.2B
+        default: "1200000000"
       # num_children_leaf:
       #   type: number
       #   required: false
@@ -88,7 +91,7 @@ on:
         type: string
         required: false
         description: The family of the instance, can be multiple ones concat with "+" e.g. r8g+r7g
-        default: m8g.24xlarge
+        default: g6e.8xlarge
       memory_allocator:
         type: string
         required: false
@@ -98,7 +101,7 @@ on:
         type: number
         required: false
         description: Block number to run the benchmark on
-        default: 21000000
+        default: 23100006
       app_log_blowup:
         type: number
         required: false
@@ -122,23 +125,23 @@ on:
       mode:
         type: string
         required: false
-        description: Running mode, one of {execute, tracegen, prove-app, prove-stark, prove-evm}
-        default: prove-evm
+        description: Running mode, one of {execute, execute-metered, prove-app, prove-stark, prove-evm}
+        default: prove-stark
       profiling:
         type: string
         required: false
-        description: Profiling mode (none, host, guest)
+        description: Profiling mode (none, host, guest, nsys)
         default: none
       max_segment_length:
         type: number
         required: false
-        description: Max segment length for continuations, must be larger than 524288
-        default: 8388508
+        description: Max segment length for continuations
+        default: 4194304 # 2^22, but the main criteria should be segment_max_cells
       segment_max_cells:
         type: string
         required: false
         description: Total main trace cells (excluding memory)
-        default: "1200000000" # 1.2B
+        default: "1200000000"
       num_children_leaf:
         type: number
         required: false
@@ -167,6 +170,7 @@ on:
 
 env:
   S3_PATH: s3://axiom-public-data-sandbox-us-east-1/benchmark/github/results
+  S3_FIXTURE_PATH: s3://axiom-public-data-sandbox-us-east-1/benchmark/github/fixtures
   S3_METRICS_PATH: s3://axiom-public-data-sandbox-us-east-1/benchmark/github/metrics
   S3_FLAMEGRAPHS_PATH: s3://axiom-public-data-sandbox-us-east-1/benchmark/github/flamegraphs
   S3_FLAMEGRAPHS_URL: https://axiom-public-data-sandbox-us-east-1.s3.us-east-1.amazonaws.com/benchmark/github/flamegraphs
@@ -186,18 +190,28 @@ jobs:
       - disk=large
       - tag=bench-reth-${{ github.run_id }}-${{ github.run_number }}-${{ github.run_attempt }}
       - extras=s3-cache
-      - image=${{ contains(inputs.instance_family || github.event.inputs.instance_family, 'g.') && 'ubuntu22-full-arm64' || 'ubuntu22-full-x64' }}
+      - image=${{ startsWith(github.event.inputs.instance_family || inputs.instance_family, 'g') && 'ubuntu24-gpu-x64' || contains(github.event.inputs.instance_family || inputs.instance_family, 'g.') && 'ubuntu24-full-arm64' || 'ubuntu24-full-x64' }}
     outputs:
       metric_name: ${{ steps.set-metric-name.outputs.name }}
     steps:
-      - uses: runs-on/action@v1
-      - uses: actions/checkout@v4
+      - uses: runs-on/action@v2
+      - uses: actions/checkout@v5
         with:
           ref: ${{ inputs.ref || github.head_ref || github.ref }}
       - uses: dtolnay/rust-toolchain@nightly
       - uses: Swatinem/rust-cache@v2
         with:
           cache-on-failure: true
+
+      - name: Add workflow inputs to summary
+        run: |
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### Workflow Inputs" >> $GITHUB_STEP_SUMMARY
+          echo '```json' >> $GITHUB_STEP_SUMMARY
+          echo '${{ toJSON(inputs || github.event.inputs) }}' >> $GITHUB_STEP_SUMMARY
+          echo '```' >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+
       - name: Display workflow inputs
         run: |
           if [[ "${{ inputs.manual_call }}" == "true" ]]; then
@@ -205,8 +219,10 @@ jobs:
           else
             echo "${{ toJSON(github.event.inputs) }}"
           fi
+
       - name: Get current commit hash
         run: echo "current_sha=$(git rev-parse HEAD)" >> $GITHUB_ENV
+
       - name: Set metric name
         id: set-metric-name
         run: |
@@ -237,9 +253,19 @@ jobs:
       - name: Set build args
         id: set-build-args
         run: |
-          FEATURES="bench-metrics,evm-verify,nightly-features,${{ inputs.memory_allocator || github.event.inputs.memory_allocator || 'jemalloc' }}"
+          FEATURES="metrics,tco,unprotected,${{ inputs.memory_allocator || github.event.inputs.memory_allocator || 'jemalloc' }}"
           if [[ "${{ inputs.profiling || github.event.inputs.profiling }}" == "guest" ]]; then
-            FEATURES="${FEATURES},profiling"
+            FEATURES="${FEATURES},perf-metrics"
+          fi
+          if [[ ! "${{ inputs.instance_family || github.event.inputs.instance_family }}" =~ ^g ]]; then
+            FEATURES="${FEATURES},nightly-features"
+            JEMALLOC_SYS_WITH_MALLOC_CONF="retain:true,background_thread:true,metadata_thp:always,thp:always,dirty_decay_ms:-1,muzzy_decay_ms:-1,abort_conf:true"
+          else
+            FEATURES="${FEATURES},cuda"
+            JEMALLOC_SYS_WITH_MALLOC_CONF="retain:true,background_thread:true,metadata_thp:always,thp:always,dirty_decay_ms:10000,muzzy_decay_ms:10000,abort_conf:true"
+          fi
+          if [[ "${{ inputs.mode || github.event.inputs.mode }}" == "prove-evm" ]]; then
+            FEATURES="${FEATURES},evm-verify"
           fi
           arch=$(uname -m)
           case $arch in
@@ -247,7 +273,7 @@ jobs:
               RUSTFLAGS="-Ctarget-cpu=native"
               ;;
             x86_64|amd64)
-              RUSTFLAGS="-Ctarget-cpu=native -C target-feature=+avx512f"
+              RUSTFLAGS="-Ctarget-cpu=native"
               FEATURES="${FEATURES},halo2-asm"
               ;;
             *)
@@ -258,7 +284,6 @@ jobs:
           if [[ "${{ inputs.profiling || github.event.inputs.profiling }}" == "host" ]]; then
             RUSTFLAGS="${RUSTFLAGS} -C force-frame-pointers=yes"
           fi
-          JEMALLOC_SYS_WITH_MALLOC_CONF="retain:true,background_thread:true,metadata_thp:always,thp:always,dirty_decay_ms:-1,muzzy_decay_ms:-1,abort_conf:true"
           echo "RUSTFLAGS=${RUSTFLAGS}" >> $GITHUB_ENV
           echo "JEMALLOC_SYS_WITH_MALLOC_CONF=${JEMALLOC_SYS_WITH_MALLOC_CONF}" >> $GITHUB_ENV
           echo "FEATURES=${FEATURES}" >> $GITHUB_ENV
@@ -283,12 +308,19 @@ jobs:
           ssh-private-key: |
             ${{ secrets.GH_ACTIONS_DEPLOY_PRIVATE_KEY }}
 
+      - name: Get openvm REV
+        id: get-openvm-rev
+        run: |
+          RESULT=$(cargo metadata --format-version=1 | jq -r '.packages[] | select(.name=="openvm-sdk") | .source | split("#") | .[1]')
+          echo "result=${RESULT}" >> "$GITHUB_OUTPUT"
+
       - name: Install openvm-prof
         run: |
-          cargo install --git https://github.com/powdr-labs/openvm.git --rev 33abb41 --profile=dev --force openvm-prof
+          cargo install --git https://github.com/powdr-labs/openvm.git --rev ${{ steps.get-openvm-rev.outputs.result }} --profile=dev --force openvm-prof
+
       - name: Checkout openvm (for scripts)
         run: |
-          git clone --depth=1 https://github.com/powdr-labs/openvm.git
+          git clone --rev ${{ steps.get-openvm-rev.outputs.result }} --depth=1 https://github.com/powdr-labs/openvm.git
 
       - name: Install architecture specific tools
         run: |
@@ -297,12 +329,30 @@ jobs:
           install_s5cmd
           sudo apt update
           sudo apt install gnuplot
+          sudo apt install -y linux-tools-common linux-tools-generic linux-tools-$(uname -r) || \
+            sudo apt install -y linux-tools-aws linux-cloud-tools-aws || true
+
+          # Workaround for https://bugs.launchpad.net/ubuntu/+source/linux-hwe-6.14/+bug/2117159
+          if ! command -v perf &> /dev/null || ! perf --version &> /dev/null; then
+            echo "Applying workaround for missing perf in HWE 6.14 packages..."
+            # Find available perf binary
+            PERF_PATH=$(find /usr/lib/linux-tools* -name perf -executable 2>/dev/null | head -n1)
+            if [ -n "$PERF_PATH" ]; then
+              KERNEL_VERSION=$(uname -r)
+              TARGET_DIR="/usr/lib/linux-tools/${KERNEL_VERSION}"
+              sudo mkdir -p "$TARGET_DIR"
+              sudo ln -sf "$PERF_PATH" "$TARGET_DIR/perf"
+              echo "Symlinked $PERF_PATH to $TARGET_DIR/perf"
+            else
+              echo "Warning: Could not find any perf binary to symlink"
+            fi
+          fi
 
       - name: Setup halo2
         if: ${{ (github.event.inputs.mode == 'prove-evm') || (inputs.mode == 'prove-evm') }}
         run: |
           bash openvm/extensions/native/recursion/trusted_setup_s3.sh
-          PARAMS_DIR=$(pwd)/params
+          PARAMS_DIR="$HOME/.openvm/params/"
           echo "PARAMS_DIR=$PARAMS_DIR" >> $GITHUB_ENV
           OPTIONAL_ARGS="--kzg-params-dir $PARAMS_DIR --halo2-outer-k 22"
           echo "OPTIONAL_ARGS=${OPTIONAL_ARGS}" >> $GITHUB_ENV
@@ -314,10 +364,24 @@ jobs:
           path: bin/host/elf/openvm-client-eth
           key: ${{ steps.set-cache-keys.outputs.elf_cache_key }}
 
+      - name: Restore cargo-openvm from cache
+        id: cache-cargo-openvm-restore
+        uses: runs-on/cache/restore@v4
+        with:
+          path: ~/.cargo/bin/cargo-openvm
+          key: cargo-openvm-${{ steps.get-openvm-rev.outputs.result }}-${{ runner.os }}-${{ runner.arch }}
+
       - name: Install cargo-openvm
-        if: steps.cache-guest-elf-restore.outputs.cache-hit != 'true'
+        if: steps.cache-guest-elf-restore.outputs.cache-hit != 'true' && steps.cache-cargo-openvm-restore.outputs.cache-hit != 'true'
         run: |
-          cargo install --git https://github.com/powdr-labs/openvm.git --rev 33abb41 --locked --force cargo-openvm
+          cargo install --git https://github.com/powdr-labs/openvm.git --rev ${{ steps.get-openvm-rev.outputs.result }} --locked --force cargo-openvm
+
+      - name: Save cargo-openvm to cache
+        if: steps.cache-guest-elf-restore.outputs.cache-hit != 'true' && steps.cache-cargo-openvm-restore.outputs.cache-hit != 'true'
+        uses: runs-on/cache/save@v4
+        with:
+          path: ~/.cargo/bin/cargo-openvm
+          key: ${{ steps.cache-cargo-openvm-restore.outputs.cache-primary-key }}
       - name: Build Guest ELF
         if: steps.cache-guest-elf-restore.outputs.cache-hit != 'true'
         working-directory: bin/client-eth
@@ -346,7 +410,8 @@ jobs:
         run: |
           export JEMALLOC_SYS_WITH_MALLOC_CONF=${JEMALLOC_SYS_WITH_MALLOC_CONF}
           HOST_PROFILE=${{ steps.set-build-profiles.outputs.host_profile }}
-          RUSTFLAGS=$RUSTFLAGS cargo build --bin openvm-reth-benchmark-bin --profile=$HOST_PROFILE --no-default-features --features=$FEATURES
+          TOOLCHAIN="+nightly-2025-08-19"
+          RUSTFLAGS=$RUSTFLAGS cargo $TOOLCHAIN build --bin openvm-reth-benchmark-bin --profile=$HOST_PROFILE --no-default-features --features=$FEATURES
 
       - name: Save Host Binary to cache
         if: steps.cache-host-binary-restore.outputs.cache-hit != 'true'
@@ -359,14 +424,24 @@ jobs:
         run: |
           mkdir -p rpc-cache
           mkdir -p .bench_metrics
+          mkdir -p fixtures
           RPC_1=${{ secrets.RPC_URL_1 }}
           MODE=${{ inputs.mode || github.event.inputs.mode }}
           BLOCK_NUMBER=${{ inputs.block_number || github.event.inputs.block_number }}
+          echo "BLOCK_NUMBER=${BLOCK_NUMBER}" >> $GITHUB_ENV
+          APP_LOG_BLOWUP=${{ inputs.app_log_blowup || github.event.inputs.app_log_blowup }}
+          LEAF_LOG_BLOWUP=${{ inputs.leaf_log_blowup || github.event.inputs.leaf_log_blowup }}
+          echo "APP_LOG_BLOWUP=${APP_LOG_BLOWUP}" >> $GITHUB_ENV
+          echo "LEAF_LOG_BLOWUP=${LEAF_LOG_BLOWUP}" >> $GITHUB_ENV
           HOST_PROFILE=${{ steps.set-build-profiles.outputs.host_profile }}
           if [[ "${{ inputs.profiling || github.event.inputs.profiling }}" == "guest" ]]; then
             OPTIONAL_ARGS="${OPTIONAL_ARGS} --profiling"
           fi
+          if [[ "${{ inputs.mode || github.event.inputs.mode }}" == "generate-fixtures" ]]; then
+            FIXTURES_PATH="--fixtures-path ./fixtures/"
+          fi
           cat > run_benchmark.sh <<EOF
+          #!/bin/bash
           ./target/$HOST_PROFILE/openvm-reth-benchmark-bin \
             --mode $MODE --block-number $BLOCK_NUMBER --rpc-url $RPC_1 --cache-dir rpc-cache \
             --app-log-blowup ${{ inputs.app_log_blowup || github.event.inputs.app_log_blowup }} \
@@ -377,12 +452,17 @@ jobs:
             --segment-max-cells ${{ inputs.segment_max_cells || github.event.inputs.segment_max_cells }} \
             --num-children-leaf ${{ inputs.num_children_leaf || github.event.inputs.num_children_leaf || 1 }} \
             --num-children-internal ${{ inputs.num_children_internal || github.event.inputs.num_children_internal }} \
-            $OPTIONAL_ARGS
+            $OPTIONAL_ARGS $FIXTURES_PATH
           EOF
           chmod +x run_benchmark.sh
 
       - name: Run benchmark
         run: |
+          VPMM_PAGE_SIZE=$((4<<20))
+          MAX_SEGMENT_LENGTH=${{ inputs.max_segment_length || github.event.inputs.max_segment_length }}
+          VPMM_PAGES=$((12 * $MAX_SEGMENT_LENGTH/ $VPMM_PAGE_SIZE))
+          export VPMM_PAGES=$VPMM_PAGES
+          export VPMM_PAGE_SIZE=$VPMM_PAGE_SIZE
           export JEMALLOC_SYS_WITH_MALLOC_CONF=${JEMALLOC_SYS_WITH_MALLOC_CONF}
           export RUST_LOG="info,p3_=warn"
           export OUTPUT_PATH=${METRIC_PATH}/metrics.json
@@ -394,8 +474,23 @@ jobs:
             echo -1 | sudo tee /proc/sys/kernel/perf_event_paranoid
             echo 0 | sudo tee /proc/sys/kernel/kptr_restrict
 
+            # Set sampling frequency based on mode
+            MODE="${{ inputs.mode || github.event.inputs.mode }}"
+            if [[ "$MODE" == "execute-host" || "$MODE" == "execute" || "$MODE" == "execute-metered" ]]; then
+              PERF_FREQ=4000
+            else
+              PERF_FREQ=100
+            fi
+
             perf --version
-            perf record -F 100 --call-graph=fp -g -o perf.data -- ./run_benchmark.sh
+            perf record -F $PERF_FREQ --call-graph=fp -g -o perf.data -- ./run_benchmark.sh
+          elif [[ "${{ inputs.profiling || github.event.inputs.profiling }}" == "nsys" ]]; then
+            nsys profile --trace=cuda,osrt,nvtx \
+             --cuda-memory-usage=true \
+             --force-overwrite=true \
+             --stats=true \
+             -o reth.nsys-rep \
+             ./run_benchmark.sh
           else
             ./ci/monitor_memory.sh ./run_benchmark.sh
             echo "MEM_USAGE_PATH=memory_usage.png" >> $GITHUB_ENV
@@ -408,12 +503,21 @@ jobs:
           name: ${{ steps.set-metric-name.outputs.name }}
           path: ${{ env.METRIC_PATH }}
           retention-days: 1
+
       - name: Upload memory usage graph
         if: ${{ (inputs.profiling || github.event.inputs.profiling) == 'none' }}
         uses: actions/upload-artifact@v4
         with:
           name: ${{ steps.set-metric-name.outputs.name }}-memory-usage
           path: ${{ env.MEM_USAGE_PATH }}
+          retention-days: 1
+
+      - name: Upload nsys report
+        if: ${{ (inputs.profiling || github.event.inputs.profiling) == 'nsys' }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ steps.set-metric-name.outputs.name }}-nsys-report
+          path: ./reth.nsys-rep
           retention-days: 1
 
       - name: Upload Benchmark Metrics
@@ -473,26 +577,6 @@ jobs:
           echo "</details>" >> $MD_PATH
           echo "" >> $MD_PATH
 
-      - name: Add benchmark metadata to markdown
-        run: |
-          COMMIT_URL=https://github.com/${{ github.repository }}/commit/${current_sha}
-          BENCHMARK_WORKFLOW_URL=https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}
-
-          source openvm/ci/scripts/utils.sh
-
-          add_metadata $MD_PATH \
-            ${{ inputs.max_segment_length || github.event.inputs.max_segment_length }} \
-            ${{ inputs.instance_family || github.event.inputs.instance_family }} \
-            ${{ inputs.memory_allocator || github.event.inputs.memory_allocator }} \
-            $COMMIT_URL \
-            $BENCHMARK_WORKFLOW_URL
-
-      - name: Upload markdown
-        run: |
-          S3_MD_PATH="${{ env.S3_PATH }}/${METRIC_NAME}.md"
-          s5cmd cp $MD_PATH $S3_MD_PATH
-          echo "S3_MD_PATH=${S3_MD_PATH}" >> $GITHUB_ENV
-
       - name: Generate samply profile artifacts
         if: ${{ inputs.profiling == 'host' || github.event.inputs.profiling == 'host' }}
         run: |
@@ -501,11 +585,22 @@ jobs:
           mkdir -p samply_profile
           SAMPLY_PROFILE_PATH=samply_profile
 
-          samply import perf.data --unstable-presymbolicate --save-only --output $SAMPLY_PROFILE_PATH/profile.json
+          samply import perf.data --presymbolicate --save-only --output $SAMPLY_PROFILE_PATH/profile.json.gz
           echo "SAMPLY_PROFILE_PATH=${SAMPLY_PROFILE_PATH}" >> $GITHUB_ENV
 
-          s5cmd cp $SAMPLY_PROFILE_PATH/profile.json ${{ env.S3_SAMPLY_PROFILE_PATH }}/${METRIC_NAME}/profile.json
-          s5cmd cp $SAMPLY_PROFILE_PATH/profile.syms.json ${{ env.S3_SAMPLY_PROFILE_PATH }}/${METRIC_NAME}/profile.syms.json
+          s5cmd cp $SAMPLY_PROFILE_PATH/profile.json.gz ${{ env.S3_SAMPLY_PROFILE_PATH }}/${METRIC_NAME}/profile.json.gz
+
+          MODE=${{ inputs.mode || github.event.inputs.mode }}
+          if [[ "$MODE" == "execute-host" || "$MODE" == "execute" || "$MODE" == "execute-metered" ]]; then
+            FIREFOX_PROFILER_TOKEN=$(curl 'https://api.profiler.firefox.com/compressed-store' -X POST -H 'Accept: application/vnd.firefox-profiler+json;version=1.0' --data-binary @"$SAMPLY_PROFILE_PATH/profile.json.gz" | python3 -c "import sys,base64,json; t=sys.stdin.read().strip().split('.')[1]; t+='='*(4-len(t)%4)if len(t)%4 else''; print(json.loads(base64.urlsafe_b64decode(t))['profileToken'])")
+
+            if [ -n "$FIREFOX_PROFILER_TOKEN" ]; then
+              FIREFOX_PROFILER_URL="https://profiler.firefox.com/public/$FIREFOX_PROFILER_TOKEN"
+              echo "FIREFOX_PROFILER_URL=$FIREFOX_PROFILER_URL" >> $GITHUB_ENV
+              echo "" >> $MD_PATH
+              echo "**[Firefox Profiler]($FIREFOX_PROFILER_URL)**" >> $MD_PATH
+            fi
+          fi
           echo "S3_SAMPLY_PROFILE_PATH=${S3_SAMPLY_PROFILE_PATH}" >> $GITHUB_ENV
 
       - name: Upload samply profile artifacts
@@ -516,6 +611,31 @@ jobs:
           name: ${{ steps.set-metric-name.outputs.name }}-samply-profile
           path: ${{ env.SAMPLY_PROFILE_PATH }}
           retention-days: 1
+
+      - name: Add benchmark metadata to markdown
+        run: |
+          COMMIT_URL=https://github.com/${{ github.repository }}/commit/${current_sha}
+          BENCHMARK_WORKFLOW_URL=https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}
+
+          source openvm/ci/scripts/utils.sh
+
+          add_metadata $MD_PATH \
+            ${{ inputs.max_segment_length || github.event.inputs.max_segment_length }} \
+            ${{ inputs.instance_family || github.event.inputs.instance_family }} \
+            ${{ inputs.memory_allocator || github.event.inputs.memory_allocator || 'jemalloc' }} \
+            $COMMIT_URL \
+            $BENCHMARK_WORKFLOW_URL
+
+      - name: Upload markdown
+        run: |
+          S3_MD_PATH="${{ env.S3_PATH }}/${METRIC_NAME}.md"
+          s5cmd cp $MD_PATH $S3_MD_PATH
+          echo "S3_MD_PATH=${S3_MD_PATH}" >> $GITHUB_ENV
+
+      - name: Upload fixtures
+        if: ${{ inputs.mode == 'generate-fixtures' || github.event.inputs.mode == 'generate-fixtures' }}
+        run: |
+          s5cmd cp "./fixtures/*" "${S3_FIXTURE_PATH}/reth-app${APP_LOG_BLOWUP}-leaf${LEAF_LOG_BLOWUP}-${BLOCK_NUMBER}/"
 
       ### Update gh-pages
       - uses: actions/checkout@v4
@@ -557,6 +677,15 @@ jobs:
               echo "PUSH_FAILED"
               exit 1
           fi
+
+      - name: Update summary with results
+        run: |
+          RESULT_URL="https://github.com/axiom-crypto/openvm-reth-benchmark/blob/gh-pages/${GH_PAGES_PATH}/${METRIC_NAME}.md"
+          echo "### Results" >> $GITHUB_STEP_SUMMARY
+          echo "[${METRIC_NAME}](${RESULT_URL})" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          cat "${GH_PAGES_PATH}/${METRIC_NAME}.md" >> $GITHUB_STEP_SUMMARY
+
       - name: Path to result
         run: |
           echo "https://github.com/axiom-crypto/openvm-reth-benchmark/blob/gh-pages/${GH_PAGES_PATH}/${METRIC_NAME}.md"
