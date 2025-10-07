@@ -2074,6 +2074,7 @@ dependencies = [
  "lock_api",
  "once_cell",
  "parking_lot_core",
+ "rayon",
 ]
 
 [[package]]
@@ -2968,8 +2969,8 @@ dependencies = [
  "aho-corasick",
  "bstr",
  "log",
- "regex-automata 0.4.9",
- "regex-syntax 0.8.5",
+ "regex-automata",
+ "regex-syntax",
 ]
 
 [[package]]
@@ -3822,7 +3823,7 @@ dependencies = [
  "lalrpop-util",
  "petgraph",
  "regex",
- "regex-syntax 0.8.5",
+ "regex-syntax",
  "string_cache",
  "term",
  "tiny-keccak",
@@ -3836,7 +3837,7 @@ version = "0.20.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "507460a910eb7b32ee961886ff48539633b788a36b65692b95f225b844c82553"
 dependencies = [
- "regex-automata 0.4.9",
+ "regex-automata",
 ]
 
 [[package]]
@@ -3850,9 +3851,9 @@ dependencies = [
 
 [[package]]
 name = "libc"
-version = "0.2.174"
+version = "0.2.176"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "1171693293099992e19cddea4e8b849964e9846f4acee11b3948bcc337be8776"
+checksum = "58f929b4d672ea937a23a1ab494143d968337a5f47e56d0815df1e0890ddf174"
 
 [[package]]
 name = "libm"
@@ -3997,11 +3998,11 @@ dependencies = [
 
 [[package]]
 name = "matchers"
-version = "0.1.0"
+version = "0.2.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "8263075bb86c5a1b1427b5ae862e8889656f126e9f77c484496e8b47cf5c5558"
+checksum = "d1525a2a28c7f4fa0fc98bb91ae755d1e2d1505079e05539e35bc876b5d65ae9"
 dependencies = [
- "regex-automata 0.1.10",
+ "regex-automata",
 ]
 
 [[package]]
@@ -4029,6 +4030,15 @@ name = "memchr"
 version = "2.7.5"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "32a282da65faaf38286cf3be983213fcf1d2e2a58700e808f83f4ea9a4804bc0"
+
+[[package]]
+name = "memmap2"
+version = "0.9.8"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "843a98750cd611cc2965a8213b53b43e715f13c37a9e096c6408e69990961db7"
+dependencies = [
+ "libc",
+]
 
 [[package]]
 name = "memuse"
@@ -4060,7 +4070,7 @@ dependencies = [
  "once_cell",
  "tracing",
  "tracing-core",
- "tracing-subscriber 0.3.19",
+ "tracing-subscriber 0.3.20",
 ]
 
 [[package]]
@@ -4155,12 +4165,11 @@ dependencies = [
 
 [[package]]
 name = "nu-ansi-term"
-version = "0.46.0"
+version = "0.50.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "77a8165726e8236064dbb45459242600304b42a5ea24ee2948e18e023bf7ba84"
+checksum = "d4a28e057d01f97e61255210fcff094d74ed0466038633e95017f5beb68e4399"
 dependencies = [
- "overload",
- "winapi",
+ "windows-sys 0.52.0",
 ]
 
 [[package]]
@@ -4420,44 +4429,87 @@ dependencies = [
 
 [[package]]
 name = "openvm"
-version = "1.3.0"
-source = "git+https://github.com/powdr-labs/openvm.git?rev=62c5d26#62c5d2682027ad7804988cb4e09e5a81338aebe8"
+version = "1.4.0"
+source = "git+https://github.com/powdr-labs/openvm.git?branch=1.4.0-wip#da4fe82de9ad393262650d70041f78f38d8d0efe"
 dependencies = [
  "bytemuck",
  "getrandom 0.2.16",
  "getrandom 0.3.3",
  "num-bigint 0.4.6",
- "openvm-custom-insn",
- "openvm-platform",
- "openvm-rv32im-guest",
+ "openvm-custom-insn 0.1.0 (git+https://github.com/powdr-labs/openvm.git?branch=1.4.0-wip)",
+ "openvm-platform 1.4.0 (git+https://github.com/powdr-labs/openvm.git?branch=1.4.0-wip)",
+ "openvm-rv32im-guest 1.4.0 (git+https://github.com/powdr-labs/openvm.git?branch=1.4.0-wip)",
+ "serde",
+]
+
+[[package]]
+name = "openvm"
+version = "1.4.0"
+source = "git+https://github.com/powdr-labs/openvm.git?rev=4e8874b#4e8874b6601bc10d8a74da33e05b2e03318bc4ff"
+dependencies = [
+ "bytemuck",
+ "num-bigint 0.4.6",
+ "openvm-custom-insn 0.1.0 (git+https://github.com/powdr-labs/openvm.git?rev=4e8874b)",
+ "openvm-platform 1.4.0 (git+https://github.com/powdr-labs/openvm.git?rev=4e8874b)",
+ "openvm-rv32im-guest 1.4.0 (git+https://github.com/powdr-labs/openvm.git?rev=4e8874b)",
  "serde",
 ]
 
 [[package]]
 name = "openvm-algebra-circuit"
-version = "1.3.0"
-source = "git+https://github.com/powdr-labs/openvm.git?rev=62c5d26#62c5d2682027ad7804988cb4e09e5a81338aebe8"
+version = "1.4.0"
+source = "git+https://github.com/powdr-labs/openvm.git?branch=1.4.0-wip#da4fe82de9ad393262650d70041f78f38d8d0efe"
 dependencies = [
+ "cfg-if",
  "derive-new 0.6.0",
  "derive_more 1.0.0",
  "eyre",
- "itertools 0.14.0",
+ "halo2curves-axiom",
  "num-bigint 0.4.6",
  "num-traits",
- "openvm-algebra-transpiler",
- "openvm-circuit",
- "openvm-circuit-derive",
- "openvm-circuit-primitives",
- "openvm-circuit-primitives-derive",
- "openvm-instructions",
- "openvm-mod-circuit-builder",
- "openvm-rv32-adapters",
- "openvm-rv32im-circuit",
- "openvm-stark-backend",
- "openvm-stark-sdk",
+ "openvm-algebra-transpiler 1.4.0 (git+https://github.com/powdr-labs/openvm.git?branch=1.4.0-wip)",
+ "openvm-circuit 1.4.0 (git+https://github.com/powdr-labs/openvm.git?branch=1.4.0-wip)",
+ "openvm-circuit-derive 1.4.0 (git+https://github.com/powdr-labs/openvm.git?branch=1.4.0-wip)",
+ "openvm-circuit-primitives 1.4.0 (git+https://github.com/powdr-labs/openvm.git?branch=1.4.0-wip)",
+ "openvm-circuit-primitives-derive 1.4.0 (git+https://github.com/powdr-labs/openvm.git?branch=1.4.0-wip)",
+ "openvm-instructions 1.4.0 (git+https://github.com/powdr-labs/openvm.git?branch=1.4.0-wip)",
+ "openvm-mod-circuit-builder 1.4.0 (git+https://github.com/powdr-labs/openvm.git?branch=1.4.0-wip)",
+ "openvm-rv32-adapters 1.4.0 (git+https://github.com/powdr-labs/openvm.git?branch=1.4.0-wip)",
+ "openvm-rv32im-circuit 1.4.0 (git+https://github.com/powdr-labs/openvm.git?branch=1.4.0-wip)",
+ "openvm-stark-backend 1.2.0 (git+https://github.com/powdr-labs/stark-backend.git?branch=1.2.0-wip)",
+ "openvm-stark-sdk 1.2.0 (git+https://github.com/powdr-labs/stark-backend.git?branch=1.2.0-wip)",
  "rand 0.8.5",
  "serde",
- "serde-big-array",
+ "serde_with",
+ "struct-reflection",
+ "strum 0.26.3",
+]
+
+[[package]]
+name = "openvm-algebra-circuit"
+version = "1.4.0"
+source = "git+https://github.com/powdr-labs/openvm.git?rev=4e8874b#4e8874b6601bc10d8a74da33e05b2e03318bc4ff"
+dependencies = [
+ "cfg-if",
+ "derive-new 0.6.0",
+ "derive_more 1.0.0",
+ "eyre",
+ "halo2curves-axiom",
+ "num-bigint 0.4.6",
+ "num-traits",
+ "openvm-algebra-transpiler 1.4.0 (git+https://github.com/powdr-labs/openvm.git?rev=4e8874b)",
+ "openvm-circuit 1.4.0 (git+https://github.com/powdr-labs/openvm.git?rev=4e8874b)",
+ "openvm-circuit-derive 1.4.0 (git+https://github.com/powdr-labs/openvm.git?rev=4e8874b)",
+ "openvm-circuit-primitives 1.4.0 (git+https://github.com/powdr-labs/openvm.git?rev=4e8874b)",
+ "openvm-circuit-primitives-derive 1.4.0 (git+https://github.com/powdr-labs/openvm.git?rev=4e8874b)",
+ "openvm-instructions 1.4.0 (git+https://github.com/powdr-labs/openvm.git?rev=4e8874b)",
+ "openvm-mod-circuit-builder 1.4.0 (git+https://github.com/powdr-labs/openvm.git?rev=4e8874b)",
+ "openvm-rv32-adapters 1.4.0 (git+https://github.com/powdr-labs/openvm.git?rev=4e8874b)",
+ "openvm-rv32im-circuit 1.4.0 (git+https://github.com/powdr-labs/openvm.git?rev=4e8874b)",
+ "openvm-stark-backend 1.2.0 (git+https://github.com/powdr-labs/stark-backend.git?branch=1.2.0-wip)",
+ "openvm-stark-sdk 1.2.0 (git+https://github.com/powdr-labs/stark-backend.git?branch=1.2.0-wip)",
+ "rand 0.8.5",
+ "serde",
  "serde_with",
  "struct-reflection",
  "strum 0.26.3",
@@ -4465,88 +4517,130 @@ dependencies = [
 
 [[package]]
 name = "openvm-algebra-complex-macros"
-version = "1.3.0"
-source = "git+https://github.com/powdr-labs/openvm.git?rev=62c5d26#62c5d2682027ad7804988cb4e09e5a81338aebe8"
+version = "1.4.0"
+source = "git+https://github.com/powdr-labs/openvm.git?branch=1.4.0-wip#da4fe82de9ad393262650d70041f78f38d8d0efe"
 dependencies = [
- "openvm-macros-common",
+ "openvm-macros-common 1.4.0 (git+https://github.com/powdr-labs/openvm.git?branch=1.4.0-wip)",
+ "quote",
+ "syn 2.0.103",
+]
+
+[[package]]
+name = "openvm-algebra-complex-macros"
+version = "1.4.0"
+source = "git+https://github.com/powdr-labs/openvm.git?rev=4e8874b#4e8874b6601bc10d8a74da33e05b2e03318bc4ff"
+dependencies = [
+ "openvm-macros-common 1.4.0 (git+https://github.com/powdr-labs/openvm.git?rev=4e8874b)",
  "quote",
  "syn 2.0.103",
 ]
 
 [[package]]
 name = "openvm-algebra-guest"
-version = "1.3.0"
-source = "git+https://github.com/powdr-labs/openvm.git?rev=62c5d26#62c5d2682027ad7804988cb4e09e5a81338aebe8"
+version = "1.4.0"
+source = "git+https://github.com/powdr-labs/openvm.git?branch=1.4.0-wip#da4fe82de9ad393262650d70041f78f38d8d0efe"
 dependencies = [
  "halo2curves-axiom",
  "num-bigint 0.4.6",
  "once_cell",
- "openvm-algebra-complex-macros",
- "openvm-algebra-moduli-macros",
- "openvm-custom-insn",
- "openvm-rv32im-guest",
+ "openvm-algebra-complex-macros 1.4.0 (git+https://github.com/powdr-labs/openvm.git?branch=1.4.0-wip)",
+ "openvm-algebra-moduli-macros 1.4.0 (git+https://github.com/powdr-labs/openvm.git?branch=1.4.0-wip)",
+ "openvm-custom-insn 0.1.0 (git+https://github.com/powdr-labs/openvm.git?branch=1.4.0-wip)",
+ "openvm-rv32im-guest 1.4.0 (git+https://github.com/powdr-labs/openvm.git?branch=1.4.0-wip)",
+ "serde-big-array",
+ "strum_macros 0.26.4",
+]
+
+[[package]]
+name = "openvm-algebra-guest"
+version = "1.4.0"
+source = "git+https://github.com/powdr-labs/openvm.git?rev=4e8874b#4e8874b6601bc10d8a74da33e05b2e03318bc4ff"
+dependencies = [
+ "halo2curves-axiom",
+ "num-bigint 0.4.6",
+ "once_cell",
+ "openvm-algebra-complex-macros 1.4.0 (git+https://github.com/powdr-labs/openvm.git?rev=4e8874b)",
+ "openvm-algebra-moduli-macros 1.4.0 (git+https://github.com/powdr-labs/openvm.git?rev=4e8874b)",
+ "openvm-custom-insn 0.1.0 (git+https://github.com/powdr-labs/openvm.git?rev=4e8874b)",
+ "openvm-rv32im-guest 1.4.0 (git+https://github.com/powdr-labs/openvm.git?rev=4e8874b)",
  "serde-big-array",
  "strum_macros 0.26.4",
 ]
 
 [[package]]
 name = "openvm-algebra-moduli-macros"
-version = "1.3.0"
-source = "git+https://github.com/powdr-labs/openvm.git?rev=62c5d26#62c5d2682027ad7804988cb4e09e5a81338aebe8"
+version = "1.4.0"
+source = "git+https://github.com/powdr-labs/openvm.git?branch=1.4.0-wip#da4fe82de9ad393262650d70041f78f38d8d0efe"
 dependencies = [
  "num-bigint 0.4.6",
  "num-prime",
- "openvm-macros-common",
+ "openvm-macros-common 1.4.0 (git+https://github.com/powdr-labs/openvm.git?branch=1.4.0-wip)",
+ "quote",
+ "syn 2.0.103",
+]
+
+[[package]]
+name = "openvm-algebra-moduli-macros"
+version = "1.4.0"
+source = "git+https://github.com/powdr-labs/openvm.git?rev=4e8874b#4e8874b6601bc10d8a74da33e05b2e03318bc4ff"
+dependencies = [
+ "num-bigint 0.4.6",
+ "num-prime",
+ "openvm-macros-common 1.4.0 (git+https://github.com/powdr-labs/openvm.git?rev=4e8874b)",
  "quote",
  "syn 2.0.103",
 ]
 
 [[package]]
 name = "openvm-algebra-transpiler"
-version = "1.3.0"
-source = "git+https://github.com/powdr-labs/openvm.git?rev=62c5d26#62c5d2682027ad7804988cb4e09e5a81338aebe8"
+version = "1.4.0"
+source = "git+https://github.com/powdr-labs/openvm.git?branch=1.4.0-wip#da4fe82de9ad393262650d70041f78f38d8d0efe"
 dependencies = [
- "openvm-algebra-guest",
- "openvm-instructions",
- "openvm-instructions-derive",
- "openvm-stark-backend",
- "openvm-transpiler",
+ "openvm-algebra-guest 1.4.0 (git+https://github.com/powdr-labs/openvm.git?branch=1.4.0-wip)",
+ "openvm-instructions 1.4.0 (git+https://github.com/powdr-labs/openvm.git?branch=1.4.0-wip)",
+ "openvm-instructions-derive 1.4.0 (git+https://github.com/powdr-labs/openvm.git?branch=1.4.0-wip)",
+ "openvm-stark-backend 1.2.0 (git+https://github.com/powdr-labs/stark-backend.git?branch=1.2.0-wip)",
+ "openvm-transpiler 1.4.0 (git+https://github.com/powdr-labs/openvm.git?branch=1.4.0-wip)",
+ "rrs-lib",
+ "strum 0.26.3",
+]
+
+[[package]]
+name = "openvm-algebra-transpiler"
+version = "1.4.0"
+source = "git+https://github.com/powdr-labs/openvm.git?rev=4e8874b#4e8874b6601bc10d8a74da33e05b2e03318bc4ff"
+dependencies = [
+ "openvm-algebra-guest 1.4.0 (git+https://github.com/powdr-labs/openvm.git?rev=4e8874b)",
+ "openvm-instructions 1.4.0 (git+https://github.com/powdr-labs/openvm.git?rev=4e8874b)",
+ "openvm-instructions-derive 1.4.0 (git+https://github.com/powdr-labs/openvm.git?rev=4e8874b)",
+ "openvm-stark-backend 1.2.0 (git+https://github.com/powdr-labs/stark-backend.git?branch=1.2.0-wip)",
+ "openvm-transpiler 1.4.0 (git+https://github.com/powdr-labs/openvm.git?rev=4e8874b)",
  "rrs-lib",
  "strum 0.26.3",
 ]
 
 [[package]]
 name = "openvm-benchmarks-prove"
-version = "1.3.0"
-source = "git+https://github.com/powdr-labs/openvm.git?rev=62c5d26#62c5d2682027ad7804988cb4e09e5a81338aebe8"
+version = "1.4.0"
+source = "git+https://github.com/powdr-labs/openvm.git?rev=4e8874b#4e8874b6601bc10d8a74da33e05b2e03318bc4ff"
 dependencies = [
  "clap",
- "derive-new 0.6.0",
  "derive_more 1.0.0",
  "eyre",
  "k256",
- "num-bigint 0.4.6",
- "openvm-algebra-circuit",
- "openvm-algebra-transpiler",
+ "metrics",
  "openvm-benchmarks-utils",
- "openvm-circuit",
- "openvm-ecc-circuit",
- "openvm-ecc-transpiler",
- "openvm-keccak256-circuit",
- "openvm-keccak256-transpiler",
- "openvm-native-circuit",
- "openvm-native-compiler",
- "openvm-native-recursion",
- "openvm-pairing-circuit",
- "openvm-pairing-guest",
- "openvm-rv32im-circuit",
- "openvm-rv32im-transpiler",
- "openvm-sdk",
- "openvm-stark-backend",
- "openvm-stark-sdk",
- "openvm-transpiler",
+ "openvm-circuit 1.4.0 (git+https://github.com/powdr-labs/openvm.git?rev=4e8874b)",
+ "openvm-continuations 1.4.0 (git+https://github.com/powdr-labs/openvm.git?rev=4e8874b)",
+ "openvm-native-circuit 1.4.0 (git+https://github.com/powdr-labs/openvm.git?rev=4e8874b)",
+ "openvm-native-compiler 1.4.0 (git+https://github.com/powdr-labs/openvm.git?rev=4e8874b)",
+ "openvm-native-recursion 1.4.0 (git+https://github.com/powdr-labs/openvm.git?rev=4e8874b)",
+ "openvm-sdk 1.4.0 (git+https://github.com/powdr-labs/openvm.git?rev=4e8874b)",
+ "openvm-stark-backend 1.2.0 (git+https://github.com/powdr-labs/stark-backend.git?branch=1.2.0-wip)",
+ "openvm-stark-sdk 1.2.0 (git+https://github.com/powdr-labs/stark-backend.git?branch=1.2.0-wip)",
+ "openvm-transpiler 1.4.0 (git+https://github.com/powdr-labs/openvm.git?rev=4e8874b)",
+ "rand 0.8.5",
  "rand_chacha 0.3.1",
- "serde",
  "tiny-keccak",
  "tokio",
  "tracing",
@@ -4554,84 +4648,145 @@ dependencies = [
 
 [[package]]
 name = "openvm-benchmarks-utils"
-version = "1.3.0"
-source = "git+https://github.com/powdr-labs/openvm.git?rev=62c5d26#62c5d2682027ad7804988cb4e09e5a81338aebe8"
+version = "1.4.0"
+source = "git+https://github.com/powdr-labs/openvm.git?rev=4e8874b#4e8874b6601bc10d8a74da33e05b2e03318bc4ff"
 dependencies = [
  "cargo_metadata",
  "clap",
  "eyre",
- "openvm-build",
- "openvm-transpiler",
+ "openvm-build 1.4.0 (git+https://github.com/powdr-labs/openvm.git?rev=4e8874b)",
+ "openvm-transpiler 1.4.0 (git+https://github.com/powdr-labs/openvm.git?rev=4e8874b)",
  "tempfile",
  "tracing",
- "tracing-subscriber 0.3.19",
+ "tracing-subscriber 0.3.20",
 ]
 
 [[package]]
 name = "openvm-bigint-circuit"
-version = "1.3.0"
-source = "git+https://github.com/powdr-labs/openvm.git?rev=62c5d26#62c5d2682027ad7804988cb4e09e5a81338aebe8"
+version = "1.4.0"
+source = "git+https://github.com/powdr-labs/openvm.git?branch=1.4.0-wip#da4fe82de9ad393262650d70041f78f38d8d0efe"
 dependencies = [
+ "cfg-if",
  "derive-new 0.6.0",
  "derive_more 1.0.0",
- "openvm-bigint-transpiler",
- "openvm-circuit",
- "openvm-circuit-derive",
- "openvm-circuit-primitives",
- "openvm-circuit-primitives-derive",
- "openvm-instructions",
- "openvm-rv32-adapters",
- "openvm-rv32im-circuit",
- "openvm-rv32im-transpiler",
- "openvm-stark-backend",
- "openvm-stark-sdk",
+ "openvm-bigint-transpiler 1.4.0 (git+https://github.com/powdr-labs/openvm.git?branch=1.4.0-wip)",
+ "openvm-circuit 1.4.0 (git+https://github.com/powdr-labs/openvm.git?branch=1.4.0-wip)",
+ "openvm-circuit-derive 1.4.0 (git+https://github.com/powdr-labs/openvm.git?branch=1.4.0-wip)",
+ "openvm-circuit-primitives 1.4.0 (git+https://github.com/powdr-labs/openvm.git?branch=1.4.0-wip)",
+ "openvm-circuit-primitives-derive 1.4.0 (git+https://github.com/powdr-labs/openvm.git?branch=1.4.0-wip)",
+ "openvm-instructions 1.4.0 (git+https://github.com/powdr-labs/openvm.git?branch=1.4.0-wip)",
+ "openvm-rv32-adapters 1.4.0 (git+https://github.com/powdr-labs/openvm.git?branch=1.4.0-wip)",
+ "openvm-rv32im-circuit 1.4.0 (git+https://github.com/powdr-labs/openvm.git?branch=1.4.0-wip)",
+ "openvm-rv32im-transpiler 1.4.0 (git+https://github.com/powdr-labs/openvm.git?branch=1.4.0-wip)",
+ "openvm-stark-backend 1.2.0 (git+https://github.com/powdr-labs/stark-backend.git?branch=1.2.0-wip)",
+ "openvm-stark-sdk 1.2.0 (git+https://github.com/powdr-labs/stark-backend.git?branch=1.2.0-wip)",
+ "rand 0.8.5",
+ "serde",
+]
+
+[[package]]
+name = "openvm-bigint-circuit"
+version = "1.4.0"
+source = "git+https://github.com/powdr-labs/openvm.git?rev=4e8874b#4e8874b6601bc10d8a74da33e05b2e03318bc4ff"
+dependencies = [
+ "cfg-if",
+ "derive-new 0.6.0",
+ "derive_more 1.0.0",
+ "openvm-bigint-transpiler 1.4.0 (git+https://github.com/powdr-labs/openvm.git?rev=4e8874b)",
+ "openvm-circuit 1.4.0 (git+https://github.com/powdr-labs/openvm.git?rev=4e8874b)",
+ "openvm-circuit-derive 1.4.0 (git+https://github.com/powdr-labs/openvm.git?rev=4e8874b)",
+ "openvm-circuit-primitives 1.4.0 (git+https://github.com/powdr-labs/openvm.git?rev=4e8874b)",
+ "openvm-circuit-primitives-derive 1.4.0 (git+https://github.com/powdr-labs/openvm.git?rev=4e8874b)",
+ "openvm-instructions 1.4.0 (git+https://github.com/powdr-labs/openvm.git?rev=4e8874b)",
+ "openvm-rv32-adapters 1.4.0 (git+https://github.com/powdr-labs/openvm.git?rev=4e8874b)",
+ "openvm-rv32im-circuit 1.4.0 (git+https://github.com/powdr-labs/openvm.git?rev=4e8874b)",
+ "openvm-rv32im-transpiler 1.4.0 (git+https://github.com/powdr-labs/openvm.git?rev=4e8874b)",
+ "openvm-stark-backend 1.2.0 (git+https://github.com/powdr-labs/stark-backend.git?branch=1.2.0-wip)",
+ "openvm-stark-sdk 1.2.0 (git+https://github.com/powdr-labs/stark-backend.git?branch=1.2.0-wip)",
  "rand 0.8.5",
  "serde",
 ]
 
 [[package]]
 name = "openvm-bigint-guest"
-version = "1.3.0"
-source = "git+https://github.com/powdr-labs/openvm.git?rev=62c5d26#62c5d2682027ad7804988cb4e09e5a81338aebe8"
+version = "1.4.0"
+source = "git+https://github.com/powdr-labs/openvm.git?branch=1.4.0-wip#da4fe82de9ad393262650d70041f78f38d8d0efe"
 dependencies = [
- "openvm-platform",
+ "openvm-platform 1.4.0 (git+https://github.com/powdr-labs/openvm.git?branch=1.4.0-wip)",
+ "strum_macros 0.26.4",
+]
+
+[[package]]
+name = "openvm-bigint-guest"
+version = "1.4.0"
+source = "git+https://github.com/powdr-labs/openvm.git?rev=4e8874b#4e8874b6601bc10d8a74da33e05b2e03318bc4ff"
+dependencies = [
+ "openvm-platform 1.4.0 (git+https://github.com/powdr-labs/openvm.git?rev=4e8874b)",
  "strum_macros 0.26.4",
 ]
 
 [[package]]
 name = "openvm-bigint-transpiler"
-version = "1.3.0"
-source = "git+https://github.com/powdr-labs/openvm.git?rev=62c5d26#62c5d2682027ad7804988cb4e09e5a81338aebe8"
+version = "1.4.0"
+source = "git+https://github.com/powdr-labs/openvm.git?branch=1.4.0-wip#da4fe82de9ad393262650d70041f78f38d8d0efe"
 dependencies = [
- "openvm-bigint-guest",
- "openvm-instructions",
- "openvm-instructions-derive",
- "openvm-rv32im-transpiler",
- "openvm-stark-backend",
- "openvm-transpiler",
+ "openvm-bigint-guest 1.4.0 (git+https://github.com/powdr-labs/openvm.git?branch=1.4.0-wip)",
+ "openvm-instructions 1.4.0 (git+https://github.com/powdr-labs/openvm.git?branch=1.4.0-wip)",
+ "openvm-instructions-derive 1.4.0 (git+https://github.com/powdr-labs/openvm.git?branch=1.4.0-wip)",
+ "openvm-rv32im-transpiler 1.4.0 (git+https://github.com/powdr-labs/openvm.git?branch=1.4.0-wip)",
+ "openvm-stark-backend 1.2.0 (git+https://github.com/powdr-labs/stark-backend.git?branch=1.2.0-wip)",
+ "openvm-transpiler 1.4.0 (git+https://github.com/powdr-labs/openvm.git?branch=1.4.0-wip)",
+ "rrs-lib",
+ "strum 0.26.3",
+]
+
+[[package]]
+name = "openvm-bigint-transpiler"
+version = "1.4.0"
+source = "git+https://github.com/powdr-labs/openvm.git?rev=4e8874b#4e8874b6601bc10d8a74da33e05b2e03318bc4ff"
+dependencies = [
+ "openvm-bigint-guest 1.4.0 (git+https://github.com/powdr-labs/openvm.git?rev=4e8874b)",
+ "openvm-instructions 1.4.0 (git+https://github.com/powdr-labs/openvm.git?rev=4e8874b)",
+ "openvm-instructions-derive 1.4.0 (git+https://github.com/powdr-labs/openvm.git?rev=4e8874b)",
+ "openvm-rv32im-transpiler 1.4.0 (git+https://github.com/powdr-labs/openvm.git?rev=4e8874b)",
+ "openvm-stark-backend 1.2.0 (git+https://github.com/powdr-labs/stark-backend.git?branch=1.2.0-wip)",
+ "openvm-transpiler 1.4.0 (git+https://github.com/powdr-labs/openvm.git?rev=4e8874b)",
  "rrs-lib",
  "strum 0.26.3",
 ]
 
 [[package]]
 name = "openvm-build"
-version = "1.3.0"
-source = "git+https://github.com/powdr-labs/openvm.git?rev=62c5d26#62c5d2682027ad7804988cb4e09e5a81338aebe8"
+version = "1.4.0"
+source = "git+https://github.com/powdr-labs/openvm.git?branch=1.4.0-wip#da4fe82de9ad393262650d70041f78f38d8d0efe"
 dependencies = [
  "cargo_metadata",
  "eyre",
- "openvm-platform",
+ "openvm-platform 1.4.0 (git+https://github.com/powdr-labs/openvm.git?branch=1.4.0-wip)",
+ "serde",
+ "serde_json",
+]
+
+[[package]]
+name = "openvm-build"
+version = "1.4.0"
+source = "git+https://github.com/powdr-labs/openvm.git?rev=4e8874b#4e8874b6601bc10d8a74da33e05b2e03318bc4ff"
+dependencies = [
+ "cargo_metadata",
+ "eyre",
+ "openvm-platform 1.4.0 (git+https://github.com/powdr-labs/openvm.git?rev=4e8874b)",
  "serde",
  "serde_json",
 ]
 
 [[package]]
 name = "openvm-circuit"
-version = "1.3.0"
-source = "git+https://github.com/powdr-labs/openvm.git?rev=62c5d26#62c5d2682027ad7804988cb4e09e5a81338aebe8"
+version = "1.4.0"
+source = "git+https://github.com/powdr-labs/openvm.git?branch=1.4.0-wip#da4fe82de9ad393262650d70041f78f38d8d0efe"
 dependencies = [
  "backtrace",
  "cfg-if",
+ "dashmap",
  "derivative",
  "derive-new 0.6.0",
  "derive_more 1.0.0",
@@ -4639,15 +4794,54 @@ dependencies = [
  "eyre",
  "getset",
  "itertools 0.14.0",
- "metrics",
- "openvm-circuit-derive",
- "openvm-circuit-primitives",
- "openvm-circuit-primitives-derive",
- "openvm-instructions",
- "openvm-poseidon2-air",
- "openvm-stark-backend",
- "openvm-stark-sdk",
+ "libc",
+ "memmap2",
+ "openvm-circuit-derive 1.4.0 (git+https://github.com/powdr-labs/openvm.git?branch=1.4.0-wip)",
+ "openvm-circuit-primitives 1.4.0 (git+https://github.com/powdr-labs/openvm.git?branch=1.4.0-wip)",
+ "openvm-circuit-primitives-derive 1.4.0 (git+https://github.com/powdr-labs/openvm.git?branch=1.4.0-wip)",
+ "openvm-instructions 1.4.0 (git+https://github.com/powdr-labs/openvm.git?branch=1.4.0-wip)",
+ "openvm-poseidon2-air 1.4.0 (git+https://github.com/powdr-labs/openvm.git?branch=1.4.0-wip)",
+ "openvm-stark-backend 1.2.0 (git+https://github.com/powdr-labs/stark-backend.git?branch=1.2.0-wip)",
+ "openvm-stark-sdk 1.2.0 (git+https://github.com/powdr-labs/stark-backend.git?branch=1.2.0-wip)",
  "p3-baby-bear 0.1.0 (git+https://github.com/Plonky3/Plonky3.git?rev=539bbc84085efb609f4f62cb03cf49588388abdb)",
+ "p3-field 0.1.0 (git+https://github.com/Plonky3/Plonky3.git?rev=539bbc84085efb609f4f62cb03cf49588388abdb)",
+ "rand 0.8.5",
+ "rustc-hash 2.1.1",
+ "serde",
+ "serde-big-array",
+ "static_assertions",
+ "struct-reflection",
+ "thiserror 1.0.69",
+ "tracing",
+]
+
+[[package]]
+name = "openvm-circuit"
+version = "1.4.0"
+source = "git+https://github.com/powdr-labs/openvm.git?rev=4e8874b#4e8874b6601bc10d8a74da33e05b2e03318bc4ff"
+dependencies = [
+ "backtrace",
+ "cfg-if",
+ "dashmap",
+ "derivative",
+ "derive-new 0.6.0",
+ "derive_more 1.0.0",
+ "enum_dispatch",
+ "eyre",
+ "getset",
+ "itertools 0.14.0",
+ "libc",
+ "memmap2",
+ "metrics",
+ "openvm-circuit-derive 1.4.0 (git+https://github.com/powdr-labs/openvm.git?rev=4e8874b)",
+ "openvm-circuit-primitives 1.4.0 (git+https://github.com/powdr-labs/openvm.git?rev=4e8874b)",
+ "openvm-circuit-primitives-derive 1.4.0 (git+https://github.com/powdr-labs/openvm.git?rev=4e8874b)",
+ "openvm-instructions 1.4.0 (git+https://github.com/powdr-labs/openvm.git?rev=4e8874b)",
+ "openvm-poseidon2-air 1.4.0 (git+https://github.com/powdr-labs/openvm.git?rev=4e8874b)",
+ "openvm-stark-backend 1.2.0 (git+https://github.com/powdr-labs/stark-backend.git?branch=1.2.0-wip)",
+ "openvm-stark-sdk 1.2.0 (git+https://github.com/powdr-labs/stark-backend.git?branch=1.2.0-wip)",
+ "p3-baby-bear 0.1.0 (git+https://github.com/Plonky3/Plonky3.git?rev=539bbc84085efb609f4f62cb03cf49588388abdb)",
+ "p3-field 0.1.0 (git+https://github.com/Plonky3/Plonky3.git?rev=539bbc84085efb609f4f62cb03cf49588388abdb)",
  "rand 0.8.5",
  "rustc-hash 2.1.1",
  "serde",
@@ -4660,25 +4854,55 @@ dependencies = [
 
 [[package]]
 name = "openvm-circuit-derive"
-version = "1.3.0"
-source = "git+https://github.com/powdr-labs/openvm.git?rev=62c5d26#62c5d2682027ad7804988cb4e09e5a81338aebe8"
+version = "1.4.0"
+source = "git+https://github.com/powdr-labs/openvm.git?branch=1.4.0-wip#da4fe82de9ad393262650d70041f78f38d8d0efe"
 dependencies = [
  "itertools 0.14.0",
+ "proc-macro2",
+ "quote",
+ "syn 2.0.103",
+]
+
+[[package]]
+name = "openvm-circuit-derive"
+version = "1.4.0"
+source = "git+https://github.com/powdr-labs/openvm.git?rev=4e8874b#4e8874b6601bc10d8a74da33e05b2e03318bc4ff"
+dependencies = [
+ "itertools 0.14.0",
+ "proc-macro2",
  "quote",
  "syn 2.0.103",
 ]
 
 [[package]]
 name = "openvm-circuit-primitives"
-version = "1.3.0"
-source = "git+https://github.com/powdr-labs/openvm.git?rev=62c5d26#62c5d2682027ad7804988cb4e09e5a81338aebe8"
+version = "1.4.0"
+source = "git+https://github.com/powdr-labs/openvm.git?branch=1.4.0-wip#da4fe82de9ad393262650d70041f78f38d8d0efe"
 dependencies = [
  "derive-new 0.6.0",
  "itertools 0.14.0",
  "num-bigint 0.4.6",
  "num-traits",
- "openvm-circuit-primitives-derive",
- "openvm-stark-backend",
+ "openvm-circuit-primitives-derive 1.4.0 (git+https://github.com/powdr-labs/openvm.git?branch=1.4.0-wip)",
+ "openvm-cuda-builder",
+ "openvm-stark-backend 1.2.0 (git+https://github.com/powdr-labs/stark-backend.git?branch=1.2.0-wip)",
+ "rand 0.8.5",
+ "struct-reflection",
+ "tracing",
+]
+
+[[package]]
+name = "openvm-circuit-primitives"
+version = "1.4.0"
+source = "git+https://github.com/powdr-labs/openvm.git?rev=4e8874b#4e8874b6601bc10d8a74da33e05b2e03318bc4ff"
+dependencies = [
+ "derive-new 0.6.0",
+ "itertools 0.14.0",
+ "num-bigint 0.4.6",
+ "num-traits",
+ "openvm-circuit-primitives-derive 1.4.0 (git+https://github.com/powdr-labs/openvm.git?rev=4e8874b)",
+ "openvm-cuda-builder",
+ "openvm-stark-backend 1.2.0 (git+https://github.com/powdr-labs/stark-backend.git?branch=1.2.0-wip)",
  "rand 0.8.5",
  "struct-reflection",
  "tracing",
@@ -4686,8 +4910,18 @@ dependencies = [
 
 [[package]]
 name = "openvm-circuit-primitives-derive"
-version = "1.3.0"
-source = "git+https://github.com/powdr-labs/openvm.git?rev=62c5d26#62c5d2682027ad7804988cb4e09e5a81338aebe8"
+version = "1.4.0"
+source = "git+https://github.com/powdr-labs/openvm.git?branch=1.4.0-wip#da4fe82de9ad393262650d70041f78f38d8d0efe"
+dependencies = [
+ "itertools 0.14.0",
+ "quote",
+ "syn 2.0.103",
+]
+
+[[package]]
+name = "openvm-circuit-primitives-derive"
+version = "1.4.0"
+source = "git+https://github.com/powdr-labs/openvm.git?rev=4e8874b#4e8874b6601bc10d8a74da33e05b2e03318bc4ff"
 dependencies = [
  "itertools 0.14.0",
  "quote",
@@ -4723,23 +4957,57 @@ dependencies = [
 
 [[package]]
 name = "openvm-continuations"
-version = "1.3.0"
-source = "git+https://github.com/powdr-labs/openvm.git?rev=62c5d26#62c5d2682027ad7804988cb4e09e5a81338aebe8"
+version = "1.4.0"
+source = "git+https://github.com/powdr-labs/openvm.git?branch=1.4.0-wip#da4fe82de9ad393262650d70041f78f38d8d0efe"
 dependencies = [
  "derivative",
- "openvm-circuit",
- "openvm-native-compiler",
- "openvm-native-recursion",
- "openvm-stark-backend",
- "openvm-stark-sdk",
+ "openvm-circuit 1.4.0 (git+https://github.com/powdr-labs/openvm.git?branch=1.4.0-wip)",
+ "openvm-native-compiler 1.4.0 (git+https://github.com/powdr-labs/openvm.git?branch=1.4.0-wip)",
+ "openvm-native-recursion 1.4.0 (git+https://github.com/powdr-labs/openvm.git?branch=1.4.0-wip)",
+ "openvm-stark-backend 1.2.0 (git+https://github.com/powdr-labs/stark-backend.git?branch=1.2.0-wip)",
+ "openvm-stark-sdk 1.2.0 (git+https://github.com/powdr-labs/stark-backend.git?branch=1.2.0-wip)",
  "serde",
  "static_assertions",
 ]
 
 [[package]]
+name = "openvm-continuations"
+version = "1.4.0"
+source = "git+https://github.com/powdr-labs/openvm.git?rev=4e8874b#4e8874b6601bc10d8a74da33e05b2e03318bc4ff"
+dependencies = [
+ "derivative",
+ "openvm-circuit 1.4.0 (git+https://github.com/powdr-labs/openvm.git?rev=4e8874b)",
+ "openvm-native-compiler 1.4.0 (git+https://github.com/powdr-labs/openvm.git?rev=4e8874b)",
+ "openvm-native-recursion 1.4.0 (git+https://github.com/powdr-labs/openvm.git?rev=4e8874b)",
+ "openvm-stark-backend 1.2.0 (git+https://github.com/powdr-labs/stark-backend.git?branch=1.2.0-wip)",
+ "openvm-stark-sdk 1.2.0 (git+https://github.com/powdr-labs/stark-backend.git?branch=1.2.0-wip)",
+ "serde",
+ "static_assertions",
+]
+
+[[package]]
+name = "openvm-cuda-builder"
+version = "1.2.0"
+source = "git+https://github.com/powdr-labs/stark-backend.git?branch=1.2.0-wip#e27de8b08d124291e87fabd2bc0226c03cc5fd97"
+dependencies = [
+ "cc",
+ "glob",
+]
+
+[[package]]
 name = "openvm-custom-insn"
 version = "0.1.0"
-source = "git+https://github.com/powdr-labs/openvm.git?rev=62c5d26#62c5d2682027ad7804988cb4e09e5a81338aebe8"
+source = "git+https://github.com/powdr-labs/openvm.git?branch=1.4.0-wip#da4fe82de9ad393262650d70041f78f38d8d0efe"
+dependencies = [
+ "proc-macro2",
+ "quote",
+ "syn 2.0.103",
+]
+
+[[package]]
+name = "openvm-custom-insn"
+version = "0.1.0"
+source = "git+https://github.com/powdr-labs/openvm.git?rev=4e8874b#4e8874b6601bc10d8a74da33e05b2e03318bc4ff"
 dependencies = [
  "proc-macro2",
  "quote",
@@ -4748,27 +5016,57 @@ dependencies = [
 
 [[package]]
 name = "openvm-ecc-circuit"
-version = "1.3.0"
-source = "git+https://github.com/powdr-labs/openvm.git?rev=62c5d26#62c5d2682027ad7804988cb4e09e5a81338aebe8"
+version = "1.4.0"
+source = "git+https://github.com/powdr-labs/openvm.git?branch=1.4.0-wip#da4fe82de9ad393262650d70041f78f38d8d0efe"
 dependencies = [
+ "cfg-if",
  "derive-new 0.6.0",
  "derive_more 1.0.0",
+ "halo2curves-axiom",
  "hex-literal",
  "lazy_static",
  "num-bigint 0.4.6",
  "num-traits",
  "once_cell",
- "openvm-algebra-circuit",
- "openvm-circuit",
- "openvm-circuit-derive",
- "openvm-circuit-primitives",
- "openvm-circuit-primitives-derive",
- "openvm-ecc-transpiler",
- "openvm-instructions",
- "openvm-mod-circuit-builder",
- "openvm-rv32-adapters",
- "openvm-rv32im-circuit",
- "openvm-stark-backend",
+ "openvm-algebra-circuit 1.4.0 (git+https://github.com/powdr-labs/openvm.git?branch=1.4.0-wip)",
+ "openvm-circuit 1.4.0 (git+https://github.com/powdr-labs/openvm.git?branch=1.4.0-wip)",
+ "openvm-circuit-derive 1.4.0 (git+https://github.com/powdr-labs/openvm.git?branch=1.4.0-wip)",
+ "openvm-circuit-primitives 1.4.0 (git+https://github.com/powdr-labs/openvm.git?branch=1.4.0-wip)",
+ "openvm-ecc-transpiler 1.4.0 (git+https://github.com/powdr-labs/openvm.git?branch=1.4.0-wip)",
+ "openvm-instructions 1.4.0 (git+https://github.com/powdr-labs/openvm.git?branch=1.4.0-wip)",
+ "openvm-mod-circuit-builder 1.4.0 (git+https://github.com/powdr-labs/openvm.git?branch=1.4.0-wip)",
+ "openvm-rv32-adapters 1.4.0 (git+https://github.com/powdr-labs/openvm.git?branch=1.4.0-wip)",
+ "openvm-stark-backend 1.2.0 (git+https://github.com/powdr-labs/stark-backend.git?branch=1.2.0-wip)",
+ "rand 0.8.5",
+ "serde",
+ "serde_with",
+ "strum 0.26.3",
+]
+
+[[package]]
+name = "openvm-ecc-circuit"
+version = "1.4.0"
+source = "git+https://github.com/powdr-labs/openvm.git?rev=4e8874b#4e8874b6601bc10d8a74da33e05b2e03318bc4ff"
+dependencies = [
+ "cfg-if",
+ "derive-new 0.6.0",
+ "derive_more 1.0.0",
+ "halo2curves-axiom",
+ "hex-literal",
+ "lazy_static",
+ "num-bigint 0.4.6",
+ "num-traits",
+ "once_cell",
+ "openvm-algebra-circuit 1.4.0 (git+https://github.com/powdr-labs/openvm.git?rev=4e8874b)",
+ "openvm-circuit 1.4.0 (git+https://github.com/powdr-labs/openvm.git?rev=4e8874b)",
+ "openvm-circuit-derive 1.4.0 (git+https://github.com/powdr-labs/openvm.git?rev=4e8874b)",
+ "openvm-circuit-primitives 1.4.0 (git+https://github.com/powdr-labs/openvm.git?rev=4e8874b)",
+ "openvm-ecc-transpiler 1.4.0 (git+https://github.com/powdr-labs/openvm.git?rev=4e8874b)",
+ "openvm-instructions 1.4.0 (git+https://github.com/powdr-labs/openvm.git?rev=4e8874b)",
+ "openvm-mod-circuit-builder 1.4.0 (git+https://github.com/powdr-labs/openvm.git?rev=4e8874b)",
+ "openvm-rv32-adapters 1.4.0 (git+https://github.com/powdr-labs/openvm.git?rev=4e8874b)",
+ "openvm-stark-backend 1.2.0 (git+https://github.com/powdr-labs/stark-backend.git?branch=1.2.0-wip)",
+ "rand 0.8.5",
  "serde",
  "serde_with",
  "strum 0.26.3",
@@ -4776,43 +5074,86 @@ dependencies = [
 
 [[package]]
 name = "openvm-ecc-guest"
-version = "1.3.0"
-source = "git+https://github.com/powdr-labs/openvm.git?rev=62c5d26#62c5d2682027ad7804988cb4e09e5a81338aebe8"
+version = "1.4.0"
+source = "git+https://github.com/powdr-labs/openvm.git?branch=1.4.0-wip#da4fe82de9ad393262650d70041f78f38d8d0efe"
 dependencies = [
  "ecdsa",
  "elliptic-curve",
  "group 0.13.0",
  "halo2curves-axiom",
  "once_cell",
- "openvm",
- "openvm-algebra-guest",
- "openvm-custom-insn",
- "openvm-ecc-sw-macros",
- "openvm-rv32im-guest",
+ "openvm 1.4.0 (git+https://github.com/powdr-labs/openvm.git?branch=1.4.0-wip)",
+ "openvm-algebra-guest 1.4.0 (git+https://github.com/powdr-labs/openvm.git?branch=1.4.0-wip)",
+ "openvm-custom-insn 0.1.0 (git+https://github.com/powdr-labs/openvm.git?branch=1.4.0-wip)",
+ "openvm-ecc-sw-macros 1.4.0 (git+https://github.com/powdr-labs/openvm.git?branch=1.4.0-wip)",
+ "openvm-rv32im-guest 1.4.0 (git+https://github.com/powdr-labs/openvm.git?branch=1.4.0-wip)",
+ "serde",
+ "strum_macros 0.26.4",
+]
+
+[[package]]
+name = "openvm-ecc-guest"
+version = "1.4.0"
+source = "git+https://github.com/powdr-labs/openvm.git?rev=4e8874b#4e8874b6601bc10d8a74da33e05b2e03318bc4ff"
+dependencies = [
+ "ecdsa",
+ "elliptic-curve",
+ "group 0.13.0",
+ "halo2curves-axiom",
+ "once_cell",
+ "openvm 1.4.0 (git+https://github.com/powdr-labs/openvm.git?rev=4e8874b)",
+ "openvm-algebra-guest 1.4.0 (git+https://github.com/powdr-labs/openvm.git?rev=4e8874b)",
+ "openvm-custom-insn 0.1.0 (git+https://github.com/powdr-labs/openvm.git?rev=4e8874b)",
+ "openvm-ecc-sw-macros 1.4.0 (git+https://github.com/powdr-labs/openvm.git?rev=4e8874b)",
+ "openvm-rv32im-guest 1.4.0 (git+https://github.com/powdr-labs/openvm.git?rev=4e8874b)",
  "serde",
  "strum_macros 0.26.4",
 ]
 
 [[package]]
 name = "openvm-ecc-sw-macros"
-version = "1.3.0"
-source = "git+https://github.com/powdr-labs/openvm.git?rev=62c5d26#62c5d2682027ad7804988cb4e09e5a81338aebe8"
+version = "1.4.0"
+source = "git+https://github.com/powdr-labs/openvm.git?branch=1.4.0-wip#da4fe82de9ad393262650d70041f78f38d8d0efe"
 dependencies = [
- "openvm-macros-common",
+ "openvm-macros-common 1.4.0 (git+https://github.com/powdr-labs/openvm.git?branch=1.4.0-wip)",
+ "quote",
+ "syn 2.0.103",
+]
+
+[[package]]
+name = "openvm-ecc-sw-macros"
+version = "1.4.0"
+source = "git+https://github.com/powdr-labs/openvm.git?rev=4e8874b#4e8874b6601bc10d8a74da33e05b2e03318bc4ff"
+dependencies = [
+ "openvm-macros-common 1.4.0 (git+https://github.com/powdr-labs/openvm.git?rev=4e8874b)",
  "quote",
  "syn 2.0.103",
 ]
 
 [[package]]
 name = "openvm-ecc-transpiler"
-version = "1.3.0"
-source = "git+https://github.com/powdr-labs/openvm.git?rev=62c5d26#62c5d2682027ad7804988cb4e09e5a81338aebe8"
+version = "1.4.0"
+source = "git+https://github.com/powdr-labs/openvm.git?branch=1.4.0-wip#da4fe82de9ad393262650d70041f78f38d8d0efe"
 dependencies = [
- "openvm-ecc-guest",
- "openvm-instructions",
- "openvm-instructions-derive",
- "openvm-stark-backend",
- "openvm-transpiler",
+ "openvm-ecc-guest 1.4.0 (git+https://github.com/powdr-labs/openvm.git?branch=1.4.0-wip)",
+ "openvm-instructions 1.4.0 (git+https://github.com/powdr-labs/openvm.git?branch=1.4.0-wip)",
+ "openvm-instructions-derive 1.4.0 (git+https://github.com/powdr-labs/openvm.git?branch=1.4.0-wip)",
+ "openvm-stark-backend 1.2.0 (git+https://github.com/powdr-labs/stark-backend.git?branch=1.2.0-wip)",
+ "openvm-transpiler 1.4.0 (git+https://github.com/powdr-labs/openvm.git?branch=1.4.0-wip)",
+ "rrs-lib",
+ "strum 0.26.3",
+]
+
+[[package]]
+name = "openvm-ecc-transpiler"
+version = "1.4.0"
+source = "git+https://github.com/powdr-labs/openvm.git?rev=4e8874b#4e8874b6601bc10d8a74da33e05b2e03318bc4ff"
+dependencies = [
+ "openvm-ecc-guest 1.4.0 (git+https://github.com/powdr-labs/openvm.git?rev=4e8874b)",
+ "openvm-instructions 1.4.0 (git+https://github.com/powdr-labs/openvm.git?rev=4e8874b)",
+ "openvm-instructions-derive 1.4.0 (git+https://github.com/powdr-labs/openvm.git?rev=4e8874b)",
+ "openvm-stark-backend 1.2.0 (git+https://github.com/powdr-labs/stark-backend.git?branch=1.2.0-wip)",
+ "openvm-transpiler 1.4.0 (git+https://github.com/powdr-labs/openvm.git?rev=4e8874b)",
  "rrs-lib",
  "strum 0.26.3",
 ]
@@ -4855,22 +5196,39 @@ dependencies = [
  "serde_json",
  "tokio",
  "tracing",
- "tracing-subscriber 0.3.19",
+ "tracing-subscriber 0.3.20",
  "url",
 ]
 
 [[package]]
 name = "openvm-instructions"
-version = "1.3.0"
-source = "git+https://github.com/powdr-labs/openvm.git?rev=62c5d26#62c5d2682027ad7804988cb4e09e5a81338aebe8"
+version = "1.4.0"
+source = "git+https://github.com/powdr-labs/openvm.git?branch=1.4.0-wip#da4fe82de9ad393262650d70041f78f38d8d0efe"
 dependencies = [
  "backtrace",
  "derive-new 0.6.0",
  "itertools 0.14.0",
  "num-bigint 0.4.6",
  "num-traits",
- "openvm-instructions-derive",
- "openvm-stark-backend",
+ "openvm-instructions-derive 1.4.0 (git+https://github.com/powdr-labs/openvm.git?branch=1.4.0-wip)",
+ "openvm-stark-backend 1.2.0 (git+https://github.com/powdr-labs/stark-backend.git?branch=1.2.0-wip)",
+ "serde",
+ "strum 0.26.3",
+ "strum_macros 0.26.4",
+]
+
+[[package]]
+name = "openvm-instructions"
+version = "1.4.0"
+source = "git+https://github.com/powdr-labs/openvm.git?rev=4e8874b#4e8874b6601bc10d8a74da33e05b2e03318bc4ff"
+dependencies = [
+ "backtrace",
+ "derive-new 0.6.0",
+ "itertools 0.14.0",
+ "num-bigint 0.4.6",
+ "num-traits",
+ "openvm-instructions-derive 1.4.0 (git+https://github.com/powdr-labs/openvm.git?rev=4e8874b)",
+ "openvm-stark-backend 1.2.0 (git+https://github.com/powdr-labs/stark-backend.git?branch=1.2.0-wip)",
  "serde",
  "strum 0.26.3",
  "strum_macros 0.26.4",
@@ -4878,8 +5236,17 @@ dependencies = [
 
 [[package]]
 name = "openvm-instructions-derive"
-version = "1.3.0"
-source = "git+https://github.com/powdr-labs/openvm.git?rev=62c5d26#62c5d2682027ad7804988cb4e09e5a81338aebe8"
+version = "1.4.0"
+source = "git+https://github.com/powdr-labs/openvm.git?branch=1.4.0-wip#da4fe82de9ad393262650d70041f78f38d8d0efe"
+dependencies = [
+ "quote",
+ "syn 2.0.103",
+]
+
+[[package]]
+name = "openvm-instructions-derive"
+version = "1.4.0"
+source = "git+https://github.com/powdr-labs/openvm.git?rev=4e8874b#4e8874b6601bc10d8a74da33e05b2e03318bc4ff"
 dependencies = [
  "quote",
  "syn 2.0.103",
@@ -4887,77 +5254,149 @@ dependencies = [
 
 [[package]]
 name = "openvm-keccak256-circuit"
-version = "1.3.0"
-source = "git+https://github.com/powdr-labs/openvm.git?rev=62c5d26#62c5d2682027ad7804988cb4e09e5a81338aebe8"
+version = "1.4.0"
+source = "git+https://github.com/powdr-labs/openvm.git?branch=1.4.0-wip#da4fe82de9ad393262650d70041f78f38d8d0efe"
 dependencies = [
+ "cfg-if",
  "derive-new 0.6.0",
  "derive_more 1.0.0",
  "itertools 0.14.0",
- "openvm-circuit",
- "openvm-circuit-derive",
- "openvm-circuit-primitives",
- "openvm-circuit-primitives-derive",
- "openvm-instructions",
- "openvm-keccak256-transpiler",
- "openvm-rv32im-circuit",
- "openvm-stark-backend",
- "openvm-stark-sdk",
+ "openvm-circuit 1.4.0 (git+https://github.com/powdr-labs/openvm.git?branch=1.4.0-wip)",
+ "openvm-circuit-derive 1.4.0 (git+https://github.com/powdr-labs/openvm.git?branch=1.4.0-wip)",
+ "openvm-circuit-primitives 1.4.0 (git+https://github.com/powdr-labs/openvm.git?branch=1.4.0-wip)",
+ "openvm-circuit-primitives-derive 1.4.0 (git+https://github.com/powdr-labs/openvm.git?branch=1.4.0-wip)",
+ "openvm-instructions 1.4.0 (git+https://github.com/powdr-labs/openvm.git?branch=1.4.0-wip)",
+ "openvm-keccak256-transpiler 1.4.0 (git+https://github.com/powdr-labs/openvm.git?branch=1.4.0-wip)",
+ "openvm-rv32im-circuit 1.4.0 (git+https://github.com/powdr-labs/openvm.git?branch=1.4.0-wip)",
+ "openvm-stark-backend 1.2.0 (git+https://github.com/powdr-labs/stark-backend.git?branch=1.2.0-wip)",
+ "openvm-stark-sdk 1.2.0 (git+https://github.com/powdr-labs/stark-backend.git?branch=1.2.0-wip)",
  "p3-keccak-air",
  "rand 0.8.5",
  "serde",
- "serde-big-array",
  "struct-reflection",
  "strum 0.26.3",
  "tiny-keccak",
- "tracing",
+]
+
+[[package]]
+name = "openvm-keccak256-circuit"
+version = "1.4.0"
+source = "git+https://github.com/powdr-labs/openvm.git?rev=4e8874b#4e8874b6601bc10d8a74da33e05b2e03318bc4ff"
+dependencies = [
+ "cfg-if",
+ "derive-new 0.6.0",
+ "derive_more 1.0.0",
+ "itertools 0.14.0",
+ "openvm-circuit 1.4.0 (git+https://github.com/powdr-labs/openvm.git?rev=4e8874b)",
+ "openvm-circuit-derive 1.4.0 (git+https://github.com/powdr-labs/openvm.git?rev=4e8874b)",
+ "openvm-circuit-primitives 1.4.0 (git+https://github.com/powdr-labs/openvm.git?rev=4e8874b)",
+ "openvm-circuit-primitives-derive 1.4.0 (git+https://github.com/powdr-labs/openvm.git?rev=4e8874b)",
+ "openvm-instructions 1.4.0 (git+https://github.com/powdr-labs/openvm.git?rev=4e8874b)",
+ "openvm-keccak256-transpiler 1.4.0 (git+https://github.com/powdr-labs/openvm.git?rev=4e8874b)",
+ "openvm-rv32im-circuit 1.4.0 (git+https://github.com/powdr-labs/openvm.git?rev=4e8874b)",
+ "openvm-stark-backend 1.2.0 (git+https://github.com/powdr-labs/stark-backend.git?branch=1.2.0-wip)",
+ "openvm-stark-sdk 1.2.0 (git+https://github.com/powdr-labs/stark-backend.git?branch=1.2.0-wip)",
+ "p3-keccak-air",
+ "rand 0.8.5",
+ "serde",
+ "struct-reflection",
+ "strum 0.26.3",
+ "tiny-keccak",
 ]
 
 [[package]]
 name = "openvm-keccak256-guest"
-version = "1.3.0"
-source = "git+https://github.com/powdr-labs/openvm.git?rev=62c5d26#62c5d2682027ad7804988cb4e09e5a81338aebe8"
+version = "1.4.0"
+source = "git+https://github.com/powdr-labs/openvm.git?branch=1.4.0-wip#da4fe82de9ad393262650d70041f78f38d8d0efe"
 dependencies = [
- "openvm-platform",
+ "openvm-platform 1.4.0 (git+https://github.com/powdr-labs/openvm.git?branch=1.4.0-wip)",
+]
+
+[[package]]
+name = "openvm-keccak256-guest"
+version = "1.4.0"
+source = "git+https://github.com/powdr-labs/openvm.git?rev=4e8874b#4e8874b6601bc10d8a74da33e05b2e03318bc4ff"
+dependencies = [
+ "openvm-platform 1.4.0 (git+https://github.com/powdr-labs/openvm.git?rev=4e8874b)",
 ]
 
 [[package]]
 name = "openvm-keccak256-transpiler"
-version = "1.3.0"
-source = "git+https://github.com/powdr-labs/openvm.git?rev=62c5d26#62c5d2682027ad7804988cb4e09e5a81338aebe8"
+version = "1.4.0"
+source = "git+https://github.com/powdr-labs/openvm.git?branch=1.4.0-wip#da4fe82de9ad393262650d70041f78f38d8d0efe"
 dependencies = [
- "openvm-instructions",
- "openvm-instructions-derive",
- "openvm-keccak256-guest",
- "openvm-stark-backend",
- "openvm-transpiler",
+ "openvm-instructions 1.4.0 (git+https://github.com/powdr-labs/openvm.git?branch=1.4.0-wip)",
+ "openvm-instructions-derive 1.4.0 (git+https://github.com/powdr-labs/openvm.git?branch=1.4.0-wip)",
+ "openvm-keccak256-guest 1.4.0 (git+https://github.com/powdr-labs/openvm.git?branch=1.4.0-wip)",
+ "openvm-stark-backend 1.2.0 (git+https://github.com/powdr-labs/stark-backend.git?branch=1.2.0-wip)",
+ "openvm-transpiler 1.4.0 (git+https://github.com/powdr-labs/openvm.git?branch=1.4.0-wip)",
+ "rrs-lib",
+ "strum 0.26.3",
+]
+
+[[package]]
+name = "openvm-keccak256-transpiler"
+version = "1.4.0"
+source = "git+https://github.com/powdr-labs/openvm.git?rev=4e8874b#4e8874b6601bc10d8a74da33e05b2e03318bc4ff"
+dependencies = [
+ "openvm-instructions 1.4.0 (git+https://github.com/powdr-labs/openvm.git?rev=4e8874b)",
+ "openvm-instructions-derive 1.4.0 (git+https://github.com/powdr-labs/openvm.git?rev=4e8874b)",
+ "openvm-keccak256-guest 1.4.0 (git+https://github.com/powdr-labs/openvm.git?rev=4e8874b)",
+ "openvm-stark-backend 1.2.0 (git+https://github.com/powdr-labs/stark-backend.git?branch=1.2.0-wip)",
+ "openvm-transpiler 1.4.0 (git+https://github.com/powdr-labs/openvm.git?rev=4e8874b)",
  "rrs-lib",
  "strum 0.26.3",
 ]
 
 [[package]]
 name = "openvm-macros-common"
-version = "1.3.0"
-source = "git+https://github.com/powdr-labs/openvm.git?rev=62c5d26#62c5d2682027ad7804988cb4e09e5a81338aebe8"
+version = "1.4.0"
+source = "git+https://github.com/powdr-labs/openvm.git?branch=1.4.0-wip#da4fe82de9ad393262650d70041f78f38d8d0efe"
+dependencies = [
+ "syn 2.0.103",
+]
+
+[[package]]
+name = "openvm-macros-common"
+version = "1.4.0"
+source = "git+https://github.com/powdr-labs/openvm.git?rev=4e8874b#4e8874b6601bc10d8a74da33e05b2e03318bc4ff"
 dependencies = [
  "syn 2.0.103",
 ]
 
 [[package]]
 name = "openvm-mod-circuit-builder"
-version = "1.3.0"
-source = "git+https://github.com/powdr-labs/openvm.git?rev=62c5d26#62c5d2682027ad7804988cb4e09e5a81338aebe8"
+version = "1.4.0"
+source = "git+https://github.com/powdr-labs/openvm.git?branch=1.4.0-wip#da4fe82de9ad393262650d70041f78f38d8d0efe"
 dependencies = [
  "itertools 0.14.0",
  "num-bigint 0.4.6",
  "num-traits",
- "openvm-circuit",
- "openvm-circuit-primitives",
- "openvm-instructions",
- "openvm-stark-backend",
- "openvm-stark-sdk",
+ "openvm-circuit 1.4.0 (git+https://github.com/powdr-labs/openvm.git?branch=1.4.0-wip)",
+ "openvm-circuit-primitives 1.4.0 (git+https://github.com/powdr-labs/openvm.git?branch=1.4.0-wip)",
+ "openvm-cuda-builder",
+ "openvm-instructions 1.4.0 (git+https://github.com/powdr-labs/openvm.git?branch=1.4.0-wip)",
+ "openvm-stark-backend 1.2.0 (git+https://github.com/powdr-labs/stark-backend.git?branch=1.2.0-wip)",
+ "openvm-stark-sdk 1.2.0 (git+https://github.com/powdr-labs/stark-backend.git?branch=1.2.0-wip)",
  "rand 0.8.5",
- "serde",
- "serde_with",
+ "tracing",
+]
+
+[[package]]
+name = "openvm-mod-circuit-builder"
+version = "1.4.0"
+source = "git+https://github.com/powdr-labs/openvm.git?rev=4e8874b#4e8874b6601bc10d8a74da33e05b2e03318bc4ff"
+dependencies = [
+ "itertools 0.14.0",
+ "num-bigint 0.4.6",
+ "num-traits",
+ "openvm-circuit 1.4.0 (git+https://github.com/powdr-labs/openvm.git?rev=4e8874b)",
+ "openvm-circuit-primitives 1.4.0 (git+https://github.com/powdr-labs/openvm.git?rev=4e8874b)",
+ "openvm-cuda-builder",
+ "openvm-instructions 1.4.0 (git+https://github.com/powdr-labs/openvm.git?rev=4e8874b)",
+ "openvm-stark-backend 1.2.0 (git+https://github.com/powdr-labs/stark-backend.git?branch=1.2.0-wip)",
+ "openvm-stark-sdk 1.2.0 (git+https://github.com/powdr-labs/stark-backend.git?branch=1.2.0-wip)",
+ "rand 0.8.5",
  "tracing",
 ]
 
@@ -4985,54 +5424,107 @@ dependencies = [
  "rustc-hash 2.1.1",
  "serde",
  "thiserror 1.0.69",
- "tracing-subscriber 0.3.19",
+ "tracing-subscriber 0.3.20",
 ]
 
 [[package]]
 name = "openvm-native-circuit"
-version = "1.3.0"
-source = "git+https://github.com/powdr-labs/openvm.git?rev=62c5d26#62c5d2682027ad7804988cb4e09e5a81338aebe8"
+version = "1.4.0"
+source = "git+https://github.com/powdr-labs/openvm.git?branch=1.4.0-wip#da4fe82de9ad393262650d70041f78f38d8d0efe"
 dependencies = [
+ "cfg-if",
  "derive-new 0.6.0",
  "derive_more 1.0.0",
  "eyre",
  "itertools 0.14.0",
- "openvm-circuit",
- "openvm-circuit-derive",
- "openvm-circuit-primitives",
- "openvm-circuit-primitives-derive",
- "openvm-instructions",
- "openvm-native-compiler",
- "openvm-poseidon2-air",
- "openvm-rv32im-circuit",
- "openvm-stark-backend",
- "openvm-stark-sdk",
+ "openvm-circuit 1.4.0 (git+https://github.com/powdr-labs/openvm.git?branch=1.4.0-wip)",
+ "openvm-circuit-derive 1.4.0 (git+https://github.com/powdr-labs/openvm.git?branch=1.4.0-wip)",
+ "openvm-circuit-primitives 1.4.0 (git+https://github.com/powdr-labs/openvm.git?branch=1.4.0-wip)",
+ "openvm-circuit-primitives-derive 1.4.0 (git+https://github.com/powdr-labs/openvm.git?branch=1.4.0-wip)",
+ "openvm-instructions 1.4.0 (git+https://github.com/powdr-labs/openvm.git?branch=1.4.0-wip)",
+ "openvm-native-compiler 1.4.0 (git+https://github.com/powdr-labs/openvm.git?branch=1.4.0-wip)",
+ "openvm-poseidon2-air 1.4.0 (git+https://github.com/powdr-labs/openvm.git?branch=1.4.0-wip)",
+ "openvm-rv32im-circuit 1.4.0 (git+https://github.com/powdr-labs/openvm.git?branch=1.4.0-wip)",
+ "openvm-rv32im-transpiler 1.4.0 (git+https://github.com/powdr-labs/openvm.git?branch=1.4.0-wip)",
+ "openvm-stark-backend 1.2.0 (git+https://github.com/powdr-labs/stark-backend.git?branch=1.2.0-wip)",
+ "openvm-stark-sdk 1.2.0 (git+https://github.com/powdr-labs/stark-backend.git?branch=1.2.0-wip)",
+ "p3-field 0.1.0 (git+https://github.com/Plonky3/Plonky3.git?rev=539bbc84085efb609f4f62cb03cf49588388abdb)",
  "rand 0.8.5",
  "serde",
- "serde-big-array",
  "static_assertions",
  "struct-reflection",
  "strum 0.26.3",
- "tracing",
+]
+
+[[package]]
+name = "openvm-native-circuit"
+version = "1.4.0"
+source = "git+https://github.com/powdr-labs/openvm.git?rev=4e8874b#4e8874b6601bc10d8a74da33e05b2e03318bc4ff"
+dependencies = [
+ "cfg-if",
+ "derive-new 0.6.0",
+ "derive_more 1.0.0",
+ "eyre",
+ "itertools 0.14.0",
+ "openvm-circuit 1.4.0 (git+https://github.com/powdr-labs/openvm.git?rev=4e8874b)",
+ "openvm-circuit-derive 1.4.0 (git+https://github.com/powdr-labs/openvm.git?rev=4e8874b)",
+ "openvm-circuit-primitives 1.4.0 (git+https://github.com/powdr-labs/openvm.git?rev=4e8874b)",
+ "openvm-circuit-primitives-derive 1.4.0 (git+https://github.com/powdr-labs/openvm.git?rev=4e8874b)",
+ "openvm-instructions 1.4.0 (git+https://github.com/powdr-labs/openvm.git?rev=4e8874b)",
+ "openvm-native-compiler 1.4.0 (git+https://github.com/powdr-labs/openvm.git?rev=4e8874b)",
+ "openvm-poseidon2-air 1.4.0 (git+https://github.com/powdr-labs/openvm.git?rev=4e8874b)",
+ "openvm-rv32im-circuit 1.4.0 (git+https://github.com/powdr-labs/openvm.git?rev=4e8874b)",
+ "openvm-rv32im-transpiler 1.4.0 (git+https://github.com/powdr-labs/openvm.git?rev=4e8874b)",
+ "openvm-stark-backend 1.2.0 (git+https://github.com/powdr-labs/stark-backend.git?branch=1.2.0-wip)",
+ "openvm-stark-sdk 1.2.0 (git+https://github.com/powdr-labs/stark-backend.git?branch=1.2.0-wip)",
+ "p3-field 0.1.0 (git+https://github.com/Plonky3/Plonky3.git?rev=539bbc84085efb609f4f62cb03cf49588388abdb)",
+ "rand 0.8.5",
+ "serde",
+ "static_assertions",
+ "struct-reflection",
+ "strum 0.26.3",
 ]
 
 [[package]]
 name = "openvm-native-compiler"
-version = "1.3.0"
-source = "git+https://github.com/powdr-labs/openvm.git?rev=62c5d26#62c5d2682027ad7804988cb4e09e5a81338aebe8"
+version = "1.4.0"
+source = "git+https://github.com/powdr-labs/openvm.git?branch=1.4.0-wip#da4fe82de9ad393262650d70041f78f38d8d0efe"
+dependencies = [
+ "backtrace",
+ "itertools 0.14.0",
+ "num-bigint 0.4.6",
+ "num-integer",
+ "openvm-circuit 1.4.0 (git+https://github.com/powdr-labs/openvm.git?branch=1.4.0-wip)",
+ "openvm-instructions 1.4.0 (git+https://github.com/powdr-labs/openvm.git?branch=1.4.0-wip)",
+ "openvm-instructions-derive 1.4.0 (git+https://github.com/powdr-labs/openvm.git?branch=1.4.0-wip)",
+ "openvm-native-compiler-derive 1.4.0 (git+https://github.com/powdr-labs/openvm.git?branch=1.4.0-wip)",
+ "openvm-rv32im-transpiler 1.4.0 (git+https://github.com/powdr-labs/openvm.git?branch=1.4.0-wip)",
+ "openvm-stark-backend 1.2.0 (git+https://github.com/powdr-labs/stark-backend.git?branch=1.2.0-wip)",
+ "openvm-stark-sdk 1.2.0 (git+https://github.com/powdr-labs/stark-backend.git?branch=1.2.0-wip)",
+ "serde",
+ "snark-verifier-sdk",
+ "strum 0.26.3",
+ "strum_macros 0.26.4",
+ "zkhash",
+]
+
+[[package]]
+name = "openvm-native-compiler"
+version = "1.4.0"
+source = "git+https://github.com/powdr-labs/openvm.git?rev=4e8874b#4e8874b6601bc10d8a74da33e05b2e03318bc4ff"
 dependencies = [
  "backtrace",
  "itertools 0.14.0",
  "metrics",
  "num-bigint 0.4.6",
  "num-integer",
- "openvm-circuit",
- "openvm-instructions",
- "openvm-instructions-derive",
- "openvm-native-compiler-derive",
- "openvm-rv32im-transpiler",
- "openvm-stark-backend",
- "openvm-stark-sdk",
+ "openvm-circuit 1.4.0 (git+https://github.com/powdr-labs/openvm.git?rev=4e8874b)",
+ "openvm-instructions 1.4.0 (git+https://github.com/powdr-labs/openvm.git?rev=4e8874b)",
+ "openvm-instructions-derive 1.4.0 (git+https://github.com/powdr-labs/openvm.git?rev=4e8874b)",
+ "openvm-native-compiler-derive 1.4.0 (git+https://github.com/powdr-labs/openvm.git?rev=4e8874b)",
+ "openvm-rv32im-transpiler 1.4.0 (git+https://github.com/powdr-labs/openvm.git?rev=4e8874b)",
+ "openvm-stark-backend 1.2.0 (git+https://github.com/powdr-labs/stark-backend.git?branch=1.2.0-wip)",
+ "openvm-stark-sdk 1.2.0 (git+https://github.com/powdr-labs/stark-backend.git?branch=1.2.0-wip)",
  "serde",
  "snark-verifier-sdk",
  "strum 0.26.3",
@@ -5042,8 +5534,17 @@ dependencies = [
 
 [[package]]
 name = "openvm-native-compiler-derive"
-version = "1.3.0"
-source = "git+https://github.com/powdr-labs/openvm.git?rev=62c5d26#62c5d2682027ad7804988cb4e09e5a81338aebe8"
+version = "1.4.0"
+source = "git+https://github.com/powdr-labs/openvm.git?branch=1.4.0-wip#da4fe82de9ad393262650d70041f78f38d8d0efe"
+dependencies = [
+ "quote",
+ "syn 2.0.103",
+]
+
+[[package]]
+name = "openvm-native-compiler-derive"
+version = "1.4.0"
+source = "git+https://github.com/powdr-labs/openvm.git?rev=4e8874b#4e8874b6601bc10d8a74da33e05b2e03318bc4ff"
 dependencies = [
  "quote",
  "syn 2.0.103",
@@ -5051,20 +5552,47 @@ dependencies = [
 
 [[package]]
 name = "openvm-native-recursion"
-version = "1.3.0"
-source = "git+https://github.com/powdr-labs/openvm.git?rev=62c5d26#62c5d2682027ad7804988cb4e09e5a81338aebe8"
+version = "1.4.0"
+source = "git+https://github.com/powdr-labs/openvm.git?branch=1.4.0-wip#da4fe82de9ad393262650d70041f78f38d8d0efe"
+dependencies = [
+ "cfg-if",
+ "itertools 0.14.0",
+ "lazy_static",
+ "once_cell",
+ "openvm-circuit 1.4.0 (git+https://github.com/powdr-labs/openvm.git?branch=1.4.0-wip)",
+ "openvm-native-circuit 1.4.0 (git+https://github.com/powdr-labs/openvm.git?branch=1.4.0-wip)",
+ "openvm-native-compiler 1.4.0 (git+https://github.com/powdr-labs/openvm.git?branch=1.4.0-wip)",
+ "openvm-native-compiler-derive 1.4.0 (git+https://github.com/powdr-labs/openvm.git?branch=1.4.0-wip)",
+ "openvm-stark-backend 1.2.0 (git+https://github.com/powdr-labs/stark-backend.git?branch=1.2.0-wip)",
+ "openvm-stark-sdk 1.2.0 (git+https://github.com/powdr-labs/stark-backend.git?branch=1.2.0-wip)",
+ "p3-dft 0.1.0 (git+https://github.com/Plonky3/Plonky3.git?rev=539bbc84085efb609f4f62cb03cf49588388abdb)",
+ "p3-fri",
+ "p3-merkle-tree",
+ "p3-symmetric 0.1.0 (git+https://github.com/Plonky3/Plonky3.git?rev=539bbc84085efb609f4f62cb03cf49588388abdb)",
+ "rand 0.8.5",
+ "serde",
+ "serde_json",
+ "serde_with",
+ "snark-verifier-sdk",
+ "tracing",
+]
+
+[[package]]
+name = "openvm-native-recursion"
+version = "1.4.0"
+source = "git+https://github.com/powdr-labs/openvm.git?rev=4e8874b#4e8874b6601bc10d8a74da33e05b2e03318bc4ff"
 dependencies = [
  "cfg-if",
  "itertools 0.14.0",
  "lazy_static",
  "metrics",
  "once_cell",
- "openvm-circuit",
- "openvm-native-circuit",
- "openvm-native-compiler",
- "openvm-native-compiler-derive",
- "openvm-stark-backend",
- "openvm-stark-sdk",
+ "openvm-circuit 1.4.0 (git+https://github.com/powdr-labs/openvm.git?rev=4e8874b)",
+ "openvm-native-circuit 1.4.0 (git+https://github.com/powdr-labs/openvm.git?rev=4e8874b)",
+ "openvm-native-compiler 1.4.0 (git+https://github.com/powdr-labs/openvm.git?rev=4e8874b)",
+ "openvm-native-compiler-derive 1.4.0 (git+https://github.com/powdr-labs/openvm.git?rev=4e8874b)",
+ "openvm-stark-backend 1.2.0 (git+https://github.com/powdr-labs/stark-backend.git?branch=1.2.0-wip)",
+ "openvm-stark-sdk 1.2.0 (git+https://github.com/powdr-labs/stark-backend.git?branch=1.2.0-wip)",
  "p3-dft 0.1.0 (git+https://github.com/Plonky3/Plonky3.git?rev=539bbc84085efb609f4f62cb03cf49588388abdb)",
  "p3-fri",
  "p3-merkle-tree",
@@ -5079,40 +5607,77 @@ dependencies = [
 
 [[package]]
 name = "openvm-native-transpiler"
-version = "1.3.0"
-source = "git+https://github.com/powdr-labs/openvm.git?rev=62c5d26#62c5d2682027ad7804988cb4e09e5a81338aebe8"
+version = "1.4.0"
+source = "git+https://github.com/powdr-labs/openvm.git?branch=1.4.0-wip#da4fe82de9ad393262650d70041f78f38d8d0efe"
 dependencies = [
- "openvm-instructions",
- "openvm-transpiler",
+ "openvm-instructions 1.4.0 (git+https://github.com/powdr-labs/openvm.git?branch=1.4.0-wip)",
+ "openvm-transpiler 1.4.0 (git+https://github.com/powdr-labs/openvm.git?branch=1.4.0-wip)",
+ "p3-field 0.1.0 (git+https://github.com/Plonky3/Plonky3.git?rev=539bbc84085efb609f4f62cb03cf49588388abdb)",
+]
+
+[[package]]
+name = "openvm-native-transpiler"
+version = "1.4.0"
+source = "git+https://github.com/powdr-labs/openvm.git?rev=4e8874b#4e8874b6601bc10d8a74da33e05b2e03318bc4ff"
+dependencies = [
+ "openvm-instructions 1.4.0 (git+https://github.com/powdr-labs/openvm.git?rev=4e8874b)",
+ "openvm-transpiler 1.4.0 (git+https://github.com/powdr-labs/openvm.git?rev=4e8874b)",
  "p3-field 0.1.0 (git+https://github.com/Plonky3/Plonky3.git?rev=539bbc84085efb609f4f62cb03cf49588388abdb)",
 ]
 
 [[package]]
 name = "openvm-pairing-circuit"
-version = "1.3.0"
-source = "git+https://github.com/powdr-labs/openvm.git?rev=62c5d26#62c5d2682027ad7804988cb4e09e5a81338aebe8"
+version = "1.4.0"
+source = "git+https://github.com/powdr-labs/openvm.git?branch=1.4.0-wip#da4fe82de9ad393262650d70041f78f38d8d0efe"
 dependencies = [
+ "cfg-if",
  "derive-new 0.6.0",
  "derive_more 1.0.0",
  "eyre",
  "halo2curves-axiom",
- "itertools 0.14.0",
  "num-bigint 0.4.6",
  "num-traits",
- "openvm-algebra-circuit",
- "openvm-circuit",
- "openvm-circuit-derive",
- "openvm-circuit-primitives",
- "openvm-circuit-primitives-derive",
- "openvm-ecc-circuit",
- "openvm-ecc-guest",
- "openvm-instructions",
- "openvm-mod-circuit-builder",
- "openvm-pairing-guest",
- "openvm-pairing-transpiler",
- "openvm-rv32-adapters",
- "openvm-rv32im-circuit",
- "openvm-stark-backend",
+ "openvm-algebra-circuit 1.4.0 (git+https://github.com/powdr-labs/openvm.git?branch=1.4.0-wip)",
+ "openvm-circuit 1.4.0 (git+https://github.com/powdr-labs/openvm.git?branch=1.4.0-wip)",
+ "openvm-circuit-derive 1.4.0 (git+https://github.com/powdr-labs/openvm.git?branch=1.4.0-wip)",
+ "openvm-circuit-primitives 1.4.0 (git+https://github.com/powdr-labs/openvm.git?branch=1.4.0-wip)",
+ "openvm-ecc-circuit 1.4.0 (git+https://github.com/powdr-labs/openvm.git?branch=1.4.0-wip)",
+ "openvm-ecc-guest 1.4.0 (git+https://github.com/powdr-labs/openvm.git?branch=1.4.0-wip)",
+ "openvm-instructions 1.4.0 (git+https://github.com/powdr-labs/openvm.git?branch=1.4.0-wip)",
+ "openvm-mod-circuit-builder 1.4.0 (git+https://github.com/powdr-labs/openvm.git?branch=1.4.0-wip)",
+ "openvm-pairing-guest 1.4.0 (git+https://github.com/powdr-labs/openvm.git?branch=1.4.0-wip)",
+ "openvm-pairing-transpiler 1.4.0 (git+https://github.com/powdr-labs/openvm.git?branch=1.4.0-wip)",
+ "openvm-rv32im-circuit 1.4.0 (git+https://github.com/powdr-labs/openvm.git?branch=1.4.0-wip)",
+ "openvm-stark-backend 1.2.0 (git+https://github.com/powdr-labs/stark-backend.git?branch=1.2.0-wip)",
+ "rand 0.8.5",
+ "serde",
+ "strum 0.26.3",
+]
+
+[[package]]
+name = "openvm-pairing-circuit"
+version = "1.4.0"
+source = "git+https://github.com/powdr-labs/openvm.git?rev=4e8874b#4e8874b6601bc10d8a74da33e05b2e03318bc4ff"
+dependencies = [
+ "cfg-if",
+ "derive-new 0.6.0",
+ "derive_more 1.0.0",
+ "eyre",
+ "halo2curves-axiom",
+ "num-bigint 0.4.6",
+ "num-traits",
+ "openvm-algebra-circuit 1.4.0 (git+https://github.com/powdr-labs/openvm.git?rev=4e8874b)",
+ "openvm-circuit 1.4.0 (git+https://github.com/powdr-labs/openvm.git?rev=4e8874b)",
+ "openvm-circuit-derive 1.4.0 (git+https://github.com/powdr-labs/openvm.git?rev=4e8874b)",
+ "openvm-circuit-primitives 1.4.0 (git+https://github.com/powdr-labs/openvm.git?rev=4e8874b)",
+ "openvm-ecc-circuit 1.4.0 (git+https://github.com/powdr-labs/openvm.git?rev=4e8874b)",
+ "openvm-ecc-guest 1.4.0 (git+https://github.com/powdr-labs/openvm.git?rev=4e8874b)",
+ "openvm-instructions 1.4.0 (git+https://github.com/powdr-labs/openvm.git?rev=4e8874b)",
+ "openvm-mod-circuit-builder 1.4.0 (git+https://github.com/powdr-labs/openvm.git?rev=4e8874b)",
+ "openvm-pairing-guest 1.4.0 (git+https://github.com/powdr-labs/openvm.git?rev=4e8874b)",
+ "openvm-pairing-transpiler 1.4.0 (git+https://github.com/powdr-labs/openvm.git?rev=4e8874b)",
+ "openvm-rv32im-circuit 1.4.0 (git+https://github.com/powdr-labs/openvm.git?rev=4e8874b)",
+ "openvm-stark-backend 1.2.0 (git+https://github.com/powdr-labs/stark-backend.git?branch=1.2.0-wip)",
  "rand 0.8.5",
  "serde",
  "strum 0.26.3",
@@ -5120,8 +5685,8 @@ dependencies = [
 
 [[package]]
 name = "openvm-pairing-guest"
-version = "1.3.0"
-source = "git+https://github.com/powdr-labs/openvm.git?rev=62c5d26#62c5d2682027ad7804988cb4e09e5a81338aebe8"
+version = "1.4.0"
+source = "git+https://github.com/powdr-labs/openvm.git?branch=1.4.0-wip#da4fe82de9ad393262650d70041f78f38d8d0efe"
 dependencies = [
  "halo2curves-axiom",
  "hex-literal",
@@ -5129,11 +5694,32 @@ dependencies = [
  "lazy_static",
  "num-bigint 0.4.6",
  "num-traits",
- "openvm",
- "openvm-algebra-guest",
- "openvm-algebra-moduli-macros",
- "openvm-custom-insn",
- "openvm-ecc-guest",
+ "openvm 1.4.0 (git+https://github.com/powdr-labs/openvm.git?branch=1.4.0-wip)",
+ "openvm-algebra-guest 1.4.0 (git+https://github.com/powdr-labs/openvm.git?branch=1.4.0-wip)",
+ "openvm-algebra-moduli-macros 1.4.0 (git+https://github.com/powdr-labs/openvm.git?branch=1.4.0-wip)",
+ "openvm-custom-insn 0.1.0 (git+https://github.com/powdr-labs/openvm.git?branch=1.4.0-wip)",
+ "openvm-ecc-guest 1.4.0 (git+https://github.com/powdr-labs/openvm.git?branch=1.4.0-wip)",
+ "rand 0.8.5",
+ "serde",
+ "strum_macros 0.26.4",
+]
+
+[[package]]
+name = "openvm-pairing-guest"
+version = "1.4.0"
+source = "git+https://github.com/powdr-labs/openvm.git?rev=4e8874b#4e8874b6601bc10d8a74da33e05b2e03318bc4ff"
+dependencies = [
+ "halo2curves-axiom",
+ "hex-literal",
+ "itertools 0.14.0",
+ "lazy_static",
+ "num-bigint 0.4.6",
+ "num-traits",
+ "openvm 1.4.0 (git+https://github.com/powdr-labs/openvm.git?rev=4e8874b)",
+ "openvm-algebra-guest 1.4.0 (git+https://github.com/powdr-labs/openvm.git?rev=4e8874b)",
+ "openvm-algebra-moduli-macros 1.4.0 (git+https://github.com/powdr-labs/openvm.git?rev=4e8874b)",
+ "openvm-custom-insn 0.1.0 (git+https://github.com/powdr-labs/openvm.git?rev=4e8874b)",
+ "openvm-ecc-guest 1.4.0 (git+https://github.com/powdr-labs/openvm.git?rev=4e8874b)",
  "rand 0.8.5",
  "serde",
  "strum_macros 0.26.4",
@@ -5141,37 +5727,78 @@ dependencies = [
 
 [[package]]
 name = "openvm-pairing-transpiler"
-version = "1.3.0"
-source = "git+https://github.com/powdr-labs/openvm.git?rev=62c5d26#62c5d2682027ad7804988cb4e09e5a81338aebe8"
+version = "1.4.0"
+source = "git+https://github.com/powdr-labs/openvm.git?branch=1.4.0-wip#da4fe82de9ad393262650d70041f78f38d8d0efe"
 dependencies = [
- "openvm-instructions",
- "openvm-instructions-derive",
- "openvm-pairing-guest",
- "openvm-stark-backend",
- "openvm-transpiler",
+ "openvm-instructions 1.4.0 (git+https://github.com/powdr-labs/openvm.git?branch=1.4.0-wip)",
+ "openvm-pairing-guest 1.4.0 (git+https://github.com/powdr-labs/openvm.git?branch=1.4.0-wip)",
+ "openvm-stark-backend 1.2.0 (git+https://github.com/powdr-labs/stark-backend.git?branch=1.2.0-wip)",
+ "openvm-transpiler 1.4.0 (git+https://github.com/powdr-labs/openvm.git?branch=1.4.0-wip)",
+ "rrs-lib",
+ "strum 0.26.3",
+]
+
+[[package]]
+name = "openvm-pairing-transpiler"
+version = "1.4.0"
+source = "git+https://github.com/powdr-labs/openvm.git?rev=4e8874b#4e8874b6601bc10d8a74da33e05b2e03318bc4ff"
+dependencies = [
+ "openvm-instructions 1.4.0 (git+https://github.com/powdr-labs/openvm.git?rev=4e8874b)",
+ "openvm-pairing-guest 1.4.0 (git+https://github.com/powdr-labs/openvm.git?rev=4e8874b)",
+ "openvm-stark-backend 1.2.0 (git+https://github.com/powdr-labs/stark-backend.git?branch=1.2.0-wip)",
+ "openvm-transpiler 1.4.0 (git+https://github.com/powdr-labs/openvm.git?rev=4e8874b)",
  "rrs-lib",
  "strum 0.26.3",
 ]
 
 [[package]]
 name = "openvm-platform"
-version = "1.3.0"
-source = "git+https://github.com/powdr-labs/openvm.git?rev=62c5d26#62c5d2682027ad7804988cb4e09e5a81338aebe8"
+version = "1.4.0"
+source = "git+https://github.com/powdr-labs/openvm.git?branch=1.4.0-wip#da4fe82de9ad393262650d70041f78f38d8d0efe"
 dependencies = [
  "libm",
- "openvm-custom-insn",
- "openvm-rv32im-guest",
+ "openvm-custom-insn 0.1.0 (git+https://github.com/powdr-labs/openvm.git?branch=1.4.0-wip)",
+ "openvm-rv32im-guest 1.4.0 (git+https://github.com/powdr-labs/openvm.git?branch=1.4.0-wip)",
+]
+
+[[package]]
+name = "openvm-platform"
+version = "1.4.0"
+source = "git+https://github.com/powdr-labs/openvm.git?rev=4e8874b#4e8874b6601bc10d8a74da33e05b2e03318bc4ff"
+dependencies = [
+ "libm",
+ "openvm-custom-insn 0.1.0 (git+https://github.com/powdr-labs/openvm.git?rev=4e8874b)",
+ "openvm-rv32im-guest 1.4.0 (git+https://github.com/powdr-labs/openvm.git?rev=4e8874b)",
 ]
 
 [[package]]
 name = "openvm-poseidon2-air"
-version = "1.3.0"
-source = "git+https://github.com/powdr-labs/openvm.git?rev=62c5d26#62c5d2682027ad7804988cb4e09e5a81338aebe8"
+version = "1.4.0"
+source = "git+https://github.com/powdr-labs/openvm.git?branch=1.4.0-wip#da4fe82de9ad393262650d70041f78f38d8d0efe"
 dependencies = [
  "derivative",
  "lazy_static",
- "openvm-stark-backend",
- "openvm-stark-sdk",
+ "openvm-cuda-builder",
+ "openvm-stark-backend 1.2.0 (git+https://github.com/powdr-labs/stark-backend.git?branch=1.2.0-wip)",
+ "openvm-stark-sdk 1.2.0 (git+https://github.com/powdr-labs/stark-backend.git?branch=1.2.0-wip)",
+ "p3-monty-31 0.1.0 (git+https://github.com/Plonky3/Plonky3.git?rev=539bbc84085efb609f4f62cb03cf49588388abdb)",
+ "p3-poseidon2 0.1.0 (git+https://github.com/Plonky3/Plonky3.git?rev=539bbc84085efb609f4f62cb03cf49588388abdb)",
+ "p3-poseidon2-air",
+ "p3-symmetric 0.1.0 (git+https://github.com/Plonky3/Plonky3.git?rev=539bbc84085efb609f4f62cb03cf49588388abdb)",
+ "rand 0.8.5",
+ "zkhash",
+]
+
+[[package]]
+name = "openvm-poseidon2-air"
+version = "1.4.0"
+source = "git+https://github.com/powdr-labs/openvm.git?rev=4e8874b#4e8874b6601bc10d8a74da33e05b2e03318bc4ff"
+dependencies = [
+ "derivative",
+ "lazy_static",
+ "openvm-cuda-builder",
+ "openvm-stark-backend 1.2.0 (git+https://github.com/powdr-labs/stark-backend.git?branch=1.2.0-wip)",
+ "openvm-stark-sdk 1.2.0 (git+https://github.com/powdr-labs/stark-backend.git?branch=1.2.0-wip)",
  "p3-monty-31 0.1.0 (git+https://github.com/Plonky3/Plonky3.git?rev=539bbc84085efb609f4f62cb03cf49588388abdb)",
  "p3-poseidon2 0.1.0 (git+https://github.com/Plonky3/Plonky3.git?rev=539bbc84085efb609f4f62cb03cf49588388abdb)",
  "p3-poseidon2-air",
@@ -5215,22 +5842,22 @@ dependencies = [
  "halo2-axiom",
  "hex",
  "metrics",
- "openvm",
- "openvm-algebra-circuit",
+ "openvm 1.4.0 (git+https://github.com/powdr-labs/openvm.git?rev=4e8874b)",
+ "openvm-algebra-circuit 1.4.0 (git+https://github.com/powdr-labs/openvm.git?rev=4e8874b)",
  "openvm-benchmarks-prove",
- "openvm-bigint-circuit",
- "openvm-build",
- "openvm-circuit",
+ "openvm-bigint-circuit 1.4.0 (git+https://github.com/powdr-labs/openvm.git?rev=4e8874b)",
+ "openvm-build 1.4.0 (git+https://github.com/powdr-labs/openvm.git?rev=4e8874b)",
+ "openvm-circuit 1.4.0 (git+https://github.com/powdr-labs/openvm.git?rev=4e8874b)",
  "openvm-client-executor",
- "openvm-ecc-circuit",
+ "openvm-ecc-circuit 1.4.0 (git+https://github.com/powdr-labs/openvm.git?rev=4e8874b)",
  "openvm-host-executor",
- "openvm-native-compiler",
- "openvm-native-recursion",
- "openvm-pairing-circuit",
- "openvm-rv32im-circuit",
- "openvm-sdk",
- "openvm-stark-sdk",
- "openvm-transpiler",
+ "openvm-native-compiler 1.4.0 (git+https://github.com/powdr-labs/openvm.git?rev=4e8874b)",
+ "openvm-native-recursion 1.4.0 (git+https://github.com/powdr-labs/openvm.git?rev=4e8874b)",
+ "openvm-pairing-circuit 1.4.0 (git+https://github.com/powdr-labs/openvm.git?rev=4e8874b)",
+ "openvm-rv32im-circuit 1.4.0 (git+https://github.com/powdr-labs/openvm.git?rev=4e8874b)",
+ "openvm-sdk 1.4.0 (git+https://github.com/powdr-labs/openvm.git?rev=4e8874b)",
+ "openvm-stark-sdk 1.2.0 (git+https://github.com/powdr-labs/stark-backend.git?rev=e27de8b)",
+ "openvm-transpiler 1.4.0 (git+https://github.com/powdr-labs/openvm.git?rev=4e8874b)",
  "powdr-autoprecompiles",
  "powdr-number",
  "powdr-openvm",
@@ -5240,7 +5867,7 @@ dependencies = [
  "serde_json",
  "tokio",
  "tracing",
- "tracing-subscriber 0.3.19",
+ "tracing-subscriber 0.3.20",
  "url",
 ]
 
@@ -5251,7 +5878,7 @@ dependencies = [
  "clap_builder",
  "eyre",
  "openvm-reth-benchmark",
- "openvm-stark-sdk",
+ "openvm-stark-sdk 1.2.0 (git+https://github.com/powdr-labs/stark-backend.git?rev=e27de8b)",
 ]
 
 [[package]]
@@ -5275,69 +5902,134 @@ dependencies = [
 
 [[package]]
 name = "openvm-rv32-adapters"
-version = "1.3.0"
-source = "git+https://github.com/powdr-labs/openvm.git?rev=62c5d26#62c5d2682027ad7804988cb4e09e5a81338aebe8"
+version = "1.4.0"
+source = "git+https://github.com/powdr-labs/openvm.git?branch=1.4.0-wip#da4fe82de9ad393262650d70041f78f38d8d0efe"
 dependencies = [
  "derive-new 0.6.0",
  "itertools 0.14.0",
- "openvm-circuit",
- "openvm-circuit-primitives",
- "openvm-circuit-primitives-derive",
- "openvm-instructions",
- "openvm-rv32im-circuit",
- "openvm-stark-backend",
- "openvm-stark-sdk",
+ "openvm-circuit 1.4.0 (git+https://github.com/powdr-labs/openvm.git?branch=1.4.0-wip)",
+ "openvm-circuit-primitives 1.4.0 (git+https://github.com/powdr-labs/openvm.git?branch=1.4.0-wip)",
+ "openvm-circuit-primitives-derive 1.4.0 (git+https://github.com/powdr-labs/openvm.git?branch=1.4.0-wip)",
+ "openvm-instructions 1.4.0 (git+https://github.com/powdr-labs/openvm.git?branch=1.4.0-wip)",
+ "openvm-rv32im-circuit 1.4.0 (git+https://github.com/powdr-labs/openvm.git?branch=1.4.0-wip)",
+ "openvm-stark-backend 1.2.0 (git+https://github.com/powdr-labs/stark-backend.git?branch=1.2.0-wip)",
+ "openvm-stark-sdk 1.2.0 (git+https://github.com/powdr-labs/stark-backend.git?branch=1.2.0-wip)",
  "rand 0.8.5",
- "serde",
- "serde-big-array",
- "serde_with",
+ "struct-reflection",
+]
+
+[[package]]
+name = "openvm-rv32-adapters"
+version = "1.4.0"
+source = "git+https://github.com/powdr-labs/openvm.git?rev=4e8874b#4e8874b6601bc10d8a74da33e05b2e03318bc4ff"
+dependencies = [
+ "derive-new 0.6.0",
+ "itertools 0.14.0",
+ "openvm-circuit 1.4.0 (git+https://github.com/powdr-labs/openvm.git?rev=4e8874b)",
+ "openvm-circuit-primitives 1.4.0 (git+https://github.com/powdr-labs/openvm.git?rev=4e8874b)",
+ "openvm-circuit-primitives-derive 1.4.0 (git+https://github.com/powdr-labs/openvm.git?rev=4e8874b)",
+ "openvm-instructions 1.4.0 (git+https://github.com/powdr-labs/openvm.git?rev=4e8874b)",
+ "openvm-rv32im-circuit 1.4.0 (git+https://github.com/powdr-labs/openvm.git?rev=4e8874b)",
+ "openvm-stark-backend 1.2.0 (git+https://github.com/powdr-labs/stark-backend.git?branch=1.2.0-wip)",
+ "openvm-stark-sdk 1.2.0 (git+https://github.com/powdr-labs/stark-backend.git?branch=1.2.0-wip)",
+ "rand 0.8.5",
  "struct-reflection",
 ]
 
 [[package]]
 name = "openvm-rv32im-circuit"
-version = "1.3.0"
-source = "git+https://github.com/powdr-labs/openvm.git?rev=62c5d26#62c5d2682027ad7804988cb4e09e5a81338aebe8"
+version = "1.4.0"
+source = "git+https://github.com/powdr-labs/openvm.git?branch=1.4.0-wip#da4fe82de9ad393262650d70041f78f38d8d0efe"
 dependencies = [
+ "cfg-if",
  "derive-new 0.6.0",
  "derive_more 1.0.0",
  "eyre",
  "num-bigint 0.4.6",
  "num-integer",
- "openvm-circuit",
- "openvm-circuit-derive",
- "openvm-circuit-primitives",
- "openvm-circuit-primitives-derive",
- "openvm-instructions",
- "openvm-rv32im-transpiler",
- "openvm-stark-backend",
+ "openvm-circuit 1.4.0 (git+https://github.com/powdr-labs/openvm.git?branch=1.4.0-wip)",
+ "openvm-circuit-derive 1.4.0 (git+https://github.com/powdr-labs/openvm.git?branch=1.4.0-wip)",
+ "openvm-circuit-primitives 1.4.0 (git+https://github.com/powdr-labs/openvm.git?branch=1.4.0-wip)",
+ "openvm-circuit-primitives-derive 1.4.0 (git+https://github.com/powdr-labs/openvm.git?branch=1.4.0-wip)",
+ "openvm-instructions 1.4.0 (git+https://github.com/powdr-labs/openvm.git?branch=1.4.0-wip)",
+ "openvm-rv32im-transpiler 1.4.0 (git+https://github.com/powdr-labs/openvm.git?branch=1.4.0-wip)",
+ "openvm-stark-backend 1.2.0 (git+https://github.com/powdr-labs/stark-backend.git?branch=1.2.0-wip)",
  "rand 0.8.5",
  "serde",
- "serde-big-array",
+ "struct-reflection",
+ "strum 0.26.3",
+]
+
+[[package]]
+name = "openvm-rv32im-circuit"
+version = "1.4.0"
+source = "git+https://github.com/powdr-labs/openvm.git?rev=4e8874b#4e8874b6601bc10d8a74da33e05b2e03318bc4ff"
+dependencies = [
+ "cfg-if",
+ "derive-new 0.6.0",
+ "derive_more 1.0.0",
+ "eyre",
+ "num-bigint 0.4.6",
+ "num-integer",
+ "openvm-circuit 1.4.0 (git+https://github.com/powdr-labs/openvm.git?rev=4e8874b)",
+ "openvm-circuit-derive 1.4.0 (git+https://github.com/powdr-labs/openvm.git?rev=4e8874b)",
+ "openvm-circuit-primitives 1.4.0 (git+https://github.com/powdr-labs/openvm.git?rev=4e8874b)",
+ "openvm-circuit-primitives-derive 1.4.0 (git+https://github.com/powdr-labs/openvm.git?rev=4e8874b)",
+ "openvm-instructions 1.4.0 (git+https://github.com/powdr-labs/openvm.git?rev=4e8874b)",
+ "openvm-rv32im-transpiler 1.4.0 (git+https://github.com/powdr-labs/openvm.git?rev=4e8874b)",
+ "openvm-stark-backend 1.2.0 (git+https://github.com/powdr-labs/stark-backend.git?branch=1.2.0-wip)",
+ "rand 0.8.5",
+ "serde",
  "struct-reflection",
  "strum 0.26.3",
 ]
 
 [[package]]
 name = "openvm-rv32im-guest"
-version = "1.3.0"
-source = "git+https://github.com/powdr-labs/openvm.git?rev=62c5d26#62c5d2682027ad7804988cb4e09e5a81338aebe8"
+version = "1.4.0"
+source = "git+https://github.com/powdr-labs/openvm.git?branch=1.4.0-wip#da4fe82de9ad393262650d70041f78f38d8d0efe"
 dependencies = [
- "openvm-custom-insn",
+ "openvm-custom-insn 0.1.0 (git+https://github.com/powdr-labs/openvm.git?branch=1.4.0-wip)",
+ "p3-field 0.1.0 (git+https://github.com/Plonky3/Plonky3.git?rev=539bbc84085efb609f4f62cb03cf49588388abdb)",
+ "strum_macros 0.26.4",
+]
+
+[[package]]
+name = "openvm-rv32im-guest"
+version = "1.4.0"
+source = "git+https://github.com/powdr-labs/openvm.git?rev=4e8874b#4e8874b6601bc10d8a74da33e05b2e03318bc4ff"
+dependencies = [
+ "openvm-custom-insn 0.1.0 (git+https://github.com/powdr-labs/openvm.git?rev=4e8874b)",
  "p3-field 0.1.0 (git+https://github.com/Plonky3/Plonky3.git?rev=539bbc84085efb609f4f62cb03cf49588388abdb)",
  "strum_macros 0.26.4",
 ]
 
 [[package]]
 name = "openvm-rv32im-transpiler"
-version = "1.3.0"
-source = "git+https://github.com/powdr-labs/openvm.git?rev=62c5d26#62c5d2682027ad7804988cb4e09e5a81338aebe8"
+version = "1.4.0"
+source = "git+https://github.com/powdr-labs/openvm.git?branch=1.4.0-wip#da4fe82de9ad393262650d70041f78f38d8d0efe"
 dependencies = [
- "openvm-instructions",
- "openvm-instructions-derive",
- "openvm-rv32im-guest",
- "openvm-stark-backend",
- "openvm-transpiler",
+ "openvm-instructions 1.4.0 (git+https://github.com/powdr-labs/openvm.git?branch=1.4.0-wip)",
+ "openvm-instructions-derive 1.4.0 (git+https://github.com/powdr-labs/openvm.git?branch=1.4.0-wip)",
+ "openvm-rv32im-guest 1.4.0 (git+https://github.com/powdr-labs/openvm.git?branch=1.4.0-wip)",
+ "openvm-stark-backend 1.2.0 (git+https://github.com/powdr-labs/stark-backend.git?branch=1.2.0-wip)",
+ "openvm-transpiler 1.4.0 (git+https://github.com/powdr-labs/openvm.git?branch=1.4.0-wip)",
+ "rrs-lib",
+ "serde",
+ "strum 0.26.3",
+ "tracing",
+]
+
+[[package]]
+name = "openvm-rv32im-transpiler"
+version = "1.4.0"
+source = "git+https://github.com/powdr-labs/openvm.git?rev=4e8874b#4e8874b6601bc10d8a74da33e05b2e03318bc4ff"
+dependencies = [
+ "openvm-instructions 1.4.0 (git+https://github.com/powdr-labs/openvm.git?rev=4e8874b)",
+ "openvm-instructions-derive 1.4.0 (git+https://github.com/powdr-labs/openvm.git?rev=4e8874b)",
+ "openvm-rv32im-guest 1.4.0 (git+https://github.com/powdr-labs/openvm.git?rev=4e8874b)",
+ "openvm-stark-backend 1.2.0 (git+https://github.com/powdr-labs/stark-backend.git?branch=1.2.0-wip)",
+ "openvm-transpiler 1.4.0 (git+https://github.com/powdr-labs/openvm.git?rev=4e8874b)",
  "rrs-lib",
  "serde",
  "strum 0.26.3",
@@ -5346,13 +6038,69 @@ dependencies = [
 
 [[package]]
 name = "openvm-sdk"
-version = "1.3.0"
-source = "git+https://github.com/powdr-labs/openvm.git?rev=62c5d26#62c5d2682027ad7804988cb4e09e5a81338aebe8"
+version = "1.4.0"
+source = "git+https://github.com/powdr-labs/openvm.git?branch=1.4.0-wip#da4fe82de9ad393262650d70041f78f38d8d0efe"
 dependencies = [
- "alloy-sol-types 0.8.25",
- "async-trait",
  "bitcode",
  "bon",
+ "cfg-if",
+ "clap",
+ "derivative",
+ "derive_more 1.0.0",
+ "eyre",
+ "getset",
+ "hex",
+ "itertools 0.14.0",
+ "metrics",
+ "num-bigint 0.4.6",
+ "openvm 1.4.0 (git+https://github.com/powdr-labs/openvm.git?branch=1.4.0-wip)",
+ "openvm-algebra-circuit 1.4.0 (git+https://github.com/powdr-labs/openvm.git?branch=1.4.0-wip)",
+ "openvm-algebra-transpiler 1.4.0 (git+https://github.com/powdr-labs/openvm.git?branch=1.4.0-wip)",
+ "openvm-bigint-circuit 1.4.0 (git+https://github.com/powdr-labs/openvm.git?branch=1.4.0-wip)",
+ "openvm-bigint-transpiler 1.4.0 (git+https://github.com/powdr-labs/openvm.git?branch=1.4.0-wip)",
+ "openvm-build 1.4.0 (git+https://github.com/powdr-labs/openvm.git?branch=1.4.0-wip)",
+ "openvm-circuit 1.4.0 (git+https://github.com/powdr-labs/openvm.git?branch=1.4.0-wip)",
+ "openvm-continuations 1.4.0 (git+https://github.com/powdr-labs/openvm.git?branch=1.4.0-wip)",
+ "openvm-ecc-circuit 1.4.0 (git+https://github.com/powdr-labs/openvm.git?branch=1.4.0-wip)",
+ "openvm-ecc-transpiler 1.4.0 (git+https://github.com/powdr-labs/openvm.git?branch=1.4.0-wip)",
+ "openvm-keccak256-circuit 1.4.0 (git+https://github.com/powdr-labs/openvm.git?branch=1.4.0-wip)",
+ "openvm-keccak256-transpiler 1.4.0 (git+https://github.com/powdr-labs/openvm.git?branch=1.4.0-wip)",
+ "openvm-native-circuit 1.4.0 (git+https://github.com/powdr-labs/openvm.git?branch=1.4.0-wip)",
+ "openvm-native-compiler 1.4.0 (git+https://github.com/powdr-labs/openvm.git?branch=1.4.0-wip)",
+ "openvm-native-recursion 1.4.0 (git+https://github.com/powdr-labs/openvm.git?branch=1.4.0-wip)",
+ "openvm-native-transpiler 1.4.0 (git+https://github.com/powdr-labs/openvm.git?branch=1.4.0-wip)",
+ "openvm-pairing-circuit 1.4.0 (git+https://github.com/powdr-labs/openvm.git?branch=1.4.0-wip)",
+ "openvm-pairing-transpiler 1.4.0 (git+https://github.com/powdr-labs/openvm.git?branch=1.4.0-wip)",
+ "openvm-rv32im-circuit 1.4.0 (git+https://github.com/powdr-labs/openvm.git?branch=1.4.0-wip)",
+ "openvm-rv32im-transpiler 1.4.0 (git+https://github.com/powdr-labs/openvm.git?branch=1.4.0-wip)",
+ "openvm-sha256-circuit 1.4.0 (git+https://github.com/powdr-labs/openvm.git?branch=1.4.0-wip)",
+ "openvm-sha256-transpiler 1.4.0 (git+https://github.com/powdr-labs/openvm.git?branch=1.4.0-wip)",
+ "openvm-stark-backend 1.2.0 (git+https://github.com/powdr-labs/stark-backend.git?branch=1.2.0-wip)",
+ "openvm-stark-sdk 1.2.0 (git+https://github.com/powdr-labs/stark-backend.git?branch=1.2.0-wip)",
+ "openvm-transpiler 1.4.0 (git+https://github.com/powdr-labs/openvm.git?branch=1.4.0-wip)",
+ "p3-fri",
+ "rand 0.8.5",
+ "rrs-lib",
+ "serde",
+ "serde_json",
+ "serde_with",
+ "snark-verifier",
+ "snark-verifier-sdk",
+ "tempfile",
+ "thiserror 1.0.69",
+ "toml 0.8.23",
+ "tracing",
+]
+
+[[package]]
+name = "openvm-sdk"
+version = "1.4.0"
+source = "git+https://github.com/powdr-labs/openvm.git?rev=4e8874b#4e8874b6601bc10d8a74da33e05b2e03318bc4ff"
+dependencies = [
+ "alloy-sol-types 0.8.25",
+ "bitcode",
+ "bon",
+ "cfg-if",
  "clap",
  "derivative",
  "derive_more 1.0.0",
@@ -5363,32 +6111,33 @@ dependencies = [
  "itertools 0.14.0",
  "metrics",
  "num-bigint 0.4.6",
- "openvm",
- "openvm-algebra-circuit",
- "openvm-algebra-transpiler",
- "openvm-bigint-circuit",
- "openvm-bigint-transpiler",
- "openvm-build",
- "openvm-circuit",
- "openvm-continuations",
- "openvm-ecc-circuit",
- "openvm-ecc-transpiler",
- "openvm-keccak256-circuit",
- "openvm-keccak256-transpiler",
- "openvm-native-circuit",
- "openvm-native-compiler",
- "openvm-native-recursion",
- "openvm-native-transpiler",
- "openvm-pairing-circuit",
- "openvm-pairing-transpiler",
- "openvm-rv32im-circuit",
- "openvm-rv32im-transpiler",
- "openvm-sha256-circuit",
- "openvm-sha256-transpiler",
- "openvm-stark-backend",
- "openvm-stark-sdk",
- "openvm-transpiler",
+ "openvm 1.4.0 (git+https://github.com/powdr-labs/openvm.git?rev=4e8874b)",
+ "openvm-algebra-circuit 1.4.0 (git+https://github.com/powdr-labs/openvm.git?rev=4e8874b)",
+ "openvm-algebra-transpiler 1.4.0 (git+https://github.com/powdr-labs/openvm.git?rev=4e8874b)",
+ "openvm-bigint-circuit 1.4.0 (git+https://github.com/powdr-labs/openvm.git?rev=4e8874b)",
+ "openvm-bigint-transpiler 1.4.0 (git+https://github.com/powdr-labs/openvm.git?rev=4e8874b)",
+ "openvm-build 1.4.0 (git+https://github.com/powdr-labs/openvm.git?rev=4e8874b)",
+ "openvm-circuit 1.4.0 (git+https://github.com/powdr-labs/openvm.git?rev=4e8874b)",
+ "openvm-continuations 1.4.0 (git+https://github.com/powdr-labs/openvm.git?rev=4e8874b)",
+ "openvm-ecc-circuit 1.4.0 (git+https://github.com/powdr-labs/openvm.git?rev=4e8874b)",
+ "openvm-ecc-transpiler 1.4.0 (git+https://github.com/powdr-labs/openvm.git?rev=4e8874b)",
+ "openvm-keccak256-circuit 1.4.0 (git+https://github.com/powdr-labs/openvm.git?rev=4e8874b)",
+ "openvm-keccak256-transpiler 1.4.0 (git+https://github.com/powdr-labs/openvm.git?rev=4e8874b)",
+ "openvm-native-circuit 1.4.0 (git+https://github.com/powdr-labs/openvm.git?rev=4e8874b)",
+ "openvm-native-compiler 1.4.0 (git+https://github.com/powdr-labs/openvm.git?rev=4e8874b)",
+ "openvm-native-recursion 1.4.0 (git+https://github.com/powdr-labs/openvm.git?rev=4e8874b)",
+ "openvm-native-transpiler 1.4.0 (git+https://github.com/powdr-labs/openvm.git?rev=4e8874b)",
+ "openvm-pairing-circuit 1.4.0 (git+https://github.com/powdr-labs/openvm.git?rev=4e8874b)",
+ "openvm-pairing-transpiler 1.4.0 (git+https://github.com/powdr-labs/openvm.git?rev=4e8874b)",
+ "openvm-rv32im-circuit 1.4.0 (git+https://github.com/powdr-labs/openvm.git?rev=4e8874b)",
+ "openvm-rv32im-transpiler 1.4.0 (git+https://github.com/powdr-labs/openvm.git?rev=4e8874b)",
+ "openvm-sha256-circuit 1.4.0 (git+https://github.com/powdr-labs/openvm.git?rev=4e8874b)",
+ "openvm-sha256-transpiler 1.4.0 (git+https://github.com/powdr-labs/openvm.git?rev=4e8874b)",
+ "openvm-stark-backend 1.2.0 (git+https://github.com/powdr-labs/stark-backend.git?branch=1.2.0-wip)",
+ "openvm-stark-sdk 1.2.0 (git+https://github.com/powdr-labs/stark-backend.git?branch=1.2.0-wip)",
+ "openvm-transpiler 1.4.0 (git+https://github.com/powdr-labs/openvm.git?rev=4e8874b)",
  "p3-fri",
+ "rand 0.8.5",
  "rrs-lib",
  "serde",
  "serde_json",
@@ -5397,37 +6146,72 @@ dependencies = [
  "snark-verifier-sdk",
  "tempfile",
  "thiserror 1.0.69",
+ "toml 0.8.23",
  "tracing",
 ]
 
 [[package]]
 name = "openvm-sha256-air"
-version = "1.3.0"
-source = "git+https://github.com/powdr-labs/openvm.git?rev=62c5d26#62c5d2682027ad7804988cb4e09e5a81338aebe8"
+version = "1.4.0"
+source = "git+https://github.com/powdr-labs/openvm.git?branch=1.4.0-wip#da4fe82de9ad393262650d70041f78f38d8d0efe"
 dependencies = [
- "openvm-circuit-primitives",
- "openvm-stark-backend",
+ "openvm-circuit-primitives 1.4.0 (git+https://github.com/powdr-labs/openvm.git?branch=1.4.0-wip)",
+ "openvm-stark-backend 1.2.0 (git+https://github.com/powdr-labs/stark-backend.git?branch=1.2.0-wip)",
+ "rand 0.8.5",
+ "sha2 0.10.9",
+]
+
+[[package]]
+name = "openvm-sha256-air"
+version = "1.4.0"
+source = "git+https://github.com/powdr-labs/openvm.git?rev=4e8874b#4e8874b6601bc10d8a74da33e05b2e03318bc4ff"
+dependencies = [
+ "openvm-circuit-primitives 1.4.0 (git+https://github.com/powdr-labs/openvm.git?rev=4e8874b)",
+ "openvm-stark-backend 1.2.0 (git+https://github.com/powdr-labs/stark-backend.git?branch=1.2.0-wip)",
  "rand 0.8.5",
  "sha2 0.10.9",
 ]
 
 [[package]]
 name = "openvm-sha256-circuit"
-version = "1.3.0"
-source = "git+https://github.com/powdr-labs/openvm.git?rev=62c5d26#62c5d2682027ad7804988cb4e09e5a81338aebe8"
+version = "1.4.0"
+source = "git+https://github.com/powdr-labs/openvm.git?branch=1.4.0-wip#da4fe82de9ad393262650d70041f78f38d8d0efe"
 dependencies = [
+ "cfg-if",
  "derive-new 0.6.0",
  "derive_more 1.0.0",
- "openvm-circuit",
- "openvm-circuit-derive",
- "openvm-circuit-primitives",
- "openvm-circuit-primitives-derive",
- "openvm-instructions",
- "openvm-rv32im-circuit",
- "openvm-sha256-air",
- "openvm-sha256-transpiler",
- "openvm-stark-backend",
- "openvm-stark-sdk",
+ "openvm-circuit 1.4.0 (git+https://github.com/powdr-labs/openvm.git?branch=1.4.0-wip)",
+ "openvm-circuit-derive 1.4.0 (git+https://github.com/powdr-labs/openvm.git?branch=1.4.0-wip)",
+ "openvm-circuit-primitives 1.4.0 (git+https://github.com/powdr-labs/openvm.git?branch=1.4.0-wip)",
+ "openvm-instructions 1.4.0 (git+https://github.com/powdr-labs/openvm.git?branch=1.4.0-wip)",
+ "openvm-rv32im-circuit 1.4.0 (git+https://github.com/powdr-labs/openvm.git?branch=1.4.0-wip)",
+ "openvm-sha256-air 1.4.0 (git+https://github.com/powdr-labs/openvm.git?branch=1.4.0-wip)",
+ "openvm-sha256-transpiler 1.4.0 (git+https://github.com/powdr-labs/openvm.git?branch=1.4.0-wip)",
+ "openvm-stark-backend 1.2.0 (git+https://github.com/powdr-labs/stark-backend.git?branch=1.2.0-wip)",
+ "openvm-stark-sdk 1.2.0 (git+https://github.com/powdr-labs/stark-backend.git?branch=1.2.0-wip)",
+ "rand 0.8.5",
+ "serde",
+ "sha2 0.10.9",
+ "strum 0.26.3",
+]
+
+[[package]]
+name = "openvm-sha256-circuit"
+version = "1.4.0"
+source = "git+https://github.com/powdr-labs/openvm.git?rev=4e8874b#4e8874b6601bc10d8a74da33e05b2e03318bc4ff"
+dependencies = [
+ "cfg-if",
+ "derive-new 0.6.0",
+ "derive_more 1.0.0",
+ "openvm-circuit 1.4.0 (git+https://github.com/powdr-labs/openvm.git?rev=4e8874b)",
+ "openvm-circuit-derive 1.4.0 (git+https://github.com/powdr-labs/openvm.git?rev=4e8874b)",
+ "openvm-circuit-primitives 1.4.0 (git+https://github.com/powdr-labs/openvm.git?rev=4e8874b)",
+ "openvm-instructions 1.4.0 (git+https://github.com/powdr-labs/openvm.git?rev=4e8874b)",
+ "openvm-rv32im-circuit 1.4.0 (git+https://github.com/powdr-labs/openvm.git?rev=4e8874b)",
+ "openvm-sha256-air 1.4.0 (git+https://github.com/powdr-labs/openvm.git?rev=4e8874b)",
+ "openvm-sha256-transpiler 1.4.0 (git+https://github.com/powdr-labs/openvm.git?rev=4e8874b)",
+ "openvm-stark-backend 1.2.0 (git+https://github.com/powdr-labs/stark-backend.git?branch=1.2.0-wip)",
+ "openvm-stark-sdk 1.2.0 (git+https://github.com/powdr-labs/stark-backend.git?branch=1.2.0-wip)",
  "rand 0.8.5",
  "serde",
  "sha2 0.10.9",
@@ -5436,30 +6220,52 @@ dependencies = [
 
 [[package]]
 name = "openvm-sha256-guest"
-version = "1.3.0"
-source = "git+https://github.com/powdr-labs/openvm.git?rev=62c5d26#62c5d2682027ad7804988cb4e09e5a81338aebe8"
+version = "1.4.0"
+source = "git+https://github.com/powdr-labs/openvm.git?branch=1.4.0-wip#da4fe82de9ad393262650d70041f78f38d8d0efe"
 dependencies = [
- "openvm-platform",
+ "openvm-platform 1.4.0 (git+https://github.com/powdr-labs/openvm.git?branch=1.4.0-wip)",
+]
+
+[[package]]
+name = "openvm-sha256-guest"
+version = "1.4.0"
+source = "git+https://github.com/powdr-labs/openvm.git?rev=4e8874b#4e8874b6601bc10d8a74da33e05b2e03318bc4ff"
+dependencies = [
+ "openvm-platform 1.4.0 (git+https://github.com/powdr-labs/openvm.git?rev=4e8874b)",
 ]
 
 [[package]]
 name = "openvm-sha256-transpiler"
-version = "1.3.0"
-source = "git+https://github.com/powdr-labs/openvm.git?rev=62c5d26#62c5d2682027ad7804988cb4e09e5a81338aebe8"
+version = "1.4.0"
+source = "git+https://github.com/powdr-labs/openvm.git?branch=1.4.0-wip#da4fe82de9ad393262650d70041f78f38d8d0efe"
 dependencies = [
- "openvm-instructions",
- "openvm-instructions-derive",
- "openvm-sha256-guest",
- "openvm-stark-backend",
- "openvm-transpiler",
+ "openvm-instructions 1.4.0 (git+https://github.com/powdr-labs/openvm.git?branch=1.4.0-wip)",
+ "openvm-instructions-derive 1.4.0 (git+https://github.com/powdr-labs/openvm.git?branch=1.4.0-wip)",
+ "openvm-sha256-guest 1.4.0 (git+https://github.com/powdr-labs/openvm.git?branch=1.4.0-wip)",
+ "openvm-stark-backend 1.2.0 (git+https://github.com/powdr-labs/stark-backend.git?branch=1.2.0-wip)",
+ "openvm-transpiler 1.4.0 (git+https://github.com/powdr-labs/openvm.git?branch=1.4.0-wip)",
+ "rrs-lib",
+ "strum 0.26.3",
+]
+
+[[package]]
+name = "openvm-sha256-transpiler"
+version = "1.4.0"
+source = "git+https://github.com/powdr-labs/openvm.git?rev=4e8874b#4e8874b6601bc10d8a74da33e05b2e03318bc4ff"
+dependencies = [
+ "openvm-instructions 1.4.0 (git+https://github.com/powdr-labs/openvm.git?rev=4e8874b)",
+ "openvm-instructions-derive 1.4.0 (git+https://github.com/powdr-labs/openvm.git?rev=4e8874b)",
+ "openvm-sha256-guest 1.4.0 (git+https://github.com/powdr-labs/openvm.git?rev=4e8874b)",
+ "openvm-stark-backend 1.2.0 (git+https://github.com/powdr-labs/stark-backend.git?branch=1.2.0-wip)",
+ "openvm-transpiler 1.4.0 (git+https://github.com/powdr-labs/openvm.git?rev=4e8874b)",
  "rrs-lib",
  "strum 0.26.3",
 ]
 
 [[package]]
 name = "openvm-stark-backend"
-version = "1.1.1"
-source = "git+https://github.com/powdr-labs/stark-backend.git?rev=ee4e22b#ee4e22b859ae5af0443c769a581897715d87dae8"
+version = "1.2.0"
+source = "git+https://github.com/powdr-labs/stark-backend.git?branch=1.2.0-wip#e27de8b08d124291e87fabd2bc0226c03cc5fd97"
 dependencies = [
  "bitcode",
  "cfg-if",
@@ -5485,10 +6291,35 @@ dependencies = [
 ]
 
 [[package]]
-name = "openvm-stark-sdk"
-version = "1.1.1"
-source = "git+https://github.com/powdr-labs/stark-backend.git?rev=ee4e22b#ee4e22b859ae5af0443c769a581897715d87dae8"
+name = "openvm-stark-backend"
+version = "1.2.0"
+source = "git+https://github.com/powdr-labs/stark-backend.git?rev=e27de8b#e27de8b08d124291e87fabd2bc0226c03cc5fd97"
 dependencies = [
+ "bitcode",
+ "cfg-if",
+ "derivative",
+ "derive-new 0.7.0",
+ "itertools 0.14.0",
+ "p3-air",
+ "p3-challenger",
+ "p3-commit",
+ "p3-field 0.1.0 (git+https://github.com/Plonky3/Plonky3.git?rev=539bbc84085efb609f4f62cb03cf49588388abdb)",
+ "p3-matrix 0.1.0 (git+https://github.com/Plonky3/Plonky3.git?rev=539bbc84085efb609f4f62cb03cf49588388abdb)",
+ "p3-maybe-rayon 0.1.0 (git+https://github.com/Plonky3/Plonky3.git?rev=539bbc84085efb609f4f62cb03cf49588388abdb)",
+ "p3-uni-stark",
+ "p3-util 0.1.0 (git+https://github.com/Plonky3/Plonky3.git?rev=539bbc84085efb609f4f62cb03cf49588388abdb)",
+ "rustc-hash 2.1.1",
+ "serde",
+ "thiserror 1.0.69",
+ "tracing",
+]
+
+[[package]]
+name = "openvm-stark-sdk"
+version = "1.2.0"
+source = "git+https://github.com/powdr-labs/stark-backend.git?branch=1.2.0-wip#e27de8b08d124291e87fabd2bc0226c03cc5fd97"
+dependencies = [
+ "dashmap",
  "derivative",
  "derive_more 0.99.20",
  "ff 0.13.1",
@@ -5496,7 +6327,7 @@ dependencies = [
  "metrics",
  "metrics-tracing-context",
  "metrics-util",
- "openvm-stark-backend",
+ "openvm-stark-backend 1.2.0 (git+https://github.com/powdr-labs/stark-backend.git?branch=1.2.0-wip)",
  "p3-baby-bear 0.1.0 (git+https://github.com/Plonky3/Plonky3.git?rev=539bbc84085efb609f4f62cb03cf49588388abdb)",
  "p3-blake3",
  "p3-bn254-fr",
@@ -5516,20 +6347,71 @@ dependencies = [
  "toml 0.8.23",
  "tracing",
  "tracing-forest",
- "tracing-subscriber 0.3.19",
+ "tracing-subscriber 0.3.20",
+ "zkhash",
+]
+
+[[package]]
+name = "openvm-stark-sdk"
+version = "1.2.0"
+source = "git+https://github.com/powdr-labs/stark-backend.git?rev=e27de8b#e27de8b08d124291e87fabd2bc0226c03cc5fd97"
+dependencies = [
+ "dashmap",
+ "derivative",
+ "derive_more 0.99.20",
+ "ff 0.13.1",
+ "itertools 0.14.0",
+ "metrics",
+ "metrics-tracing-context",
+ "metrics-util",
+ "openvm-stark-backend 1.2.0 (git+https://github.com/powdr-labs/stark-backend.git?rev=e27de8b)",
+ "p3-baby-bear 0.1.0 (git+https://github.com/Plonky3/Plonky3.git?rev=539bbc84085efb609f4f62cb03cf49588388abdb)",
+ "p3-blake3",
+ "p3-bn254-fr",
+ "p3-dft 0.1.0 (git+https://github.com/Plonky3/Plonky3.git?rev=539bbc84085efb609f4f62cb03cf49588388abdb)",
+ "p3-fri",
+ "p3-goldilocks",
+ "p3-keccak",
+ "p3-koala-bear 0.1.0 (git+https://github.com/Plonky3/Plonky3.git?rev=539bbc84085efb609f4f62cb03cf49588388abdb)",
+ "p3-merkle-tree",
+ "p3-poseidon",
+ "p3-poseidon2 0.1.0 (git+https://github.com/Plonky3/Plonky3.git?rev=539bbc84085efb609f4f62cb03cf49588388abdb)",
+ "p3-symmetric 0.1.0 (git+https://github.com/Plonky3/Plonky3.git?rev=539bbc84085efb609f4f62cb03cf49588388abdb)",
+ "rand 0.8.5",
+ "serde",
+ "serde_json",
+ "static_assertions",
+ "toml 0.8.23",
+ "tracing",
+ "tracing-forest",
+ "tracing-subscriber 0.3.20",
  "zkhash",
 ]
 
 [[package]]
 name = "openvm-transpiler"
-version = "1.3.0"
-source = "git+https://github.com/powdr-labs/openvm.git?rev=62c5d26#62c5d2682027ad7804988cb4e09e5a81338aebe8"
+version = "1.4.0"
+source = "git+https://github.com/powdr-labs/openvm.git?branch=1.4.0-wip#da4fe82de9ad393262650d70041f78f38d8d0efe"
 dependencies = [
  "elf",
  "eyre",
- "openvm-instructions",
- "openvm-platform",
- "openvm-stark-backend",
+ "openvm-instructions 1.4.0 (git+https://github.com/powdr-labs/openvm.git?branch=1.4.0-wip)",
+ "openvm-platform 1.4.0 (git+https://github.com/powdr-labs/openvm.git?branch=1.4.0-wip)",
+ "openvm-stark-backend 1.2.0 (git+https://github.com/powdr-labs/stark-backend.git?branch=1.2.0-wip)",
+ "rrs-lib",
+ "thiserror 1.0.69",
+]
+
+[[package]]
+name = "openvm-transpiler"
+version = "1.4.0"
+source = "git+https://github.com/powdr-labs/openvm.git?rev=4e8874b#4e8874b6601bc10d8a74da33e05b2e03318bc4ff"
+dependencies = [
+ "elf",
+ "eyre",
+ "openvm-instructions 1.4.0 (git+https://github.com/powdr-labs/openvm.git?rev=4e8874b)",
+ "openvm-platform 1.4.0 (git+https://github.com/powdr-labs/openvm.git?rev=4e8874b)",
+ "openvm-stark-backend 1.2.0 (git+https://github.com/powdr-labs/stark-backend.git?branch=1.2.0-wip)",
  "rrs-lib",
  "rustc-demangle",
  "thiserror 1.0.69",
@@ -5559,12 +6441,6 @@ checksum = "7bb71e1b3fa6ca1c61f383464aaf2bb0e2f8e772a1f01d486832464de363b951"
 dependencies = [
  "num-traits",
 ]
-
-[[package]]
-name = "overload"
-version = "0.1.1"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "b15813163c1d831bf4a13c3610c05c0d03b39feb07f7e09fa234dac9b15aaf39"
 
 [[package]]
 name = "p256"
@@ -6395,7 +7271,7 @@ dependencies = [
 [[package]]
 name = "powdr-autoprecompiles"
 version = "0.1.4"
-source = "git+https://github.com/powdr-labs/powdr.git?rev=b0d4178#b0d41784779ce74da3ab3fdbdb887021d44638b8"
+source = "git+https://github.com/powdr-labs/powdr.git?rev=94dc325#94dc32566a3544bb38b944760ebf7ba2c5333d1e"
 dependencies = [
  "itertools 0.13.0",
  "log",
@@ -6410,13 +7286,13 @@ dependencies = [
  "serde_json",
  "strum 0.27.1",
  "tracing",
- "tracing-subscriber 0.3.19",
+ "tracing-subscriber 0.3.20",
 ]
 
 [[package]]
 name = "powdr-constraint-solver"
 version = "0.1.4"
-source = "git+https://github.com/powdr-labs/powdr.git?rev=b0d4178#b0d41784779ce74da3ab3fdbdb887021d44638b8"
+source = "git+https://github.com/powdr-labs/powdr.git?rev=94dc325#94dc32566a3544bb38b944760ebf7ba2c5333d1e"
 dependencies = [
  "auto_enums",
  "bitvec",
@@ -6430,7 +7306,7 @@ dependencies = [
 [[package]]
 name = "powdr-expression"
 version = "0.1.4"
-source = "git+https://github.com/powdr-labs/powdr.git?rev=b0d4178#b0d41784779ce74da3ab3fdbdb887021d44638b8"
+source = "git+https://github.com/powdr-labs/powdr.git?rev=94dc325#94dc32566a3544bb38b944760ebf7ba2c5333d1e"
 dependencies = [
  "derive_more 0.99.20",
  "itertools 0.13.0",
@@ -6443,12 +7319,12 @@ dependencies = [
 [[package]]
 name = "powdr-isa-utils"
 version = "0.1.4"
-source = "git+https://github.com/powdr-labs/powdr.git?rev=b0d4178#b0d41784779ce74da3ab3fdbdb887021d44638b8"
+source = "git+https://github.com/powdr-labs/powdr.git?rev=94dc325#94dc32566a3544bb38b944760ebf7ba2c5333d1e"
 
 [[package]]
 name = "powdr-number"
 version = "0.1.4"
-source = "git+https://github.com/powdr-labs/powdr.git?rev=b0d4178#b0d41784779ce74da3ab3fdbdb887021d44638b8"
+source = "git+https://github.com/powdr-labs/powdr.git?rev=94dc325#94dc32566a3544bb38b944760ebf7ba2c5333d1e"
 dependencies = [
  "ark-bn254 0.4.0",
  "ark-ff 0.4.2",
@@ -6471,7 +7347,7 @@ dependencies = [
 [[package]]
 name = "powdr-openvm"
 version = "0.1.4"
-source = "git+https://github.com/powdr-labs/powdr.git?rev=b0d4178#b0d41784779ce74da3ab3fdbdb887021d44638b8"
+source = "git+https://github.com/powdr-labs/powdr.git?rev=94dc325#94dc32566a3544bb38b944760ebf7ba2c5333d1e"
 dependencies = [
  "clap",
  "derive_more 2.0.1",
@@ -6479,35 +7355,35 @@ dependencies = [
  "itertools 0.14.0",
  "log",
  "metrics",
- "openvm",
- "openvm-algebra-circuit",
- "openvm-algebra-transpiler",
- "openvm-bigint-circuit",
- "openvm-bigint-transpiler",
- "openvm-build",
- "openvm-circuit",
- "openvm-circuit-derive",
- "openvm-circuit-primitives",
- "openvm-circuit-primitives-derive",
- "openvm-ecc-circuit",
- "openvm-ecc-transpiler",
- "openvm-instructions",
- "openvm-instructions-derive",
- "openvm-keccak256-circuit",
- "openvm-keccak256-transpiler",
- "openvm-native-circuit",
- "openvm-native-recursion",
- "openvm-pairing-circuit",
- "openvm-pairing-transpiler",
- "openvm-rv32im-circuit",
- "openvm-rv32im-guest",
- "openvm-rv32im-transpiler",
- "openvm-sdk",
- "openvm-sha256-circuit",
- "openvm-sha256-transpiler",
- "openvm-stark-backend",
- "openvm-stark-sdk",
- "openvm-transpiler",
+ "openvm 1.4.0 (git+https://github.com/powdr-labs/openvm.git?branch=1.4.0-wip)",
+ "openvm-algebra-circuit 1.4.0 (git+https://github.com/powdr-labs/openvm.git?branch=1.4.0-wip)",
+ "openvm-algebra-transpiler 1.4.0 (git+https://github.com/powdr-labs/openvm.git?branch=1.4.0-wip)",
+ "openvm-bigint-circuit 1.4.0 (git+https://github.com/powdr-labs/openvm.git?branch=1.4.0-wip)",
+ "openvm-bigint-transpiler 1.4.0 (git+https://github.com/powdr-labs/openvm.git?branch=1.4.0-wip)",
+ "openvm-build 1.4.0 (git+https://github.com/powdr-labs/openvm.git?branch=1.4.0-wip)",
+ "openvm-circuit 1.4.0 (git+https://github.com/powdr-labs/openvm.git?branch=1.4.0-wip)",
+ "openvm-circuit-derive 1.4.0 (git+https://github.com/powdr-labs/openvm.git?branch=1.4.0-wip)",
+ "openvm-circuit-primitives 1.4.0 (git+https://github.com/powdr-labs/openvm.git?branch=1.4.0-wip)",
+ "openvm-circuit-primitives-derive 1.4.0 (git+https://github.com/powdr-labs/openvm.git?branch=1.4.0-wip)",
+ "openvm-ecc-circuit 1.4.0 (git+https://github.com/powdr-labs/openvm.git?branch=1.4.0-wip)",
+ "openvm-ecc-transpiler 1.4.0 (git+https://github.com/powdr-labs/openvm.git?branch=1.4.0-wip)",
+ "openvm-instructions 1.4.0 (git+https://github.com/powdr-labs/openvm.git?branch=1.4.0-wip)",
+ "openvm-instructions-derive 1.4.0 (git+https://github.com/powdr-labs/openvm.git?branch=1.4.0-wip)",
+ "openvm-keccak256-circuit 1.4.0 (git+https://github.com/powdr-labs/openvm.git?branch=1.4.0-wip)",
+ "openvm-keccak256-transpiler 1.4.0 (git+https://github.com/powdr-labs/openvm.git?branch=1.4.0-wip)",
+ "openvm-native-circuit 1.4.0 (git+https://github.com/powdr-labs/openvm.git?branch=1.4.0-wip)",
+ "openvm-native-recursion 1.4.0 (git+https://github.com/powdr-labs/openvm.git?branch=1.4.0-wip)",
+ "openvm-pairing-circuit 1.4.0 (git+https://github.com/powdr-labs/openvm.git?branch=1.4.0-wip)",
+ "openvm-pairing-transpiler 1.4.0 (git+https://github.com/powdr-labs/openvm.git?branch=1.4.0-wip)",
+ "openvm-rv32im-circuit 1.4.0 (git+https://github.com/powdr-labs/openvm.git?branch=1.4.0-wip)",
+ "openvm-rv32im-guest 1.4.0 (git+https://github.com/powdr-labs/openvm.git?branch=1.4.0-wip)",
+ "openvm-rv32im-transpiler 1.4.0 (git+https://github.com/powdr-labs/openvm.git?branch=1.4.0-wip)",
+ "openvm-sdk 1.4.0 (git+https://github.com/powdr-labs/openvm.git?branch=1.4.0-wip)",
+ "openvm-sha256-circuit 1.4.0 (git+https://github.com/powdr-labs/openvm.git?branch=1.4.0-wip)",
+ "openvm-sha256-transpiler 1.4.0 (git+https://github.com/powdr-labs/openvm.git?branch=1.4.0-wip)",
+ "openvm-stark-backend 1.2.0 (git+https://github.com/powdr-labs/stark-backend.git?branch=1.2.0-wip)",
+ "openvm-stark-sdk 1.2.0 (git+https://github.com/powdr-labs/stark-backend.git?branch=1.2.0-wip)",
+ "openvm-transpiler 1.4.0 (git+https://github.com/powdr-labs/openvm.git?branch=1.4.0-wip)",
  "powdr-autoprecompiles",
  "powdr-constraint-solver",
  "powdr-expression",
@@ -6520,45 +7396,47 @@ dependencies = [
  "struct-reflection",
  "toml 0.8.23",
  "tracing",
- "tracing-subscriber 0.3.19",
+ "tracing-subscriber 0.3.20",
 ]
 
 [[package]]
 name = "powdr-openvm-hints-circuit"
 version = "0.1.4"
-source = "git+https://github.com/powdr-labs/powdr.git?rev=b0d4178#b0d41784779ce74da3ab3fdbdb887021d44638b8"
+source = "git+https://github.com/powdr-labs/powdr.git?rev=94dc325#94dc32566a3544bb38b944760ebf7ba2c5333d1e"
 dependencies = [
  "crypto-bigint 0.6.1",
  "elliptic-curve",
  "eyre",
- "openvm-circuit",
- "openvm-instructions",
- "openvm-rv32im-circuit",
- "openvm-stark-backend",
- "openvm-stark-sdk",
+ "openvm-circuit 1.4.0 (git+https://github.com/powdr-labs/openvm.git?branch=1.4.0-wip)",
+ "openvm-instructions 1.4.0 (git+https://github.com/powdr-labs/openvm.git?branch=1.4.0-wip)",
+ "openvm-rv32im-circuit 1.4.0 (git+https://github.com/powdr-labs/openvm.git?branch=1.4.0-wip)",
+ "openvm-stark-backend 1.2.0 (git+https://github.com/powdr-labs/stark-backend.git?branch=1.2.0-wip)",
+ "openvm-stark-sdk 1.2.0 (git+https://github.com/powdr-labs/stark-backend.git?branch=1.2.0-wip)",
  "powdr-openvm-hints-transpiler",
+ "rand 0.8.5",
+ "serde",
 ]
 
 [[package]]
 name = "powdr-openvm-hints-guest"
 version = "0.1.4"
-source = "git+https://github.com/powdr-labs/powdr.git?rev=b0d4178#b0d41784779ce74da3ab3fdbdb887021d44638b8"
+source = "git+https://github.com/powdr-labs/powdr.git?rev=94dc325#94dc32566a3544bb38b944760ebf7ba2c5333d1e"
 dependencies = [
- "openvm-custom-insn",
- "openvm-platform",
- "openvm-rv32im-guest",
+ "openvm-custom-insn 0.1.0 (git+https://github.com/powdr-labs/openvm.git?branch=1.4.0-wip)",
+ "openvm-platform 1.4.0 (git+https://github.com/powdr-labs/openvm.git?branch=1.4.0-wip)",
+ "openvm-rv32im-guest 1.4.0 (git+https://github.com/powdr-labs/openvm.git?branch=1.4.0-wip)",
  "strum_macros 0.27.1",
 ]
 
 [[package]]
 name = "powdr-openvm-hints-transpiler"
 version = "0.1.4"
-source = "git+https://github.com/powdr-labs/powdr.git?rev=b0d4178#b0d41784779ce74da3ab3fdbdb887021d44638b8"
+source = "git+https://github.com/powdr-labs/powdr.git?rev=94dc325#94dc32566a3544bb38b944760ebf7ba2c5333d1e"
 dependencies = [
- "openvm-instructions",
- "openvm-instructions-derive",
- "openvm-stark-backend",
- "openvm-transpiler",
+ "openvm-instructions 1.4.0 (git+https://github.com/powdr-labs/openvm.git?branch=1.4.0-wip)",
+ "openvm-instructions-derive 1.4.0 (git+https://github.com/powdr-labs/openvm.git?branch=1.4.0-wip)",
+ "openvm-stark-backend 1.2.0 (git+https://github.com/powdr-labs/stark-backend.git?branch=1.2.0-wip)",
+ "openvm-transpiler 1.4.0 (git+https://github.com/powdr-labs/openvm.git?branch=1.4.0-wip)",
  "powdr-openvm-hints-guest",
  "rrs-lib",
  "strum 0.27.1",
@@ -6567,7 +7445,7 @@ dependencies = [
 [[package]]
 name = "powdr-riscv-elf"
 version = "0.1.4"
-source = "git+https://github.com/powdr-labs/powdr.git?rev=b0d4178#b0d41784779ce74da3ab3fdbdb887021d44638b8"
+source = "git+https://github.com/powdr-labs/powdr.git?rev=94dc325#94dc32566a3544bb38b944760ebf7ba2c5333d1e"
 dependencies = [
  "gimli",
  "goblin",
@@ -6584,7 +7462,7 @@ dependencies = [
 [[package]]
 name = "powdr-riscv-types"
 version = "0.1.4"
-source = "git+https://github.com/powdr-labs/powdr.git?rev=b0d4178#b0d41784779ce74da3ab3fdbdb887021d44638b8"
+source = "git+https://github.com/powdr-labs/powdr.git?rev=94dc325#94dc32566a3544bb38b944760ebf7ba2c5333d1e"
 dependencies = [
  "powdr-isa-utils",
 ]
@@ -6592,7 +7470,7 @@ dependencies = [
 [[package]]
 name = "powdr-syscalls"
 version = "0.1.4"
-source = "git+https://github.com/powdr-labs/powdr.git?rev=b0d4178#b0d41784779ce74da3ab3fdbdb887021d44638b8"
+source = "git+https://github.com/powdr-labs/powdr.git?rev=94dc325#94dc32566a3544bb38b944760ebf7ba2c5333d1e"
 
 [[package]]
 name = "powerfmt"
@@ -6715,7 +7593,7 @@ dependencies = [
  "rand 0.9.1",
  "rand_chacha 0.9.0",
  "rand_xorshift 0.4.0",
- "regex-syntax 0.8.5",
+ "regex-syntax",
  "rusty-fork",
  "tempfile",
  "unarray",
@@ -6991,17 +7869,8 @@ checksum = "b544ef1b4eac5dc2db33ea63606ae9ffcfac26c1416a2806ae0bf5f56b201191"
 dependencies = [
  "aho-corasick",
  "memchr",
- "regex-automata 0.4.9",
- "regex-syntax 0.8.5",
-]
-
-[[package]]
-name = "regex-automata"
-version = "0.1.10"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "6c230d73fb8d8c1b9c0b3135c5142a8acee3a0558fb8db5cf1cb65f8d7862132"
-dependencies = [
- "regex-syntax 0.6.29",
+ "regex-automata",
+ "regex-syntax",
 ]
 
 [[package]]
@@ -7012,14 +7881,8 @@ checksum = "809e8dc61f6de73b46c85f4c96486310fe304c434cfa43669d7b40f711150908"
 dependencies = [
  "aho-corasick",
  "memchr",
- "regex-syntax 0.8.5",
+ "regex-syntax",
 ]
-
-[[package]]
-name = "regex-syntax"
-version = "0.6.29"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "f162c6dd7b008981e4d40210aca20b4bd0f9b60ca9271061b07f78537722f2e1"
 
 [[package]]
 name = "regex-syntax"
@@ -8121,10 +8984,11 @@ dependencies = [
 
 [[package]]
 name = "serde"
-version = "1.0.219"
+version = "1.0.228"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "5f0e2c6ed6606019b4e29e69dbaba95b11854410e5347d525002456dbbb786b6"
+checksum = "9a8e94ea7f378bd32cbbd37198a4a91436180c5bb472411e48b5ec2e2124ae9e"
 dependencies = [
+ "serde_core",
  "serde_derive",
 ]
 
@@ -8157,10 +9021,19 @@ dependencies = [
 ]
 
 [[package]]
-name = "serde_derive"
-version = "1.0.219"
+name = "serde_core"
+version = "1.0.228"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "5b0276cf7f2c73365f7157c8123c21cd9a50fbbd844757af28ca1f5925fc2a00"
+checksum = "41d385c7d4ca58e59fc732af25c3983b67ac852c1a25000afe1175de458b67ad"
+dependencies = [
+ "serde_derive",
+]
+
+[[package]]
+name = "serde_derive"
+version = "1.0.228"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "d540f220d3187173da220f885ab66608367b6574e925011a9353e4badda91d79"
 dependencies = [
  "proc-macro2",
  "quote",
@@ -9127,7 +10000,7 @@ dependencies = [
  "smallvec",
  "thiserror 1.0.69",
  "tracing",
- "tracing-subscriber 0.3.19",
+ "tracing-subscriber 0.3.20",
 ]
 
 [[package]]
@@ -9164,14 +10037,14 @@ dependencies = [
 
 [[package]]
 name = "tracing-subscriber"
-version = "0.3.19"
+version = "0.3.20"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "e8189decb5ac0fa7bc8b96b7cb9b2701d60d48805aca84a238004d665fcc4008"
+checksum = "2054a14f5307d601f88daf0553e1cbf472acc4f2c51afab632431cdcd72124d5"
 dependencies = [
  "matchers",
  "nu-ansi-term",
  "once_cell",
- "regex",
+ "regex-automata",
  "sharded-slab",
  "smallvec",
  "thread_local",
@@ -10000,5 +10873,5 @@ dependencies = [
 
 [[patch.unused]]
 name = "cargo-openvm"
-version = "1.3.0"
-source = "git+https://github.com/powdr-labs/openvm.git?rev=62c5d26#62c5d2682027ad7804988cb4e09e5a81338aebe8"
+version = "1.4.0"
+source = "git+https://github.com/powdr-labs/openvm.git?rev=4e8874b#4e8874b6601bc10d8a74da33e05b2e03318bc4ff"
