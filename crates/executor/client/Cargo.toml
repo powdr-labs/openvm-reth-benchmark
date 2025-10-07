@@ -47,8 +47,8 @@ itertools = "0.13.0"
 alloy-primitives = { workspace = true, features = ["tiny-keccak"] }
 # revm must have feature `kzg-rs` or `openvm-kzg` enabled. Due to patching we cannot enable `openvm-kzg` here.
 
-[target.'cfg(not(target_os = "zkvm"))'.dependencies]
-revm = { workspace = true, features = ["c-kzg"] }
+#[target.'cfg(not(target_os = "zkvm"))'.dependencies]
+#revm = { workspace = true, features = ["c-kzg"] }
 
 [dev-dependencies]
 
