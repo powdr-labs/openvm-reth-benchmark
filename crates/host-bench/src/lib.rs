@@ -14,17 +14,22 @@ use openvm_circuit::{
 };
 use openvm_client_executor::{io::ClientExecutorInput, CHAIN_ID_ETH_MAINNET};
 use openvm_host_executor::HostExecutor;
-use openvm_native_circuit::{NativeBuilder, NativeCpuBuilder};
 pub use openvm_native_circuit::NativeConfig;
+use openvm_native_circuit::NativeCpuBuilder;
 
 use openvm_sdk::{
-    config::{AppConfig, SdkVmBuilder, SdkVmConfig}, prover::{verify_app_proof, AppProver, StarkProver}, DefaultStarkEngine, GenericSdk, StdIn
+    config::{AppConfig, SdkVmConfig},
+    prover::{verify_app_proof, AppProver, StarkProver},
+    DefaultStarkEngine, GenericSdk, StdIn,
 };
-use openvm_stark_sdk::engine::StarkFriEngine;
+use openvm_stark_sdk::{
+    config::baby_bear_poseidon2::BabyBearPoseidon2Engine, engine::StarkFriEngine,
+};
 use openvm_transpiler::{elf::Elf, openvm_platform::memory::MEM_SIZE};
 use powdr_autoprecompiles::PgoType;
-use powdr_openvm::{CompiledProgram, ExtendedVmConfig, ExtendedVmConfigCpuBuilder, OriginalCompiledProgram};
-use openvm_stark_sdk::config::baby_bear_poseidon2::BabyBearPoseidon2Engine;
+use powdr_openvm::{
+    CompiledProgram, ExtendedVmConfig, ExtendedVmConfigCpuBuilder, OriginalCompiledProgram,
+};
 use powdr_openvm_hints_circuit::HintsExtension;
 pub use reth_primitives;
 use serde_json::json;
@@ -216,21 +221,20 @@ pub async fn run_reth_benchmark(args: HostArgs, openvm_client_eth_elf: &[u8]) ->
 
     #[cfg(feature = "cuda")]
     println!("CUDA Backend Enabled");
-    let sdk: GenericSdk<BabyBearPoseidon2Engine, _, NativeCpuBuilder> = GenericSdk::new(app_config.clone())?
-        .with_agg_config(args.benchmark.agg_config())
-        .with_agg_tree_config(args.benchmark.agg_tree_config);
+    let sdk: GenericSdk<BabyBearPoseidon2Engine, _, NativeCpuBuilder> =
+        GenericSdk::new(app_config.clone())?
+            .with_agg_config(args.benchmark.agg_config())
+            .with_agg_tree_config(args.benchmark.agg_tree_config);
     let elf = Elf::decode(openvm_client_eth_elf, MEM_SIZE as u32)?;
     let exe = sdk.convert_to_exe(elf.clone())?;
 
-    let CompiledProgram { exe, vm_config } = {
+    let CompiledProgram { exe, .. } = {
         // We do this in a separate scope so the log initialization does not conflict with OpenVM's.
         // The powdr log is enabled during the scope of `_guard`.
         let subscriber = tracing_subscriber::FmtSubscriber::builder()
             .with_max_level(tracing::Level::DEBUG)
             .finish();
         let _guard = tracing::subscriber::set_default(subscriber);
-    
-        use powdr_openvm_hints_circuit::HintsExtension;
 
         powdr::apc(
             OriginalCompiledProgram { exe, vm_config },
@@ -279,13 +283,15 @@ pub async fn run_reth_benchmark(args: HostArgs, openvm_client_eth_elf: &[u8]) ->
                         println!("Number of segments: {}", segments.len());
                     }
                     BenchMode::ProveApp => {
-                        let mut prover: AppProver<_, ExtendedVmConfigCpuBuilder> = sdk.app_prover(elf)?.with_program_name(program_name);
+                        let mut prover: AppProver<_, ExtendedVmConfigCpuBuilder> =
+                            sdk.app_prover(elf)?.with_program_name(program_name);
                         let (_, app_vk) = sdk.app_keygen();
                         let proof = prover.prove(stdin)?;
                         verify_app_proof(&app_vk, &proof)?;
                     }
                     BenchMode::ProveStark => {
-                        let mut prover: StarkProver<_, ExtendedVmConfigCpuBuilder, _> = sdk.prover(elf)?.with_program_name(program_name);
+                        let mut prover: StarkProver<_, ExtendedVmConfigCpuBuilder, _> =
+                            sdk.prover(elf)?.with_program_name(program_name);
                         let proof = prover.prove(stdin)?;
                         let block_hash = proof
                             .user_public_values
@@ -347,13 +353,18 @@ fn try_load_input_from_cache(
 }
 
 mod powdr {
-    use openvm_circuit::utils::TestStarkEngine;
+    
     use openvm_native_circuit::NativeCpuBuilder;
-    use openvm_sdk::{config::{AppConfig, DEFAULT_APP_LOG_BLOWUP}, GenericSdk, Sdk, StdIn};
+    use openvm_sdk::{
+        config::{AppConfig, DEFAULT_APP_LOG_BLOWUP},
+        GenericSdk, StdIn,
+    };
     use openvm_stark_sdk::config::FriParameters;
     use powdr_autoprecompiles::{execution_profile::execution_profile, PgoType};
     use powdr_openvm::{
-        compile_exe_with_elf, default_powdr_openvm_config, BabyBearOpenVmApcAdapter, CompiledProgram, DegreeBound, ExtendedVmConfigCpuBuilder, OriginalCompiledProgram, PgoConfig, PrecompileImplementation, Prog
+        compile_exe_with_elf, default_powdr_openvm_config, BabyBearOpenVmApcAdapter,
+        CompiledProgram, DegreeBound, ExtendedVmConfigCpuBuilder, OriginalCompiledProgram,
+        PgoConfig, PrecompileImplementation, Prog,
     };
 
     /// This function is used to generate the specialized program for the Powdr APC.
@@ -361,7 +372,8 @@ mod powdr {
     /// - `exe`: The original transpiled OpenVM executable.
     /// - `vm_config`: The base VM configuration the executable relates to.
     /// - `elf`: The original ELF file, used to detect the basic blocks.
-    /// - `stdin`: The standard input to the program, used for PGO data generation to choose which basic blocks to accelerate.
+    /// - `stdin`: The standard input to the program, used for PGO data generation to choose which
+    ///   basic blocks to accelerate.
     pub fn apc(
         original_program: OriginalCompiledProgram,
         elf: &[u8],
@@ -370,25 +382,19 @@ mod powdr {
         pgo_type: PgoType,
         stdin: StdIn,
     ) -> CompiledProgram {
-        let program = Prog::from(&original_program.exe.program);
-
         // Set app configuration
         let app_fri_params =
             FriParameters::standard_with_100_bits_conjectured_security(DEFAULT_APP_LOG_BLOWUP);
         let app_config = AppConfig::new(app_fri_params, original_program.vm_config.clone());
 
-use openvm_stark_sdk::config::baby_bear_poseidon2::BabyBearPoseidon2Engine;
+        use openvm_stark_sdk::config::baby_bear_poseidon2::BabyBearPoseidon2Engine;
 
         // prepare for execute
         let sdk: GenericSdk<BabyBearPoseidon2Engine, ExtendedVmConfigCpuBuilder, NativeCpuBuilder> =
             GenericSdk::new(app_config).unwrap();
 
         let execute = || {
-            sdk.execute(
-                original_program.exe.clone(),
-                stdin.clone(),
-            )
-            .unwrap();
+            sdk.execute(original_program.exe.clone(), stdin.clone()).unwrap();
         };
 
         let program = Prog::from(&original_program.exe.program);
