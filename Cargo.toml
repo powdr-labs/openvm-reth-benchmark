@@ -174,3 +174,191 @@ opt-level = 3
 [profile.bench-with-debug]
 inherits = "release"
 debug = 1
+
+# NORMAL USAGE PATCHES
+
+# This patch should be enabled for "normal" usage.
+# Comment it out if you want to use a local stark-backend instead.
+# This rev needs to be the same that powdr uses.
+[patch."https://github.com/openvm-org/stark-backend.git"]
+openvm-cuda-backend = { git = "https://github.com/powdr-labs/stark-backend.git", rev = "e27de8b" }
+openvm-cuda-common = { git = "https://github.com/powdr-labs/stark-backend.git", rev = "e27de8b" }
+openvm-stark-sdk = { git = "https://github.com/powdr-labs/stark-backend.git", rev = "e27de8b" }
+
+# This patch should be enabled for "normal" usage.
+# Comment it out if you want to use a local OpenVM instead (patches below this block).
+# This rev needs to be the same that powdr uses.
+[patch."https://github.com/openvm-org/openvm.git"]
+openvm-benchmarks-prove = { git = "https://github.com/powdr-labs/openvm.git", rev = "e9695be" }
+# OpenVM
+openvm-sdk = { git = "https://github.com/powdr-labs/openvm.git", rev = "e9695be" }
+# cargo-openvm = { git = "https://github.com/powdr-labs/openvm.git", rev = "e9695be" }
+openvm-mod-circuit-builder = { git = "https://github.com/powdr-labs/openvm.git", rev = "e9695be" }
+openvm-poseidon2-air = { git = "https://github.com/powdr-labs/openvm.git", rev = "e9695be" }
+openvm-circuit-primitives = { git = "https://github.com/powdr-labs/openvm.git", rev = "e9695be" }
+openvm-circuit-primitives-derive = { git = "https://github.com/powdr-labs/openvm.git", rev = "e9695be" }
+openvm = { git = "https://github.com/powdr-labs/openvm.git", rev = "e9695be" }
+openvm-build = { git = "https://github.com/powdr-labs/openvm.git", rev = "e9695be" }
+openvm-instructions = { git = "https://github.com/powdr-labs/openvm.git", rev = "e9695be" }
+openvm-instructions-derive = { git = "https://github.com/powdr-labs/openvm.git", rev = "e9695be" }
+openvm-macros-common = { git = "https://github.com/powdr-labs/openvm.git", rev = "e9695be" }
+openvm-platform = { git = "https://github.com/powdr-labs/openvm.git", rev = "e9695be" }
+openvm-transpiler = { git = "https://github.com/powdr-labs/openvm.git", rev = "e9695be" }
+openvm-circuit = { git = "https://github.com/powdr-labs/openvm.git", rev = "e9695be" }
+openvm-circuit-derive = { git = "https://github.com/powdr-labs/openvm.git", rev = "e9695be" }
+
+# Extensions
+openvm-algebra-circuit = { git = "https://github.com/powdr-labs/openvm.git", rev = "e9695be" }
+openvm-algebra-transpiler = { git = "https://github.com/powdr-labs/openvm.git", rev = "e9695be" }
+openvm-algebra-guest = { git = "https://github.com/powdr-labs/openvm.git", rev = "e9695be" }
+openvm-algebra-moduli-macros = { git = "https://github.com/powdr-labs/openvm.git", rev = "e9695be" }
+openvm-algebra-complex-macros = { git = "https://github.com/powdr-labs/openvm.git", rev = "e9695be" }
+openvm-bigint-circuit = { git = "https://github.com/powdr-labs/openvm.git", rev = "e9695be" }
+openvm-bigint-transpiler = { git = "https://github.com/powdr-labs/openvm.git", rev = "e9695be" }
+openvm-bigint-guest = { git = "https://github.com/powdr-labs/openvm.git", rev = "e9695be" }
+openvm-ecc-circuit = { git = "https://github.com/powdr-labs/openvm.git", rev = "e9695be" }
+openvm-ecc-transpiler = { git = "https://github.com/powdr-labs/openvm.git", rev = "e9695be" }
+openvm-ecc-guest = { git = "https://github.com/powdr-labs/openvm.git", rev = "e9695be" }
+openvm-ecc-sw-macros = { git = "https://github.com/powdr-labs/openvm.git", rev = "e9695be" }
+openvm-keccak256-circuit = { git = "https://github.com/powdr-labs/openvm.git", rev = "e9695be" }
+openvm-keccak256-transpiler = { git = "https://github.com/powdr-labs/openvm.git", rev = "e9695be" }
+openvm-keccak256-guest = { git = "https://github.com/powdr-labs/openvm.git", rev = "e9695be" }
+openvm-sha256-circuit = { git = "https://github.com/powdr-labs/openvm.git", rev = "e9695be" }
+openvm-sha256-transpiler = { git = "https://github.com/powdr-labs/openvm.git", rev = "e9695be" }
+openvm-sha256-guest = { git = "https://github.com/powdr-labs/openvm.git", rev = "e9695be" }
+openvm-native-circuit = { git = "https://github.com/powdr-labs/openvm.git", rev = "e9695be" }
+openvm-native-compiler = { git = "https://github.com/powdr-labs/openvm.git", rev = "e9695be" }
+openvm-native-compiler-derive = { git = "https://github.com/powdr-labs/openvm.git", rev = "e9695be" }
+openvm-native-recursion = { git = "https://github.com/powdr-labs/openvm.git", rev = "e9695be" }
+openvm-pairing-circuit = { git = "https://github.com/powdr-labs/openvm.git", rev = "e9695be" }
+openvm-pairing-transpiler = { git = "https://github.com/powdr-labs/openvm.git", rev = "e9695be" }
+openvm-pairing-guest = { git = "https://github.com/powdr-labs/openvm.git", rev = "e9695be" }
+openvm-rv32-adapters = { git = "https://github.com/powdr-labs/openvm.git", rev = "e9695be" }
+openvm-rv32im-circuit = { git = "https://github.com/powdr-labs/openvm.git", rev = "e9695be" }
+openvm-rv32im-transpiler = { git = "https://github.com/powdr-labs/openvm.git", rev = "e9695be" }
+openvm-rv32im-guest = { git = "https://github.com/powdr-labs/openvm.git", rev = "e9695be" }
+
+# LOCAL USAGE PATCHES
+
+# Uncomment to use a local version of powdr.
+# [patch."https://github.com/powdr-labs/powdr.git"]
+# powdr-openvm = { path = "../powdr/openvm" }
+# powdr-riscv-elf = { path = "../powdr/riscv-elf" }
+# powdr-number = { path = "../powdr/number" }
+# powdr-autoprecompiles = { path = "../powdr/autoprecompiles" }
+
+# Uncomment the 2 patches below to use a local version of OpenVM.
+
+# Uncomment to use a local version of stark-backend.
+# [patch."https://github.com/openvm-org/stark-backend.git"]
+# openvm-stark-backend = { path = "../stark-backend/crates/stark-backend" }
+# openvm-stark-sdk = { path = "../stark-backend/crates/stark-sdk" }
+
+# Uncomment to use a local version of stark-backend.
+# [patch."https://github.com/powdr-labs/stark-backend.git"]
+# openvm-stark-backend = { path = "../stark-backend/crates/stark-backend" }
+# openvm-stark-sdk = { path = "../stark-backend/crates/stark-sdk" }
+
+# Uncomment the 2 patches below to use a local OpenVM repo.
+
+# Uncomment to use a local version of OpenVM.
+# [patch."https://github.com/openvm-org/openvm.git"]
+# openvm-benchmarks-prove = { path = "../openvm/benchmarks/prove" }
+# # OpenVM
+# openvm-sdk = { path = "../openvm/crates/sdk" }
+# cargo-openvm = { path = "../openvm/crates/cli" }
+# openvm-mod-circuit-builder = { path = "../openvm/crates/circuits/mod-builder/" }
+# openvm-poseidon2-air = { path = "../openvm/crates/circuits/poseidon2-air" }
+# openvm-circuit-primitives = { path = "../openvm/crates/circuits/primitives" }
+# openvm-circuit-primitives-derive = { path = "../openvm/crates/circuits/primitives/derive" }
+# openvm = { path = "../openvm/crates/toolchain/openvm" }
+# openvm-build = { path = "../openvm/crates/toolchain/build" }
+# openvm-instructions = { path = "../openvm/crates/toolchain/instructions" }
+# openvm-instructions-derive = { path = "../openvm/crates/toolchain/instructions/derive" }
+# openvm-macros-common = { path = "../openvm/crates/toolchain/macros" }
+# openvm-platform = { path = "../openvm/crates/toolchain/platform" }
+# openvm-transpiler = { path = "../openvm/crates/toolchain/transpiler" }
+# openvm-circuit = { path = "../openvm/crates/vm" }
+# openvm-circuit-derive = { path = "../openvm/crates/vm/derive" }
+#
+# # Extensions
+# openvm-algebra-transpiler = { path = "../openvm/extensions/algebra/transpiler" }
+# openvm-algebra-circuit = { path = "../openvm/extensions/algebra/circuit" }
+# openvm-algebra-guest = { path = "../openvm/extensions/algebra/guest" }
+# openvm-algebra-moduli-macros = { path = "../openvm/extensions/algebra/moduli-macros/" }
+# openvm-algebra-complex-macros = { path = "../openvm/extensions/algebra/complex-macros/" }
+# openvm-bigint-circuit = { path = "../openvm/extensions/bigint/circuit" }
+# openvm-bigint-transpiler = { path = "../openvm/extensions/bigint/transpiler" }
+# openvm-bigint-guest = { path = "../openvm/extensions/bigint/guest" }
+# openvm-ecc-circuit = { path = "../openvm/extensions/ecc/circuit" }
+# openvm-ecc-transpiler = { path = "../openvm/extensions/ecc/transpiler/" }
+# openvm-ecc-guest = { path = "../openvm/extensions/ecc/guest/" }
+# openvm-ecc-sw-macros = { path = "../openvm/extensions/ecc/sw-macros/" }
+# openvm-keccak256-circuit = { path = "../openvm/extensions/keccak256/circuit" }
+# openvm-keccak256-transpiler = { path = "../openvm/extensions/keccak256/transpiler" }
+# openvm-keccak256-guest = { path = "../openvm/extensions/keccak256/guest" }
+# openvm-sha256-circuit = { path = "../openvm/extensions/sha256/circuit" }
+# openvm-sha256-transpiler = { path = "../openvm/extensions/sha256/transpiler" }
+# openvm-sha256-guest = { path = "../openvm/extensions/sha256/guest" }
+# openvm-native-circuit = { path = "../openvm/extensions/native/circuit" }
+# openvm-native-compiler = { path = "../openvm/extensions/native/compiler" }
+# openvm-native-compiler-derive = { path = "../openvm/extensions/native/compiler/derive" }
+# openvm-native-recursion = { path = "../openvm/extensions/native/recursion" }
+# openvm-pairing-circuit = { path = "../openvm/extensions/pairing/circuit" }
+# openvm-pairing-transpiler = { path = "../openvm/extensions/pairing/transpiler" }
+# openvm-pairing-guest = { path = "../openvm/extensions/pairing/guest" }
+# openvm-rv32-adapters = { path = "../openvm/extensions/rv32-adapters/" }
+# openvm-rv32im-circuit = { path = "../openvm/extensions/rv32im/circuit/" }
+# openvm-rv32im-transpiler = { path = "../openvm/extensions/rv32im/transpiler" }
+# openvm-rv32im-guest = { path = "../openvm/extensions/rv32im/guest" }
+#
+# # Uncomment to use a local version of OpenVM.
+# [patch."https://github.com/powdr-labs/openvm.git"]
+# openvm-benchmarks-prove = { path = "../openvm/benchmarks/prove" }
+# # OpenVM
+# openvm-sdk = { path = "../openvm/crates/sdk" }
+# cargo-openvm = { path = "../openvm/crates/cli" }
+# openvm-mod-circuit-builder = { path = "../openvm/crates/circuits/mod-builder/" }
+# openvm-poseidon2-air = { path = "../openvm/crates/circuits/poseidon2-air" }
+# openvm-circuit-primitives = { path = "../openvm/crates/circuits/primitives" }
+# openvm-circuit-primitives-derive = { path = "../openvm/crates/circuits/primitives/derive" }
+# openvm = { path = "../openvm/crates/toolchain/openvm" }
+# openvm-build = { path = "../openvm/crates/toolchain/build" }
+# openvm-instructions = { path = "../openvm/crates/toolchain/instructions" }
+# openvm-instructions-derive = { path = "../openvm/crates/toolchain/instructions/derive" }
+# openvm-macros-common = { path = "../openvm/crates/toolchain/macros" }
+# openvm-platform = { path = "../openvm/crates/toolchain/platform" }
+# openvm-transpiler = { path = "../openvm/crates/toolchain/transpiler" }
+# openvm-circuit = { path = "../openvm/crates/vm" }
+# openvm-circuit-derive = { path = "../openvm/crates/vm/derive" }
+#
+# # Extensions
+# openvm-algebra-transpiler = { path = "../openvm/extensions/algebra/transpiler" }
+# openvm-algebra-circuit = { path = "../openvm/extensions/algebra/circuit" }
+# openvm-algebra-guest = { path = "../openvm/extensions/algebra/guest" }
+# openvm-algebra-moduli-macros = { path = "../openvm/extensions/algebra/moduli-macros/" }
+# openvm-algebra-complex-macros = { path = "../openvm/extensions/algebra/complex-macros/" }
+# openvm-bigint-circuit = { path = "../openvm/extensions/bigint/circuit" }
+# openvm-bigint-transpiler = { path = "../openvm/extensions/bigint/transpiler" }
+# openvm-bigint-guest = { path = "../openvm/extensions/bigint/guest" }
+# openvm-ecc-circuit = { path = "../openvm/extensions/ecc/circuit" }
+# openvm-ecc-transpiler = { path = "../openvm/extensions/ecc/transpiler/" }
+# openvm-ecc-guest = { path = "../openvm/extensions/ecc/guest/" }
+# openvm-ecc-sw-macros = { path = "../openvm/extensions/ecc/sw-macros/" }
+# openvm-keccak256-circuit = { path = "../openvm/extensions/keccak256/circuit" }
+# openvm-keccak256-transpiler = { path = "../openvm/extensions/keccak256/transpiler" }
+# openvm-keccak256-guest = { path = "../openvm/extensions/keccak256/guest" }
+# openvm-sha256-circuit = { path = "../openvm/extensions/sha256/circuit" }
+# openvm-sha256-transpiler = { path = "../openvm/extensions/sha256/transpiler" }
+# openvm-sha256-guest = { path = "../openvm/extensions/sha256/guest" }
+# openvm-native-circuit = { path = "../openvm/extensions/native/circuit" }
+# openvm-native-compiler = { path = "../openvm/extensions/native/compiler" }
+# openvm-native-compiler-derive = { path = "../openvm/extensions/native/compiler/derive" }
+# openvm-native-recursion = { path = "../openvm/extensions/native/recursion" }
+# openvm-pairing-circuit = { path = "../openvm/extensions/pairing/circuit" }
+# openvm-pairing-transpiler = { path = "../openvm/extensions/pairing/transpiler" }
+# openvm-pairing-guest = { path = "../openvm/extensions/pairing/guest" }
+# openvm-rv32-adapters = { path = "../openvm/extensions/rv32-adapters/" }
+# openvm-rv32im-circuit = { path = "../openvm/extensions/rv32im/circuit/" }
+# openvm-rv32im-transpiler = { path = "../openvm/extensions/rv32im/transpiler" }
+# openvm-rv32im-guest = { path = "../openvm/extensions/rv32im/guest" }

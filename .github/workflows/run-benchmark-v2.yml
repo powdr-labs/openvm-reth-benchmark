@@ -57,7 +57,7 @@ jobs:
 
             # Install OpenVM CLI
             echo "Installing OpenVM CLI..."
-            cargo +1.85 install --git https://github.com/openvm-org/openvm.git --locked --force cargo-openvm
+            cargo +1.85 install --git https://github.com/powdr-labs/openvm.git --locked --force cargo-openvm
 
             RPC_1=${{ secrets.RPC_URL_1 }}
 
