@@ -67,7 +67,7 @@ ruint = { git = "https://github.com/openvm-org/openvm.git", branch = "main" }
 [profile.release]
 panic = "abort"
 lto = "fat"
-strip = true
+strip = false
 
 [profile.profiling]
 inherits = "release"

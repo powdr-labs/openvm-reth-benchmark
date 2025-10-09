@@ -7,7 +7,7 @@ fi
 
 set -e
 cd bin/client-eth
-cargo openvm build
+RUSTFLAGS="-Clink-arg=--emit-relocs" cargo openvm build --no-transpile
 mkdir -p ../host/elf
 SRC="target/riscv32im-risc0-zkvm-elf/release/openvm-client-eth"
 DEST="../host/elf/openvm-client-eth"
@@ -19,7 +19,7 @@ cd ../..
 
 mkdir -p rpc-cache
 source .env
-MODE=execute # can be execute, execute-metered, prove-app, prove-stark, or prove-evm (needs "evm-verify" feature)
+# MODE=execute # can be compile, execute, execute-metered, prove-app, prove-stark, or prove-evm (needs "evm-verify" feature)
 PROFILE="release"
 FEATURES="metrics,jemalloc,tco,unprotected"
 BLOCK_NUMBER=23100006
@@ -38,19 +38,12 @@ if [ "$MODE" = "prove-evm" ]; then
     FEATURES="$FEATURES,evm-verify"
 fi
 
-arch=$(uname -m)
-case $arch in
-arm64|aarch64)
-    RUSTFLAGS="-Ctarget-cpu=native"
-    ;;
-x86_64|amd64)
-    RUSTFLAGS="-Ctarget-cpu=native"
-    ;;
-*)
-echo "Unsupported architecture: $arch"
-exit 1
-;;
-esac
+if grep -m1 -q 'avx512f' /proc/cpuinfo; then
+  RUSTFLAGS="-Ctarget-cpu=native -C target-feature=+avx512f"
+else
+  RUSTFLAGS="-Ctarget-cpu=native"
+fi
+
 export JEMALLOC_SYS_WITH_MALLOC_CONF="retain:true,background_thread:true,metadata_thp:always,dirty_decay_ms:10000,muzzy_decay_ms:10000,abort_conf:true"
 RUSTFLAGS=$RUSTFLAGS cargo $TOOLCHAIN build --bin $BIN_NAME --profile=$PROFILE --no-default-features --features=$FEATURES
 PARAMS_DIR="$HOME/.openvm/params/"
@@ -62,7 +55,7 @@ else
     TARGET_DIR="$PROFILE"
 fi
 
-RUST_LOG="info,p3_=warn" OUTPUT_PATH="metrics.json" ./target/$TARGET_DIR/$BIN_NAME \
+POWDR_APC_CANDIDATES_DIR=apcs RUST_LOG="debug" OUTPUT_PATH="metrics.json" ./target/$TARGET_DIR/$BIN_NAME \
 --kzg-params-dir $PARAMS_DIR \
 --mode $MODE \
 --block-number $BLOCK_NUMBER \
@@ -75,4 +68,7 @@ RUST_LOG="info,p3_=warn" OUTPUT_PATH="metrics.json" ./target/$TARGET_DIR/$BIN_NA
 --max-segment-length $MAX_SEGMENT_LENGTH \
 --segment-max-cells $SEGMENT_MAX_CELLS \
 --num-children-leaf 1 \
---num-children-internal 3
+--num-children-internal 3 \
+--apc "$APC" \
+--apc-skip "$APC_SKIP" \
+--pgo-type "$PGO_TYPE"

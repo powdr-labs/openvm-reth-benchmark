@@ -49,6 +49,8 @@ pub enum BenchMode {
     ProveEvm,
     /// Generate input file only.
     MakeInput,
+    /// Compile with apcs, no execution.
+    Compile,
 }
 
 impl std::fmt::Display for BenchMode {
@@ -61,6 +63,7 @@ impl std::fmt::Display for BenchMode {
             #[cfg(feature = "evm-verify")]
             Self::ProveEvm => write!(f, "prove_evm"),
             Self::MakeInput => write!(f, "make_input"),
+            Self::Compile => write!(f, "compile"),
         }
     }
 }
@@ -92,6 +95,15 @@ pub struct HostArgs {
     /// Optional path to write the input to. Only needed for mode=make_input
     #[arg(long)]
     pub input_path: Option<PathBuf>,
+
+    #[arg(long)]
+    apc: usize,
+
+    #[arg(long)]
+    apc_skip: usize,
+
+    #[arg(long)]
+    pgo_type: PgoType,
 }
 
 pub fn reth_vm_config(app_log_blowup: usize) -> SdkVmConfig {
@@ -207,6 +219,24 @@ pub async fn run_reth_benchmark(args: HostArgs, openvm_client_eth_elf: &[u8]) ->
     let elf = Elf::decode(openvm_client_eth_elf, MEM_SIZE as u32)?;
     let exe = sdk.convert_to_exe(elf.clone())?;
 
+    let CompiledProgram { exe, vm_config } = {
+        // We do this in a separate scope so the log initialization does not conflict with OpenVM's.
+        // The powdr log is enabled during the scope of `_guard`.
+        let subscriber = tracing_subscriber::FmtSubscriber::builder()
+            .with_max_level(tracing::Level::DEBUG)
+            .finish();
+        let _guard = tracing::subscriber::set_default(subscriber);
+    
+        powdr::apc(
+            OriginalCompiledProgram { exe, vm_config: ExtendedVmConfig { sdk: vm_config } },
+            openvm_client_eth_elf,
+            args.apc,
+            args.apc_skip,
+            args.pgo_type,
+            stdin.clone(),
+        )
+    };
+
     let program_name = format!("reth.{}.block_{}", args.mode, args.block_number);
     // NOTE: args.benchmark.app_config resets SegmentationLimits if max_segment_length is set
     args.benchmark.max_segment_length = None;
@@ -222,6 +252,10 @@ pub async fn run_reth_benchmark(args: HostArgs, openvm_client_eth_elf: &[u8]) ->
                     println!("block_hash: {}", ToHexExt::encode_hex(&block_hash));
                 }
                 match args.mode {
+                    BenchMode::Compile => {
+                        // This mode is used to compile the program with APCs, no execution.
+                        println!("Compiled program with APCs");
+                    }
                     BenchMode::Execute => {}
                     BenchMode::ExecuteMetered => {
                         let engine = DefaultStarkEngine::new(app_config.app_fri_params.fri_params);
@@ -305,4 +339,70 @@ fn try_load_input_from_cache(
     } else {
         None
     })
+}
+
+mod powdr {
+    use openvm_sdk::{Sdk, StdIn};
+    use powdr_autoprecompiles::{execution_profile::execution_profile, PgoType};
+    use powdr_openvm::{
+        compile_exe_with_elf, default_powdr_openvm_config, BabyBearOpenVmApcAdapter,
+        CompiledProgram, DegreeBound, OriginalCompiledProgram, PgoConfig,
+        PrecompileImplementation, Prog,
+    };
+
+    /// This function is used to generate the specialized program for the Powdr APC.
+    /// It takes:
+    /// - `exe`: The original transpiled OpenVM executable.
+    /// - `vm_config`: The base VM configuration the executable relates to.
+    /// - `elf`: The original ELF file, used to detect the basic blocks.
+    /// - `stdin`: The standard input to the program, used for PGO data generation to choose which basic blocks to accelerate.
+    pub fn apc(
+        original_program: OriginalCompiledProgram,
+        elf: &[u8],
+        apc: usize,
+        apc_skip: usize,
+        pgo_type: PgoType,
+        stdin: StdIn,
+    ) -> CompiledProgram {
+        let sdk = Sdk::default();
+
+        let execute = || {
+            sdk.execute(
+                original_program.exe.clone(),
+                original_program.vm_config.clone(),
+                stdin.clone(),
+            )
+            .unwrap();
+        };
+
+        let program = Prog::from(&original_program.exe.program);
+
+        let pgo_config = match pgo_type {
+            PgoType::None => PgoConfig::None,
+            PgoType::Instruction => PgoConfig::Instruction(execution_profile::<
+                BabyBearOpenVmApcAdapter,
+            >(&program, execute)),
+            PgoType::Cell => PgoConfig::Cell(
+                execution_profile::<BabyBearOpenVmApcAdapter>(&program, execute),
+                None, // max total columns
+            ),
+        };
+
+        let mut config = default_powdr_openvm_config(apc as u64, apc_skip as u64);
+
+        config.degree_bound = DegreeBound { identities: 3, bus_interactions: 2 };
+
+        if let Ok(path) = std::env::var("POWDR_APC_CANDIDATES_DIR") {
+            config = config.with_apc_candidates_dir(path);
+        }
+
+        compile_exe_with_elf(
+            original_program,
+            elf,
+            config,
+            PrecompileImplementation::SingleRowChip,
+            pgo_config,
+        )
+        .unwrap()
+    }
 }
