@@ -152,6 +152,7 @@ powdr-openvm = { git = "https://github.com/powdr-labs/powdr.git", rev = "fa84893
 powdr-riscv-elf = { git = "https://github.com/powdr-labs/powdr.git", rev = "fa84893", default-features = false }
 powdr-number = { git = "https://github.com/powdr-labs/powdr.git", rev = "fa84893", default-features = false }
 powdr-autoprecompiles = { git = "https://github.com/powdr-labs/powdr.git", rev = "fa84893", default-features = false }
+powdr-openvm-hints-circuit = { git = "https://github.com/powdr-labs/powdr.git", rev = "fa84893", default-features = false }
 
 [workspace.lints]
 rust.missing_debug_implementations = "warn"
