@@ -55,6 +55,12 @@ else
     TARGET_DIR="$PROFILE"
 fi
 
+# Default options if not set
+: "${MODE:=execute}"
+: "${APC:=0}"
+: "${APC_SKIP:=0}"
+: "${PGO_TYPE:=cell}"
+
 POWDR_APC_CANDIDATES_DIR=apcs RUST_LOG="debug" OUTPUT_PATH="metrics.json" ./target/$TARGET_DIR/$BIN_NAME \
 --kzg-params-dir $PARAMS_DIR \
 --mode $MODE \
