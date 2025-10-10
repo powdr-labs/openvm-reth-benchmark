@@ -30,7 +30,7 @@ use powdr_autoprecompiles::PgoType;
 use powdr_openvm::{
     CompiledProgram, ExtendedVmConfig, ExtendedVmConfigCpuBuilder, OriginalCompiledProgram,
 };
-use powdr_openvm_hints_circuit::HintsExtension;
+use powdr_openvm::HintsExtension;
 pub use reth_primitives;
 use serde_json::json;
 use std::{fs, path::PathBuf};
