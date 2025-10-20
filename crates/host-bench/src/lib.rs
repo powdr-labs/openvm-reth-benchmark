@@ -28,9 +28,9 @@ use openvm_stark_sdk::{
 use openvm_transpiler::{elf::Elf, openvm_platform::memory::MEM_SIZE};
 use powdr_autoprecompiles::PgoType;
 use powdr_openvm::{
-    CompiledProgram, ExtendedVmConfig, ExtendedVmConfigCpuBuilder, OriginalCompiledProgram,
+    CompiledProgram, ExtendedVmConfig, ExtendedVmConfigCpuBuilder, HintsExtension,
+    OriginalCompiledProgram,
 };
-use powdr_openvm::HintsExtension;
 pub use reth_primitives;
 use serde_json::json;
 use std::{fs, path::PathBuf};
@@ -353,7 +353,7 @@ fn try_load_input_from_cache(
 }
 
 mod powdr {
-    
+
     use openvm_native_circuit::NativeCpuBuilder;
     use openvm_sdk::{
         config::{AppConfig, DEFAULT_APP_LOG_BLOWUP},
