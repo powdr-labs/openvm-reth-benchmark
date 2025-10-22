@@ -32,9 +32,12 @@ tracing = { version = "0.1", features = [
 ] }
 
 serde = { version = "1", default-features = false, features = ["derive"] }
-postcard = { version = "1", default-features = false, features = [
+bincode = { version = "2.0.0", default-features = false, features = [
+  "derive",
   "alloc",
-] } # enable if you have alloc
+  "serde",
+] }
+
 
 # sp1_bls12_381 = { path = "../../../bls12_381", package = "bls12_381" }
 # getrandom = "=0.3.3"
@@ -48,7 +51,7 @@ sp1_bls12_381 = { path = "../../../bls12_381" }
 [profile.release]
 panic = "abort"
 lto = "fat"
-strip = false
+strip = "symbols"
 
 [profile.profiling]
 inherits = "release"
