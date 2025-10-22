@@ -236,21 +236,32 @@ pub async fn run_reth_benchmark(args: HostArgs, openvm_client_eth_elf: &[u8]) ->
     let leaf_log_blowup = args.benchmark.leaf_log_blowup.unwrap_or(RETH_DEFAULT_LEAF_LOG_BLOWUP);
     args.benchmark.leaf_log_blowup = Some(leaf_log_blowup);
 
-    let vm_config = reth_vm_config(app_log_blowup);
-    let app_config = args.benchmark.app_config(vm_config);
-
     #[cfg(feature = "cuda")]
     println!("CUDA Backend Enabled");
+
+    let vm_config = reth_vm_config(app_log_blowup);
+    let app_config = args.benchmark.app_config(vm_config.clone());
     let sdk = Sdk::new(app_config.clone())?
         .with_agg_config(args.benchmark.agg_config())
         .with_agg_tree_config(args.benchmark.agg_tree_config);
 
+    if args.app_pk_path.is_some() != args.agg_pk_path.is_some() {
+        eyre::bail!("app_pk_path and agg_pk_path must be provided together");
+    }
     if let Some(app_pk_path) = args.app_pk_path {
         let app_pk: AppProvingKey<SdkVmConfig> = read_object_from_file(app_pk_path)?;
-        sdk.set_app_pk(app_pk).map_err(|_| eyre::eyre!("failed to set app pk"))?;
-    }
-    if let Some(agg_pk_path) = args.agg_pk_path {
+        let agg_pk_path = args.agg_pk_path.unwrap();
         let agg_pk: AggProvingKey = read_object_from_file(agg_pk_path)?;
+        let vm_config_loaded = app_pk.app_vm_pk.vm_config.clone();
+        let vm_config_json =
+            serde_json::to_value(&vm_config).expect("failed to serialize vm_config to json value");
+        let vm_config_loaded_json = serde_json::to_value(&vm_config_loaded)
+            .expect("failed to serialize vm_config_loaded to json value");
+        assert_eq!(
+            vm_config_json, vm_config_loaded_json,
+            "vm_config mismatch between runtime config and proving key"
+        );
+        sdk.set_app_pk(app_pk).map_err(|_| eyre::eyre!("failed to set app pk"))?;
         sdk.set_agg_pk(agg_pk).map_err(|_| eyre::eyre!("failed to set agg pk"))?;
     }
 
