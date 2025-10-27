@@ -93,6 +93,11 @@ pub struct HostArgs {
     /// created from RPC data if it doesn't already exist.
     #[clap(long)]
     cache_dir: Option<PathBuf>,
+
+    /// Path to the directory containing cached apc compilation output.
+    #[clap(long)]
+    apc_cache_dir: PathBuf,
+
     /// The path to the CSV file containing the execution data.
     #[clap(long, default_value = "report.csv")]
     report_path: PathBuf,
@@ -242,7 +247,8 @@ pub async fn run_reth_benchmark(args: HostArgs, openvm_client_eth_elf: &[u8]) ->
             args.apc,
             args.apc_skip,
             args.pgo_type,
-            stdin.clone(),
+            &client_input,
+            &args.apc_cache_dir,
         )
     };
 
@@ -364,6 +370,12 @@ fn try_load_input_from_cache(
 
 mod powdr {
 
+    use std::{
+        fs::File,
+        path::{Path, PathBuf},
+    };
+
+    use openvm_client_executor::io::ClientExecutorInput;
     use openvm_native_circuit::NativeCpuBuilder;
     use openvm_sdk::{
         config::{AppConfig, DEFAULT_APP_LOG_BLOWUP},
@@ -377,21 +389,74 @@ mod powdr {
         PgoConfig, PrecompileImplementation, Prog,
     };
 
+    /// Get the path to the cache file
+    /// Currently does not check the original program, so a mismatch in the original config would
+    /// not be detected here
+    fn get_cache_file_path(
+        _original_program: &OriginalCompiledProgram,
+        elf: &[u8],
+        apc: usize,
+        apc_skip: usize,
+        pgo_type: PgoType,
+        pgo_client_input: &ClientExecutorInput,
+        cache_dir_path: &Path,
+    ) -> PathBuf {
+        fn hash<T: std::hash::Hash>(val: &T) -> u64 {
+            use std::hash::{DefaultHasher, Hasher};
+            let mut hasher = DefaultHasher::new();
+            val.hash(&mut hasher);
+            hasher.finish()
+        }
+
+        let elf_hash = hash(&elf);
+        // TODO: we only look at the input block number here. Consider the entire input instead.
+        let input_hash = pgo_client_input.current_block.header.number;
+
+        cache_dir_path.join(format!(
+            "elf_{elf_hash:x}_apc_{apc}_skip_{apc_skip}_pgo_{pgo_type}_block_{input_hash}"
+        ))
+    }
+
     /// This function is used to generate the specialized program for the Powdr APC.
     /// It takes:
-    /// - `exe`: The original transpiled OpenVM executable.
-    /// - `vm_config`: The base VM configuration the executable relates to.
+    /// - `original_program`: The original program, including the original vm config.
     /// - `elf`: The original ELF file, used to detect the basic blocks.
+    /// - `apc`: The number of apcs to generate
+    /// - `apc_skip`: The number of apcs to skip when selecting. Used for debugging.
+    /// - `pgo_type`: The PGO strategy to use when choosing the blocks to accelerate.
     /// - `stdin`: The standard input to the program, used for PGO data generation to choose which
     ///   basic blocks to accelerate.
+    /// - `cache_dir_path`: The path to the cache directory to read from and write to.
     pub fn apc(
         original_program: OriginalCompiledProgram,
         elf: &[u8],
         apc: usize,
         apc_skip: usize,
         pgo_type: PgoType,
-        stdin: StdIn,
+        pgo_client_input: &ClientExecutorInput,
+        cache_dir_path: &Path,
     ) -> CompiledProgram {
+        let cache_file_path = get_cache_file_path(
+            &original_program,
+            elf,
+            apc,
+            apc_skip,
+            pgo_type,
+            pgo_client_input,
+            cache_dir_path,
+        );
+
+        if let Some(compiled_program) = File::open(&cache_file_path)
+            .ok()
+            .and_then(|mut file| serde_cbor::from_reader(&mut file).ok())
+        {
+            tracing::info!("APC compilation cache hit");
+            return compiled_program;
+        }
+
+        let mut stdin = StdIn::default();
+        stdin.write(pgo_client_input);
+
         // Set app configuration
         let app_fri_params =
             FriParameters::standard_with_100_bits_conjectured_security(DEFAULT_APP_LOG_BLOWUP);
@@ -428,13 +493,19 @@ mod powdr {
             config = config.with_apc_candidates_dir(path);
         }
 
-        compile_exe_with_elf(
+        let res = compile_exe_with_elf(
             original_program,
             elf,
             config,
             PrecompileImplementation::SingleRowChip,
             pgo_config,
         )
-        .unwrap()
+        .unwrap();
+
+        tracing::info!("Saving APC compilation output to cache at {}", cache_file_path.display());
+        std::fs::create_dir_all(cache_dir_path).unwrap();
+        serde_cbor::to_writer(&mut File::create(cache_file_path).unwrap(), &res).unwrap();
+
+        res
     }
 }

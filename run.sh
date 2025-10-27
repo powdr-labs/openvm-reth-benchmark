@@ -75,6 +75,7 @@ POWDR_APC_CANDIDATES_DIR=apcs RUST_LOG="debug" OUTPUT_PATH="metrics.json" ./targ
 --segment-max-cells $SEGMENT_MAX_CELLS \
 --num-children-leaf 1 \
 --num-children-internal 3 \
+--apc-cache-dir apc-cache \
 --apc "$APC" \
 --apc-skip "$APC_SKIP" \
 --pgo-type "$PGO_TYPE"
