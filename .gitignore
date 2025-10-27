@@ -25,6 +25,9 @@ elf
 
 **/rpc-cache
 
+# APC compilation output
+**/apc-cache
+
 # Metrics
 metrics.json
 
