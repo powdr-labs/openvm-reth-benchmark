@@ -19,7 +19,7 @@ use openvm_native_circuit::NativeCpuBuilder;
 
 use openvm_sdk::{
     config::{AppConfig, SdkVmConfig},
-    prover::{verify_app_proof, AppProver, StarkProver},
+    prover::verify_app_proof,
     DefaultStarkEngine, GenericSdk, StdIn,
 };
 use openvm_stark_sdk::{
@@ -29,7 +29,7 @@ use openvm_transpiler::{elf::Elf, openvm_platform::memory::MEM_SIZE};
 use powdr_autoprecompiles::PgoType;
 use powdr_openvm::{
     CompiledProgram, ExtendedVmConfig, ExtendedVmConfigCpuBuilder, HintsExtension,
-    OriginalCompiledProgram,
+    OriginalCompiledProgram, SpecializedConfigCpuBuilder,
 };
 pub use reth_primitives;
 use serde_json::json;
@@ -221,14 +221,14 @@ pub async fn run_reth_benchmark(args: HostArgs, openvm_client_eth_elf: &[u8]) ->
 
     #[cfg(feature = "cuda")]
     println!("CUDA Backend Enabled");
-    let sdk: GenericSdk<BabyBearPoseidon2Engine, _, NativeCpuBuilder> =
+    let sdk: GenericSdk<BabyBearPoseidon2Engine, ExtendedVmConfigCpuBuilder, NativeCpuBuilder> =
         GenericSdk::new(app_config.clone())?
             .with_agg_config(args.benchmark.agg_config())
             .with_agg_tree_config(args.benchmark.agg_tree_config);
     let elf = Elf::decode(openvm_client_eth_elf, MEM_SIZE as u32)?;
     let exe = sdk.convert_to_exe(elf.clone())?;
 
-    let CompiledProgram { exe, .. } = {
+    let CompiledProgram { exe, vm_config } = {
         // We do this in a separate scope so the log initialization does not conflict with OpenVM's.
         // The powdr log is enabled during the scope of `_guard`.
         let subscriber = tracing_subscriber::FmtSubscriber::builder()
@@ -246,6 +246,15 @@ pub async fn run_reth_benchmark(args: HostArgs, openvm_client_eth_elf: &[u8]) ->
         )
     };
 
+    // Create an SDK based on the `SpecializedConfig` we generated
+    let specialized_sdk: GenericSdk<
+        BabyBearPoseidon2Engine,
+        SpecializedConfigCpuBuilder,
+        NativeCpuBuilder,
+    > = GenericSdk::new(args.benchmark.app_config(vm_config.clone()))?
+        .with_agg_config(args.benchmark.agg_config())
+        .with_agg_tree_config(args.benchmark.agg_tree_config);
+
     let program_name = format!("reth.{}.block_{}", args.mode, args.block_number);
     // NOTE: args.benchmark.app_config resets SegmentationLimits if max_segment_length is set
     args.benchmark.max_segment_length = None;
@@ -256,7 +265,7 @@ pub async fn run_reth_benchmark(args: HostArgs, openvm_client_eth_elf: &[u8]) ->
                 // Always execute_e1 for benchmarking:
                 {
                     let pvs = info_span!("sdk.execute", group = program_name)
-                        .in_scope(|| sdk.execute(elf.clone(), stdin.clone()))?;
+                        .in_scope(|| specialized_sdk.execute(elf.clone(), stdin.clone()))?;
                     let block_hash = pvs;
                     println!("block_hash: {}", ToHexExt::encode_hex(&block_hash));
                 }
@@ -283,15 +292,15 @@ pub async fn run_reth_benchmark(args: HostArgs, openvm_client_eth_elf: &[u8]) ->
                         println!("Number of segments: {}", segments.len());
                     }
                     BenchMode::ProveApp => {
-                        let mut prover: AppProver<_, ExtendedVmConfigCpuBuilder> =
-                            sdk.app_prover(elf)?.with_program_name(program_name);
-                        let (_, app_vk) = sdk.app_keygen();
+                        let mut prover =
+                            specialized_sdk.app_prover(elf)?.with_program_name(program_name);
+                        let (_, app_vk) = specialized_sdk.app_keygen();
                         let proof = prover.prove(stdin)?;
                         verify_app_proof(&app_vk, &proof)?;
                     }
                     BenchMode::ProveStark => {
-                        let mut prover: StarkProver<_, ExtendedVmConfigCpuBuilder, _> =
-                            sdk.prover(elf)?.with_program_name(program_name);
+                        let mut prover =
+                            specialized_sdk.prover(elf)?.with_program_name(program_name);
                         let proof = prover.prove(stdin)?;
                         let block_hash = proof
                             .user_public_values
@@ -302,8 +311,9 @@ pub async fn run_reth_benchmark(args: HostArgs, openvm_client_eth_elf: &[u8]) ->
                     }
                     #[cfg(feature = "evm-verify")]
                     BenchMode::ProveEvm => {
-                        let mut prover = sdk.evm_prover(elf)?.with_program_name(program_name);
-                        let halo2_pk = sdk.halo2_pk();
+                        let mut prover =
+                            specialized_sdk.evm_prover(elf)?.with_program_name(program_name);
+                        let halo2_pk = specialized_sdk.halo2_pk();
                         tracing::info!(
                             "halo2_outer_k: {}",
                             halo2_pk.verifier.pinning.metadata.config_params.k
