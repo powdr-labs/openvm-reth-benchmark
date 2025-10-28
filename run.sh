@@ -7,7 +7,7 @@ fi
 
 set -e
 cd bin/client-eth
-RUSTFLAGS="-Clink-arg=--emit-relocs" cargo openvm build --no-transpile
+# RUSTFLAGS="-Clink-arg=--emit-relocs" cargo openvm build --no-transpile
 mkdir -p ../host/elf
 SRC="target/riscv32im-risc0-zkvm-elf/release/openvm-client-eth"
 DEST="../host/elf/openvm-client-eth"
@@ -56,6 +56,7 @@ else
 fi
 
 # Default options if not set
+: "${APC_SETUP_NAME:=my-setup}"
 : "${MODE:=execute}"
 : "${APC:=0}"
 : "${APC_SKIP:=0}"

@@ -19,6 +19,7 @@ use openvm_native_circuit::NativeCpuBuilder;
 
 use openvm_sdk::{
     config::{AppConfig, SdkVmConfig},
+    keygen::{AggProvingKey, AppProvingKey},
     prover::verify_app_proof,
     DefaultStarkEngine, GenericSdk, StdIn,
 };
@@ -29,13 +30,14 @@ use openvm_transpiler::{elf::Elf, openvm_platform::memory::MEM_SIZE};
 use powdr_autoprecompiles::PgoType;
 use powdr_openvm::{
     CompiledProgram, ExtendedVmConfig, ExtendedVmConfigCpuBuilder, HintsExtension,
-    OriginalCompiledProgram, SpecializedConfigCpuBuilder,
+    OriginalCompiledProgram, SpecializedConfig, SpecializedConfigCpuBuilder,
 };
 pub use reth_primitives;
 use serde::{Deserialize, Serialize};
 use serde_json::json;
 use std::{
     fs::{self, File},
+    io::{BufReader, BufWriter},
     path::PathBuf,
 };
 use tracing::info_span;
@@ -150,11 +152,13 @@ const PGO_BLOCK_NUMBER: u64 = 23100006;
 const APP_LOG_BLOWUP: usize = 1;
 
 #[derive(Serialize, Deserialize)]
-pub struct Setup {
+pub struct PrecomputedProverData {
     program: CompiledProgram,
+    app_pk: AppProvingKey<SpecializedConfig>,
+    agg_pk: AggProvingKey,
 }
 
-pub async fn get_client_input(
+async fn get_client_input(
     provider_config: ProviderConfig,
     cache_dir: &Option<PathBuf>,
     chain_id: u64,
@@ -203,6 +207,7 @@ pub async fn get_client_input(
     }
 }
 
+/// Complete the host arguments with defaults
 pub fn complete_args(mut args: HostArgs) -> HostArgs {
     let app_log_blowup = args.benchmark.app_log_blowup.unwrap_or(RETH_DEFAULT_APP_LOG_BLOWUP);
     assert_eq!(app_log_blowup, APP_LOG_BLOWUP, "App log blowup must be {RETH_DEFAULT_APP_LOG_BLOWUP} because it must match the one used when compiling this benchmark");
@@ -213,17 +218,28 @@ pub fn complete_args(mut args: HostArgs) -> HostArgs {
     args
 }
 
-/// Compile the reth benchmark by specializing the config to the program
-pub async fn compile(args: &HostArgs, openvm_client_eth_elf: &[u8]) -> eyre::Result<Setup> {
-    let cache_file_path = args.apc_cache_dir.join(&args.apc_setup_name).with_extension("cbor");
+/// Precompute the prover data, in particular the specialized config taking into account APCs, as
+/// well as associated proving keys. If the data is already present in the cache, deserialize it and return it.
+pub async fn precompute_prover_data(
+    args: &HostArgs,
+    openvm_client_eth_elf: &[u8],
+) -> eyre::Result<PrecomputedProverData> {
+    let cache_file_path = args.apc_cache_dir.join(&args.apc_setup_name).with_extension("bin");
 
-    if let Some(compiled_program) = File::open(&cache_file_path)
-        .ok()
-        .and_then(|mut file| serde_cbor::from_reader(&mut file).ok())
+    if let Some(compiled_program) =
+        File::open(&cache_file_path).ok().map(BufReader::new).map(|mut file| {
+            bincode::serde::decode_from_std_read(&mut file, bincode::config::standard())
+                .expect("Found cached precomputed prover data, but deserialization failed")
+        })
     {
-        tracing::info!("APC compilation cache hit");
+        tracing::info!("Precomputed prover data for key {} found in cache", args.apc_setup_name);
         return Ok(compiled_program);
     }
+
+    tracing::info!(
+        "Precomputed prover data for key {} not found in cache. Precomputing prover data.",
+        args.apc_setup_name
+    );
 
     let provider_config = args.provider.clone().into_provider().await?;
     let pgo_client_input =
@@ -260,18 +276,37 @@ pub async fn compile(args: &HostArgs, openvm_client_eth_elf: &[u8]) -> eyre::Res
         )
     };
 
-    let setup = Setup { program };
+    // Precompute proving keys
+    let specialized_sdk: GenericSdk<
+        BabyBearPoseidon2Engine,
+        SpecializedConfigCpuBuilder,
+        NativeCpuBuilder,
+    > = GenericSdk::new(args.benchmark.app_config(program.vm_config.clone()))?
+        .with_agg_config(args.benchmark.agg_config())
+        .with_agg_tree_config(args.benchmark.agg_tree_config);
 
-    tracing::info!("Saving APC compilation output to cache at {}", cache_file_path.display());
+    tracing::info!("Run app keygen");
+    let (app_pk, _) = specialized_sdk.app_keygen();
+    tracing::info!("Run agg keygen");
+    let (agg_pk, _) = specialized_sdk.agg_keygen().unwrap();
+
+    let setup = PrecomputedProverData { program, app_pk, agg_pk };
+
+    tracing::info!("Saving prover data to cache at {}", cache_file_path.display());
     std::fs::create_dir_all(&args.apc_cache_dir).unwrap();
-    serde_cbor::to_writer(&mut File::create(cache_file_path).unwrap(), &setup).unwrap();
+    bincode::serde::encode_into_std_write(
+        &setup,
+        &mut BufWriter::new(File::create(cache_file_path).unwrap()),
+        bincode::config::standard()
+    )
+    .unwrap();
 
     Ok(setup)
 }
 
 pub async fn run_reth_benchmark(
     args: HostArgs,
-    setup: Setup,
+    setup: PrecomputedProverData,
     openvm_client_eth_elf: &[u8],
 ) -> eyre::Result<()> {
     // Initialize the environment variables.
@@ -320,7 +355,8 @@ pub async fn run_reth_benchmark(
 
     let elf = Elf::decode(openvm_client_eth_elf, MEM_SIZE as u32)?;
 
-    let CompiledProgram { exe, vm_config } = setup.program;
+    let PrecomputedProverData { program: CompiledProgram { exe, vm_config }, app_pk, agg_pk } =
+        setup;
 
     // Create an SDK based on the `SpecializedConfig` we generated
     let specialized_sdk: GenericSdk<
@@ -330,6 +366,12 @@ pub async fn run_reth_benchmark(
     > = GenericSdk::new(args.benchmark.app_config(vm_config.clone()))?
         .with_agg_config(args.benchmark.agg_config())
         .with_agg_tree_config(args.benchmark.agg_tree_config);
+
+    // Load the precomputed proving keys
+    tracing::info!("Load app pk");
+    specialized_sdk.set_app_pk(app_pk).map_err(|_| ()).unwrap();
+    tracing::info!("Load agg pk");
+    specialized_sdk.set_agg_pk(agg_pk).map_err(|_| ()).unwrap();
 
     let program_name = format!("reth.{}.block_{}", args.mode, args.block_number);
     // NOTE: args.benchmark.app_config resets SegmentationLimits if max_segment_length is set
