@@ -510,8 +510,8 @@ mod powdr {
     /// - `apc`: The number of apcs to generate
     /// - `apc_skip`: The number of apcs to skip when selecting. Used for debugging.
     /// - `pgo_type`: The PGO strategy to use when choosing the blocks to accelerate.
-    /// - `pgo_client_input`: The standard input to the program, used for PGO data generation to
-    ///   choose which basic blocks to accelerate.
+    /// - `pgo_stdin`: The standard inputs to the program used for PGO data generation to choose
+    ///   which basic blocks to accelerate.
     pub fn apc(
         original_program: OriginalCompiledProgram,
         elf: &[u8],

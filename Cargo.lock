@@ -5472,7 +5472,6 @@ dependencies = [
  "powdr-riscv-elf",
  "reth-primitives",
  "serde",
- "serde_cbor",
  "serde_json",
  "toml 0.9.2",
  "tracing",
