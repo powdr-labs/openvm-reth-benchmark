@@ -32,14 +32,20 @@ use powdr_openvm::{
     OriginalCompiledProgram, SpecializedConfigCpuBuilder,
 };
 pub use reth_primitives;
+use serde::{Deserialize, Serialize};
 use serde_json::json;
-use std::{fs, path::PathBuf};
+use std::{
+    fs::{self, File},
+    path::PathBuf,
+};
 use tracing::info_span;
 
 mod execute;
 
 mod cli;
 use cli::ProviderArgs;
+
+use crate::cli::ProviderConfig;
 
 /// Enum representing the execution mode of the host executable.
 #[derive(Debug, Clone, clap::ValueEnum)]
@@ -98,6 +104,9 @@ pub struct HostArgs {
     #[clap(long)]
     apc_cache_dir: PathBuf,
 
+    #[clap(long)]
+    apc_setup_name: String,
+
     /// The path to the CSV file containing the execution data.
     #[clap(long, default_value = "report.csv")]
     report_path: PathBuf,
@@ -136,7 +145,135 @@ pub fn reth_vm_config(app_log_blowup: usize) -> ExtendedVmConfig {
 pub const RETH_DEFAULT_APP_LOG_BLOWUP: usize = 1;
 pub const RETH_DEFAULT_LEAF_LOG_BLOWUP: usize = 1;
 
-pub async fn run_reth_benchmark(args: HostArgs, openvm_client_eth_elf: &[u8]) -> eyre::Result<()> {
+const PGO_CHAIN_ID: u64 = CHAIN_ID_ETH_MAINNET;
+const PGO_BLOCK_NUMBER: u64 = 23100006;
+const APP_LOG_BLOWUP: usize = 1;
+
+#[derive(Serialize, Deserialize)]
+pub struct Setup {
+    program: CompiledProgram,
+}
+
+pub async fn get_client_input(
+    provider_config: ProviderConfig,
+    cache_dir: &Option<PathBuf>,
+    chain_id: u64,
+    block_number: u64,
+) -> eyre::Result<ClientExecutorInput> {
+    let client_input_from_cache =
+        try_load_input_from_cache(cache_dir.as_ref(), PGO_CHAIN_ID, PGO_BLOCK_NUMBER)?;
+
+    match (client_input_from_cache, provider_config.rpc_url) {
+        (Some(client_input_from_cache), _) => Ok(client_input_from_cache),
+        (None, Some(rpc_url)) => {
+            // Cache not found but we have RPC
+            // Setup the provider.
+            let client =
+                RpcClient::builder().layer(RetryBackoffLayer::new(5, 1000, 100)).http(rpc_url);
+            let provider = RootProvider::new(client);
+
+            // Setup the host executor.
+            let host_executor = HostExecutor::new(provider);
+
+            // Execute the host.
+            let client_input =
+                host_executor.execute(block_number).await.expect("failed to execute host");
+
+            if let Some(cache_dir) = cache_dir {
+                let input_folder = cache_dir.join(format!("input/{}", chain_id));
+                if !input_folder.exists() {
+                    std::fs::create_dir_all(&input_folder)?;
+                }
+
+                let input_path = input_folder.join(format!("{}.bin", block_number));
+                let mut cache_file = std::fs::File::create(input_path)?;
+
+                bincode::serde::encode_into_std_write(
+                    &client_input,
+                    &mut cache_file,
+                    bincode::config::standard(),
+                )?;
+            }
+
+            Ok(client_input)
+        }
+        (None, None) => {
+            eyre::bail!("cache not found and RPC URL not provided")
+        }
+    }
+}
+
+pub fn complete_args(mut args: HostArgs) -> HostArgs {
+    let app_log_blowup = args.benchmark.app_log_blowup.unwrap_or(RETH_DEFAULT_APP_LOG_BLOWUP);
+    assert_eq!(app_log_blowup, APP_LOG_BLOWUP, "App log blowup must be {RETH_DEFAULT_APP_LOG_BLOWUP} because it must match the one used when compiling this benchmark");
+    args.benchmark.app_log_blowup = Some(app_log_blowup);
+    let leaf_log_blowup = args.benchmark.leaf_log_blowup.unwrap_or(RETH_DEFAULT_LEAF_LOG_BLOWUP);
+    args.benchmark.leaf_log_blowup = Some(leaf_log_blowup);
+
+    args
+}
+
+/// Compile the reth benchmark by specializing the config to the program
+pub async fn compile(args: &HostArgs, openvm_client_eth_elf: &[u8]) -> eyre::Result<Setup> {
+    let cache_file_path = args.apc_cache_dir.join(&args.apc_setup_name).with_extension("cbor");
+
+    if let Some(compiled_program) = File::open(&cache_file_path)
+        .ok()
+        .and_then(|mut file| serde_cbor::from_reader(&mut file).ok())
+    {
+        tracing::info!("APC compilation cache hit");
+        return Ok(compiled_program);
+    }
+
+    let provider_config = args.provider.clone().into_provider().await?;
+    let pgo_client_input =
+        get_client_input(provider_config, &args.cache_dir, PGO_CHAIN_ID, PGO_BLOCK_NUMBER).await?;
+
+    let app_log_blowup = args.benchmark.app_log_blowup.unwrap();
+
+    let vm_config = reth_vm_config(app_log_blowup);
+    let app_config = args.benchmark.app_config(vm_config.clone());
+
+    let sdk: GenericSdk<BabyBearPoseidon2Engine, ExtendedVmConfigCpuBuilder, NativeCpuBuilder> =
+        GenericSdk::new(app_config.clone())?
+            .with_agg_config(args.benchmark.agg_config())
+            .with_agg_tree_config(args.benchmark.agg_tree_config);
+    let elf = Elf::decode(openvm_client_eth_elf, MEM_SIZE as u32)?;
+    let exe = sdk.convert_to_exe(elf.clone())?;
+
+    let program = {
+        // We do this in a separate scope so the log initialization does not conflict with OpenVM's.
+        // The powdr log is enabled during the scope of `_guard`.
+        let subscriber = tracing_subscriber::FmtSubscriber::builder()
+            .with_max_level(tracing::Level::DEBUG)
+            .finish();
+        let _guard = tracing::subscriber::set_default(subscriber);
+
+        powdr::apc(
+            OriginalCompiledProgram { exe, vm_config },
+            openvm_client_eth_elf,
+            args.apc,
+            args.apc_skip,
+            args.pgo_type,
+            &pgo_client_input,
+            &args.apc_cache_dir,
+        )
+    };
+
+    let setup = Setup { program };
+
+    tracing::info!("Saving APC compilation output to cache at {}", cache_file_path.display());
+    std::fs::create_dir_all(&args.apc_cache_dir).unwrap();
+    serde_cbor::to_writer(&mut File::create(cache_file_path).unwrap(), &setup).unwrap();
+
+    Ok(setup)
+}
+
+pub async fn run_reth_benchmark(
+    args: HostArgs,
+    setup: Setup,
+    openvm_client_eth_elf: &[u8],
+) -> eyre::Result<()> {
     // Initialize the environment variables.
     dotenv::dotenv().ok();
 
@@ -156,50 +293,10 @@ pub async fn run_reth_benchmark(args: HostArgs, openvm_client_eth_elf: &[u8]) ->
         }
     };
 
-    let client_input_from_cache = try_load_input_from_cache(
-        args.cache_dir.as_ref(),
-        provider_config.chain_id,
-        args.block_number,
-    )?;
+    let chain_id = provider_config.chain_id;
 
-    let client_input = match (client_input_from_cache, provider_config.rpc_url) {
-        (Some(client_input_from_cache), _) => client_input_from_cache,
-        (None, Some(rpc_url)) => {
-            // Cache not found but we have RPC
-            // Setup the provider.
-            let client =
-                RpcClient::builder().layer(RetryBackoffLayer::new(5, 1000, 100)).http(rpc_url);
-            let provider = RootProvider::new(client);
-
-            // Setup the host executor.
-            let host_executor = HostExecutor::new(provider);
-
-            // Execute the host.
-            let client_input =
-                host_executor.execute(args.block_number).await.expect("failed to execute host");
-
-            if let Some(cache_dir) = args.cache_dir {
-                let input_folder = cache_dir.join(format!("input/{}", provider_config.chain_id));
-                if !input_folder.exists() {
-                    std::fs::create_dir_all(&input_folder)?;
-                }
-
-                let input_path = input_folder.join(format!("{}.bin", args.block_number));
-                let mut cache_file = std::fs::File::create(input_path)?;
-
-                bincode::serde::encode_into_std_write(
-                    &client_input,
-                    &mut cache_file,
-                    bincode::config::standard(),
-                )?;
-            }
-
-            client_input
-        }
-        (None, None) => {
-            eyre::bail!("cache not found and RPC URL not provided")
-        }
-    };
+    let client_input =
+        get_client_input(provider_config, &args.cache_dir, chain_id, args.block_number).await?;
 
     let mut stdin = StdIn::default();
     stdin.write(&client_input);
@@ -216,41 +313,14 @@ pub async fn run_reth_benchmark(args: HostArgs, openvm_client_eth_elf: &[u8]) ->
         return Ok(());
     }
 
-    let app_log_blowup = args.benchmark.app_log_blowup.unwrap_or(RETH_DEFAULT_APP_LOG_BLOWUP);
-    args.benchmark.app_log_blowup = Some(app_log_blowup);
-    let leaf_log_blowup = args.benchmark.leaf_log_blowup.unwrap_or(RETH_DEFAULT_LEAF_LOG_BLOWUP);
-    args.benchmark.leaf_log_blowup = Some(leaf_log_blowup);
+    let app_log_blowup = args.benchmark.app_log_blowup.unwrap();
 
     let vm_config = reth_vm_config(app_log_blowup);
     let app_config = args.benchmark.app_config(vm_config.clone());
 
-    #[cfg(feature = "cuda")]
-    println!("CUDA Backend Enabled");
-    let sdk: GenericSdk<BabyBearPoseidon2Engine, ExtendedVmConfigCpuBuilder, NativeCpuBuilder> =
-        GenericSdk::new(app_config.clone())?
-            .with_agg_config(args.benchmark.agg_config())
-            .with_agg_tree_config(args.benchmark.agg_tree_config);
     let elf = Elf::decode(openvm_client_eth_elf, MEM_SIZE as u32)?;
-    let exe = sdk.convert_to_exe(elf.clone())?;
 
-    let CompiledProgram { exe, vm_config } = {
-        // We do this in a separate scope so the log initialization does not conflict with OpenVM's.
-        // The powdr log is enabled during the scope of `_guard`.
-        let subscriber = tracing_subscriber::FmtSubscriber::builder()
-            .with_max_level(tracing::Level::DEBUG)
-            .finish();
-        let _guard = tracing::subscriber::set_default(subscriber);
-
-        powdr::apc(
-            OriginalCompiledProgram { exe, vm_config },
-            openvm_client_eth_elf,
-            args.apc,
-            args.apc_skip,
-            args.pgo_type,
-            &client_input,
-            &args.apc_cache_dir,
-        )
-    };
+    let CompiledProgram { exe, vm_config } = setup.program;
 
     // Create an SDK based on the `SpecializedConfig` we generated
     let specialized_sdk: GenericSdk<
@@ -370,10 +440,7 @@ fn try_load_input_from_cache(
 
 mod powdr {
 
-    use std::{
-        fs::File,
-        path::{Path, PathBuf},
-    };
+    use std::path::Path;
 
     use openvm_client_executor::io::ClientExecutorInput;
     use openvm_native_circuit::NativeCpuBuilder;
@@ -389,34 +456,6 @@ mod powdr {
         PgoConfig, PrecompileImplementation, Prog,
     };
 
-    /// Get the path to the cache file
-    /// Currently does not check the original program, so a mismatch in the original config would
-    /// not be detected here
-    fn get_cache_file_path(
-        _original_program: &OriginalCompiledProgram,
-        elf: &[u8],
-        apc: usize,
-        apc_skip: usize,
-        pgo_type: PgoType,
-        pgo_client_input: &ClientExecutorInput,
-        cache_dir_path: &Path,
-    ) -> PathBuf {
-        fn hash<T: std::hash::Hash>(val: &T) -> u64 {
-            use std::hash::{DefaultHasher, Hasher};
-            let mut hasher = DefaultHasher::new();
-            val.hash(&mut hasher);
-            hasher.finish()
-        }
-
-        let elf_hash = hash(&elf);
-        // TODO: we only look at the input block number here. Consider the entire input instead.
-        let input_hash = pgo_client_input.current_block.header.number;
-
-        cache_dir_path.join(format!(
-            "elf_{elf_hash:x}_apc_{apc}_skip_{apc_skip}_pgo_{pgo_type}_block_{input_hash}"
-        ))
-    }
-
     /// This function is used to generate the specialized program for the Powdr APC.
     /// It takes:
     /// - `original_program`: The original program, including the original vm config.
@@ -426,7 +465,6 @@ mod powdr {
     /// - `pgo_type`: The PGO strategy to use when choosing the blocks to accelerate.
     /// - `stdin`: The standard input to the program, used for PGO data generation to choose which
     ///   basic blocks to accelerate.
-    /// - `cache_dir_path`: The path to the cache directory to read from and write to.
     pub fn apc(
         original_program: OriginalCompiledProgram,
         elf: &[u8],
@@ -434,26 +472,8 @@ mod powdr {
         apc_skip: usize,
         pgo_type: PgoType,
         pgo_client_input: &ClientExecutorInput,
-        cache_dir_path: &Path,
+        _cache_dir_path: &Path,
     ) -> CompiledProgram {
-        let cache_file_path = get_cache_file_path(
-            &original_program,
-            elf,
-            apc,
-            apc_skip,
-            pgo_type,
-            pgo_client_input,
-            cache_dir_path,
-        );
-
-        if let Some(compiled_program) = File::open(&cache_file_path)
-            .ok()
-            .and_then(|mut file| serde_cbor::from_reader(&mut file).ok())
-        {
-            tracing::info!("APC compilation cache hit");
-            return compiled_program;
-        }
-
         let mut stdin = StdIn::default();
         stdin.write(pgo_client_input);
 
@@ -493,19 +513,13 @@ mod powdr {
             config = config.with_apc_candidates_dir(path);
         }
 
-        let res = compile_exe_with_elf(
+        compile_exe_with_elf(
             original_program,
             elf,
             config,
             PrecompileImplementation::SingleRowChip,
             pgo_config,
         )
-        .unwrap();
-
-        tracing::info!("Saving APC compilation output to cache at {}", cache_file_path.display());
-        std::fs::create_dir_all(cache_dir_path).unwrap();
-        serde_cbor::to_writer(&mut File::create(cache_file_path).unwrap(), &res).unwrap();
-
-        res
+        .unwrap()
     }
 }
