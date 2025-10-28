@@ -148,7 +148,7 @@ pub const RETH_DEFAULT_APP_LOG_BLOWUP: usize = 1;
 pub const RETH_DEFAULT_LEAF_LOG_BLOWUP: usize = 1;
 
 const PGO_CHAIN_ID: u64 = CHAIN_ID_ETH_MAINNET;
-const PGO_BLOCK_NUMBER: u64 = 23100006;
+const PGO_BLOCK_NUMBERS: [u64; 1] = [23100006];
 const APP_LOG_BLOWUP: usize = 1;
 
 #[derive(Serialize, Deserialize)]
@@ -159,21 +159,22 @@ pub struct PrecomputedProverData {
 }
 
 async fn get_client_input(
-    provider_config: ProviderConfig,
+    provider_config: &ProviderConfig,
     cache_dir: &Option<PathBuf>,
     chain_id: u64,
     block_number: u64,
 ) -> eyre::Result<ClientExecutorInput> {
     let client_input_from_cache =
-        try_load_input_from_cache(cache_dir.as_ref(), PGO_CHAIN_ID, PGO_BLOCK_NUMBER)?;
+        try_load_input_from_cache(cache_dir.as_ref(), chain_id, block_number)?;
 
-    match (client_input_from_cache, provider_config.rpc_url) {
+    match (client_input_from_cache, &provider_config.rpc_url) {
         (Some(client_input_from_cache), _) => Ok(client_input_from_cache),
         (None, Some(rpc_url)) => {
             // Cache not found but we have RPC
             // Setup the provider.
-            let client =
-                RpcClient::builder().layer(RetryBackoffLayer::new(5, 1000, 100)).http(rpc_url);
+            let client = RpcClient::builder()
+                .layer(RetryBackoffLayer::new(5, 1000, 100))
+                .http(rpc_url.clone());
             let provider = RootProvider::new(client);
 
             // Setup the host executor.
@@ -219,11 +220,18 @@ pub fn complete_args(mut args: HostArgs) -> HostArgs {
 }
 
 /// Precompute the prover data, in particular the specialized config taking into account APCs, as
-/// well as associated proving keys. If the data is already present in the cache, deserialize it and return it.
+/// well as associated proving keys. If the data is already present in the cache, deserialize it and
+/// return it.
 pub async fn precompute_prover_data(
     args: &HostArgs,
     openvm_client_eth_elf: &[u8],
 ) -> eyre::Result<PrecomputedProverData> {
+    // We do this in a separate scope so the log initialization does not conflict with OpenVM's.
+    // The powdr log is enabled during the scope of `_guard`.
+    let subscriber =
+        tracing_subscriber::FmtSubscriber::builder().with_max_level(tracing::Level::DEBUG).finish();
+    let _guard = tracing::subscriber::set_default(subscriber);
+
     let cache_file_path = args.apc_cache_dir.join(&args.apc_setup_name).with_extension("bin");
 
     if let Some(compiled_program) =
@@ -242,8 +250,19 @@ pub async fn precompute_prover_data(
     );
 
     let provider_config = args.provider.clone().into_provider().await?;
-    let pgo_client_input =
-        get_client_input(provider_config, &args.cache_dir, PGO_CHAIN_ID, PGO_BLOCK_NUMBER).await?;
+
+    let mut pgo_stdins = Vec::new();
+
+    for block_id in PGO_BLOCK_NUMBERS {
+        let pgo_client_input =
+            get_client_input(&provider_config, &args.cache_dir, PGO_CHAIN_ID, block_id)
+                .await
+                .unwrap();
+
+        let mut pgo_stdin = StdIn::default();
+        pgo_stdin.write(&pgo_client_input);
+        pgo_stdins.push(pgo_stdin);
+    }
 
     let app_log_blowup = args.benchmark.app_log_blowup.unwrap();
 
@@ -257,24 +276,14 @@ pub async fn precompute_prover_data(
     let elf = Elf::decode(openvm_client_eth_elf, MEM_SIZE as u32)?;
     let exe = sdk.convert_to_exe(elf.clone())?;
 
-    let program = {
-        // We do this in a separate scope so the log initialization does not conflict with OpenVM's.
-        // The powdr log is enabled during the scope of `_guard`.
-        let subscriber = tracing_subscriber::FmtSubscriber::builder()
-            .with_max_level(tracing::Level::DEBUG)
-            .finish();
-        let _guard = tracing::subscriber::set_default(subscriber);
-
-        powdr::apc(
-            OriginalCompiledProgram { exe, vm_config },
-            openvm_client_eth_elf,
-            args.apc,
-            args.apc_skip,
-            args.pgo_type,
-            &pgo_client_input,
-            &args.apc_cache_dir,
-        )
-    };
+    let program = powdr::apc(
+        OriginalCompiledProgram { exe, vm_config },
+        openvm_client_eth_elf,
+        args.apc,
+        args.apc_skip,
+        args.pgo_type,
+        pgo_stdins,
+    );
 
     // Precompute proving keys
     let specialized_sdk: GenericSdk<
@@ -297,7 +306,7 @@ pub async fn precompute_prover_data(
     bincode::serde::encode_into_std_write(
         &setup,
         &mut BufWriter::new(File::create(cache_file_path).unwrap()),
-        bincode::config::standard()
+        bincode::config::standard(),
     )
     .unwrap();
 
@@ -331,7 +340,7 @@ pub async fn run_reth_benchmark(
     let chain_id = provider_config.chain_id;
 
     let client_input =
-        get_client_input(provider_config, &args.cache_dir, chain_id, args.block_number).await?;
+        get_client_input(&provider_config, &args.cache_dir, chain_id, args.block_number).await?;
 
     let mut stdin = StdIn::default();
     stdin.write(&client_input);
@@ -481,10 +490,6 @@ fn try_load_input_from_cache(
 }
 
 mod powdr {
-
-    use std::path::Path;
-
-    use openvm_client_executor::io::ClientExecutorInput;
     use openvm_native_circuit::NativeCpuBuilder;
     use openvm_sdk::{
         config::{AppConfig, DEFAULT_APP_LOG_BLOWUP},
@@ -505,20 +510,16 @@ mod powdr {
     /// - `apc`: The number of apcs to generate
     /// - `apc_skip`: The number of apcs to skip when selecting. Used for debugging.
     /// - `pgo_type`: The PGO strategy to use when choosing the blocks to accelerate.
-    /// - `stdin`: The standard input to the program, used for PGO data generation to choose which
-    ///   basic blocks to accelerate.
+    /// - `pgo_client_input`: The standard input to the program, used for PGO data generation to
+    ///   choose which basic blocks to accelerate.
     pub fn apc(
         original_program: OriginalCompiledProgram,
         elf: &[u8],
         apc: usize,
         apc_skip: usize,
         pgo_type: PgoType,
-        pgo_client_input: &ClientExecutorInput,
-        _cache_dir_path: &Path,
+        pgo_stdin: Vec<StdIn>,
     ) -> CompiledProgram {
-        let mut stdin = StdIn::default();
-        stdin.write(pgo_client_input);
-
         // Set app configuration
         let app_fri_params =
             FriParameters::standard_with_100_bits_conjectured_security(DEFAULT_APP_LOG_BLOWUP);
@@ -531,7 +532,9 @@ mod powdr {
             GenericSdk::new(app_config).unwrap();
 
         let execute = || {
-            sdk.execute(original_program.exe.clone(), stdin.clone()).unwrap();
+            for stdin in pgo_stdin {
+                sdk.execute(original_program.exe.clone(), stdin).unwrap();
+            }
         };
 
         let program = Prog::from(&original_program.exe.program);
