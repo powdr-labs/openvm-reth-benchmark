@@ -56,6 +56,7 @@ else
 fi
 
 # Default options if not set
+: "${APC_SETUP_NAME:=my-setup}"
 : "${MODE:=execute}"
 : "${APC:=0}"
 : "${APC_SKIP:=0}"
@@ -75,6 +76,8 @@ POWDR_APC_CANDIDATES_DIR=apcs RUST_LOG="debug" OUTPUT_PATH="metrics.json" ./targ
 --segment-max-cells $SEGMENT_MAX_CELLS \
 --num-children-leaf 1 \
 --num-children-internal 3 \
+--apc-cache-dir apc-cache \
+--apc-setup-name $APC_SETUP_NAME \
 --apc "$APC" \
 --apc-skip "$APC_SKIP" \
 --pgo-type "$PGO_TYPE"
