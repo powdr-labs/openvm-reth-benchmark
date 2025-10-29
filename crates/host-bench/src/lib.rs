@@ -362,9 +362,6 @@ pub async fn run_reth_benchmark(
     let vm_config = reth_vm_config(app_log_blowup);
     let app_config = args.benchmark.app_config(vm_config.clone());
 
-    #[cfg(feature = "cuda")]
-    println!("CUDA Backend Enabled");
-
     let elf = Elf::decode(openvm_client_eth_elf, MEM_SIZE as u32)?;
 
     let PrecomputedProverData { program: CompiledProgram { exe, vm_config }, app_pk, agg_pk } =
