@@ -22,7 +22,7 @@ source .env
 # MODE=execute # can be compile, execute, execute-metered, prove-app, prove-stark, or prove-evm (needs "evm-verify" feature)
 PROFILE="release"
 FEATURES="metrics,jemalloc,tco,unprotected"
-BLOCK_NUMBER=23100006
+BLOCK_NUMBER=21882667
 # switch to +nightly-2025-08-19 if using tco
 TOOLCHAIN="+nightly-2025-08-19" # "+stable"
 BIN_NAME="openvm-reth-benchmark-bin"
