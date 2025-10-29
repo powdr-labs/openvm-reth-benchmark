@@ -362,6 +362,9 @@ pub async fn run_reth_benchmark(
     let vm_config = reth_vm_config(app_log_blowup);
     let app_config = args.benchmark.app_config(vm_config.clone());
 
+    #[cfg(feature = "cuda")]
+    println!("CUDA Backend Enabled");
+
     let elf = Elf::decode(openvm_client_eth_elf, MEM_SIZE as u32)?;
 
     let PrecomputedProverData { program: CompiledProgram { exe, vm_config }, app_pk, agg_pk } =
@@ -381,6 +384,15 @@ pub async fn run_reth_benchmark(
     specialized_sdk.set_app_pk(app_pk).map_err(|_| ()).unwrap();
     tracing::info!("Load agg pk");
     specialized_sdk.set_agg_pk(agg_pk).map_err(|_| ()).unwrap();
+
+    // Create an SDK based on the `SpecializedConfig` we generated
+    let specialized_sdk: GenericSdk<
+        BabyBearPoseidon2Engine,
+        SpecializedConfigCpuBuilder,
+        NativeCpuBuilder,
+    > = GenericSdk::new(args.benchmark.app_config(vm_config.clone()))?
+        .with_agg_config(args.benchmark.agg_config())
+        .with_agg_tree_config(args.benchmark.agg_tree_config);
 
     let program_name = format!("reth.{}.block_{}", args.mode, args.block_number);
     // NOTE: args.benchmark.app_config resets SegmentationLimits if max_segment_length is set
