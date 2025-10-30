@@ -18,8 +18,7 @@ pub use openvm_native_circuit::NativeConfig;
 use openvm_native_circuit::NativeCpuBuilder;
 
 use openvm_sdk::{
-    config::{AppConfig, SdkVmBuilder, SdkVmConfig},
-    fs::read_object_from_file,
+    config::{AppConfig, SdkVmConfig},
     keygen::{AggProvingKey, AppProvingKey},
     prover::verify_app_proof,
     types::VersionedVmStarkProof,
@@ -31,12 +30,16 @@ use openvm_stark_sdk::{
 use openvm_transpiler::{elf::Elf, openvm_platform::memory::MEM_SIZE};
 use powdr_autoprecompiles::PgoType;
 use powdr_openvm::{
-    CompiledProgram, ExtendedVmConfig, ExtendedVmConfigCpuBuilder, ExtendedVmConfigGpuBuilder,
+    CompiledProgram, ExtendedVmConfig, ExtendedVmConfigCpuBuilder,
     OriginalCompiledProgram, SpecializedConfig, SpecializedConfigCpuBuilder,
-    PowdrSdkCpu,
 };
 #[cfg(feature = "cuda")]
 use powdr_openvm::PowdrSdkGpu;
+#[cfg(feature = "cuda")]
+use powdr_openvm::ExtendedVmConfigGpuBuilder;
+#[cfg(not(feature = "cuda"))]
+use powdr_openvm::PowdrSdkCpu;
+
 use powdr_openvm_hints_circuit::HintsExtension;
 pub use reth_primitives;
 use serde::{Deserialize, Serialize};
