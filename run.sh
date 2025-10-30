@@ -2,7 +2,7 @@
 
 USE_CUDA=false
 if [ "$1" == "cuda" ]; then
-    USE_CUDA=true
+  USE_CUDA=true
 fi
 
 set -e
@@ -13,7 +13,7 @@ SRC="target/riscv32im-risc0-zkvm-elf/release/openvm-client-eth"
 DEST="../host/elf/openvm-client-eth"
 
 if [ ! -f "$DEST" ] || ! cmp -s "$SRC" "$DEST"; then
-    cp "$SRC" "$DEST"
+  cp "$SRC" "$DEST"
 fi
 cd ../..
 
@@ -21,8 +21,8 @@ mkdir -p rpc-cache
 source .env
 # MODE=execute # can be compile, execute, execute-metered, prove-app, prove-stark, or prove-evm (needs "evm-verify" feature)
 PROFILE="release"
-FEATURES="metrics,jemalloc,tco,unprotected"
-BLOCK_NUMBER=23100006
+FEATURES="metrics,jemalloc,unprotected"
+BLOCK_NUMBER=21882667
 # switch to +nightly-2025-08-19 if using tco
 TOOLCHAIN="+nightly-2025-08-19" # "+stable"
 BIN_NAME="openvm-reth-benchmark-bin"
@@ -30,12 +30,12 @@ MAX_SEGMENT_LENGTH=4194204
 SEGMENT_MAX_CELLS=700000000
 
 if [ "$USE_CUDA" = "true" ]; then
-    FEATURES="$FEATURES,cuda"
+  FEATURES="$FEATURES,cuda"
 else
-    FEATURES="$FEATURES,nightly-features"
+  FEATURES="$FEATURES,nightly-features"
 fi
 if [ "$MODE" = "prove-evm" ]; then
-    FEATURES="$FEATURES,evm-verify"
+  FEATURES="$FEATURES,evm-verify"
 fi
 
 if grep -m1 -q 'avx512f' /proc/cpuinfo; then
@@ -50,9 +50,9 @@ PARAMS_DIR="$HOME/.openvm/params/"
 
 # Use target/debug if profile is dev
 if [ "$PROFILE" = "dev" ]; then
-    TARGET_DIR="debug"
+  TARGET_DIR="debug"
 else
-    TARGET_DIR="$PROFILE"
+  TARGET_DIR="$PROFILE"
 fi
 
 # Default options if not set
@@ -63,21 +63,21 @@ fi
 : "${PGO_TYPE:=cell}"
 
 POWDR_APC_CANDIDATES_DIR=apcs RUST_LOG="debug" OUTPUT_PATH="metrics.json" ./target/$TARGET_DIR/$BIN_NAME \
---kzg-params-dir $PARAMS_DIR \
---mode $MODE \
---block-number $BLOCK_NUMBER \
---rpc-url $RPC_1 \
---cache-dir rpc-cache \
---app-log-blowup 1 \
---leaf-log-blowup 1 \
---internal-log-blowup 2 \
---root-log-blowup 3 \
---max-segment-length $MAX_SEGMENT_LENGTH \
---segment-max-cells $SEGMENT_MAX_CELLS \
---num-children-leaf 1 \
---num-children-internal 3 \
---apc-cache-dir apc-cache \
---apc-setup-name $APC_SETUP_NAME \
---apc "$APC" \
---apc-skip "$APC_SKIP" \
---pgo-type "$PGO_TYPE"
+  --kzg-params-dir $PARAMS_DIR \
+  --mode $MODE \
+  --block-number $BLOCK_NUMBER \
+  --rpc-url $RPC_1 \
+  --cache-dir rpc-cache \
+  --app-log-blowup 1 \
+  --leaf-log-blowup 1 \
+  --internal-log-blowup 2 \
+  --root-log-blowup 3 \
+  --max-segment-length $MAX_SEGMENT_LENGTH \
+  --segment-max-cells $SEGMENT_MAX_CELLS \
+  --num-children-leaf 1 \
+  --num-children-internal 3 \
+  --apc-cache-dir apc-cache \
+  --apc-setup-name $APC_SETUP_NAME \
+  --apc "$APC" \
+  --apc-skip "$APC_SKIP" \
+  --pgo-type "$PGO_TYPE"

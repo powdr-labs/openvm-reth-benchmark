@@ -395,13 +395,18 @@ pub async fn run_reth_benchmark(
     // NOTE: args.benchmark.app_config resets SegmentationLimits if max_segment_length is set
     args.benchmark.max_segment_length = None;
 
+    // `prover` can be called over both `elf` and `exe`.
+    // We had a bug before where `prover(elf)` was called and silently didn't use any apcs.
+    // So we drop `elf` here to make sure it's never used later.
+    drop(elf);
+
     run_with_metric_collection("OUTPUT_PATH", || {
         info_span!("reth-block", block_number = args.block_number).in_scope(
             || -> eyre::Result<()> {
                 // Always execute_e1 for benchmarking:
                 {
                     let pvs = info_span!("sdk.execute", group = program_name)
-                        .in_scope(|| specialized_sdk.execute(elf.clone(), stdin.clone()))?;
+                        .in_scope(|| specialized_sdk.execute(exe.clone(), stdin.clone()))?;
                     let block_hash = pvs;
                     println!("block_hash: {}", ToHexExt::encode_hex(&block_hash));
                 }
@@ -429,14 +434,14 @@ pub async fn run_reth_benchmark(
                     }
                     BenchMode::ProveApp => {
                         let mut prover =
-                            specialized_sdk.app_prover(elf)?.with_program_name(program_name);
+                            specialized_sdk.app_prover(exe)?.with_program_name(program_name);
                         let (_, app_vk) = specialized_sdk.app_keygen();
                         let proof = prover.prove(stdin)?;
                         verify_app_proof(&app_vk, &proof)?;
                     }
                     BenchMode::ProveStark => {
                         let mut prover =
-                            specialized_sdk.prover(elf)?.with_program_name(program_name);
+                            specialized_sdk.prover(exe)?.with_program_name(program_name);
                         let proof = prover.prove(stdin)?;
                         let block_hash = proof
                             .user_public_values
@@ -448,7 +453,7 @@ pub async fn run_reth_benchmark(
                     #[cfg(feature = "evm-verify")]
                     BenchMode::ProveEvm => {
                         let mut prover =
-                            specialized_sdk.evm_prover(elf)?.with_program_name(program_name);
+                            specialized_sdk.evm_prover(exe)?.with_program_name(program_name);
                         let halo2_pk = specialized_sdk.halo2_pk();
                         tracing::info!(
                             "halo2_outer_k: {}",
