@@ -60,6 +60,7 @@ powdr-openvm = { workspace = true }
 powdr-riscv-elf = { workspace = true }
 powdr-number = { workspace = true }
 powdr-autoprecompiles = { workspace = true }
+powdr-openvm-hints-circuit = { workspace = true }
 
 [features]
 default = ["mimalloc", "metrics"]

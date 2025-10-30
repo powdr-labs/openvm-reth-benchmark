@@ -31,9 +31,10 @@ use openvm_stark_sdk::{
 use openvm_transpiler::{elf::Elf, openvm_platform::memory::MEM_SIZE};
 use powdr_autoprecompiles::PgoType;
 use powdr_openvm::{
-    CompiledProgram, ExtendedVmConfig, ExtendedVmConfigCpuBuilder, HintsExtension,
+    CompiledProgram, ExtendedVmConfig, ExtendedVmConfigCpuBuilder,
     OriginalCompiledProgram, SpecializedConfig, SpecializedConfigCpuBuilder,
 };
+use powdr_openvm_hints_circuit::HintsExtension;
 pub use reth_primitives;
 use serde::{Deserialize, Serialize};
 use serde_json::json;
@@ -87,8 +88,10 @@ impl std::fmt::Display for BenchMode {
             Self::ProveEvm => write!(f, "prove_evm"),
             Self::MakeInput => write!(f, "make_input"),
             Self::Compile => write!(f, "compile"),
+            Self::GenerateFixtures => write!(f, "generate_fixtures"),
+        }
     }
-
+}
 /// The arguments for the host executable.
 #[derive(Debug, Parser)]
 pub struct HostArgs {
@@ -354,6 +357,15 @@ pub async fn run_reth_benchmark(
 
     // Parse the command line arguments.
     let mut args = args;
+    let provider_config = args.provider.into_provider().await?;
+
+    match provider_config.chain_id {
+        #[allow(non_snake_case)]
+        CHAIN_ID_ETH_MAINNET => (),
+        _ => {
+            eyre::bail!("unknown chain ID: {}", provider_config.chain_id);
+        }
+    };
     
     let chain_id = provider_config.chain_id;
 
@@ -522,7 +534,7 @@ pub async fn run_reth_benchmark(
                         println!("block_hash (prove_evm): {}", ToHexExt::encode_hex(block_hash));
                     }
                     BenchMode::GenerateFixtures => {
-                        let mut prover = sdk.prover(elf)?.with_program_name(program_name);
+                        let mut prover = specialized_sdk.prover(elf)?.with_program_name(program_name);
                         let app_proof = prover.app_prover.prove(stdin)?;
                         let leaf_proofs = prover.agg_prover.generate_leaf_proofs(&app_proof)?;
                         let fixture_path = args.fixtures_path.unwrap();
@@ -537,11 +549,11 @@ pub async fn run_reth_benchmark(
 
                         let mut app_pk_path = fixture_path.clone();
                         app_pk_path.push("app_pk.bitcode");
-                        fs::write(app_pk_path, bitcode::serialize(sdk.app_pk())?)?;
+                        fs::write(app_pk_path, bitcode::serialize(specialized_sdk.app_pk())?)?;
 
                         let mut agg_pk_path = fixture_path.clone();
                         agg_pk_path.push("agg_pk.bitcode");
-                        fs::write(agg_pk_path, bitcode::serialize(sdk.agg_pk())?)?;
+                        fs::write(agg_pk_path, bitcode::serialize(specialized_sdk.agg_pk())?)?;
                     }
                     _ => {
                         // This case is handled earlier and should not reach here
