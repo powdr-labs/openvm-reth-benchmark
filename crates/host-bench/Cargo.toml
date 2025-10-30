@@ -77,5 +77,6 @@ halo2-asm = ["halo2-axiom?/asm"]
 cuda = [
     "openvm-native-circuit/cuda",
     "openvm-sdk/cuda",
+    "powdr-openvm/cuda",
 ]
 unprotected = ["openvm-sdk/unprotected"]

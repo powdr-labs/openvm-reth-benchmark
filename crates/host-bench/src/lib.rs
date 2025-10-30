@@ -31,9 +31,12 @@ use openvm_stark_sdk::{
 use openvm_transpiler::{elf::Elf, openvm_platform::memory::MEM_SIZE};
 use powdr_autoprecompiles::PgoType;
 use powdr_openvm::{
-    CompiledProgram, ExtendedVmConfig, ExtendedVmConfigCpuBuilder,
+    CompiledProgram, ExtendedVmConfig, ExtendedVmConfigCpuBuilder, ExtendedVmConfigGpuBuilder,
     OriginalCompiledProgram, SpecializedConfig, SpecializedConfigCpuBuilder,
+    PowdrSdkCpu,
 };
+#[cfg(feature = "cuda")]
+use powdr_openvm::PowdrSdkGpu;
 use powdr_openvm_hints_circuit::HintsExtension;
 pub use reth_primitives;
 use serde::{Deserialize, Serialize};
@@ -399,11 +402,11 @@ pub async fn run_reth_benchmark(
         setup;
 
     // Create an SDK based on the `SpecializedConfig` we generated
-    let specialized_sdk: GenericSdk<
-        BabyBearPoseidon2Engine,
-        SpecializedConfigCpuBuilder,
-        NativeCpuBuilder,
-    > = GenericSdk::new(args.benchmark.app_config(vm_config.clone()))?
+    #[cfg(feature = "cuda")]
+    let generic_sdk = PowdrSdkGpu::new(args.benchmark.app_config(vm_config.clone()))?;
+    #[cfg(not(feature = "cuda"))]
+    let generic_sdk = PowdrSdkCpu::new(args.benchmark.app_config(vm_config.clone()))?;
+    let specialized_sdk = generic_sdk
         .with_agg_config(args.benchmark.agg_config())
         .with_agg_tree_config(args.benchmark.agg_tree_config);
 
@@ -414,11 +417,11 @@ pub async fn run_reth_benchmark(
     specialized_sdk.set_agg_pk(agg_pk).map_err(|_| ()).unwrap();
 
     // Create an SDK based on the `SpecializedConfig` we generated
-    let specialized_sdk: GenericSdk<
-        BabyBearPoseidon2Engine,
-        SpecializedConfigCpuBuilder,
-        NativeCpuBuilder,
-    > = GenericSdk::new(args.benchmark.app_config(vm_config.clone()))?
+    #[cfg(feature = "cuda")]
+    let generic_sdk = PowdrSdkGpu::new(args.benchmark.app_config(vm_config.clone()))?;
+    #[cfg(not(feature = "cuda"))]
+    let generic_sdk = PowdrSdkCpu::new(args.benchmark.app_config(vm_config.clone()))?;
+    let specialized_sdk = generic_sdk
         .with_agg_config(args.benchmark.agg_config())
         .with_agg_tree_config(args.benchmark.agg_tree_config);
 
@@ -468,6 +471,9 @@ pub async fn run_reth_benchmark(
                         let engine = DefaultStarkEngine::new(app_config.app_fri_params.fri_params);
                         let (vm, _) = VirtualMachine::new_with_keygen(
                             engine,
+                            #[cfg(feature = "cuda")]
+                            ExtendedVmConfigGpuBuilder,
+                            #[cfg(not(feature = "cuda"))]
                             ExtendedVmConfigCpuBuilder,
                             app_config.app_vm_config,
                         )?;
