@@ -29,16 +29,16 @@ use openvm_stark_sdk::{
 };
 use openvm_transpiler::{elf::Elf, openvm_platform::memory::MEM_SIZE};
 use powdr_autoprecompiles::PgoType;
-use powdr_openvm::{
-    CompiledProgram, ExtendedVmConfig, ExtendedVmConfigCpuBuilder,
-    OriginalCompiledProgram, SpecializedConfig, SpecializedConfigCpuBuilder,
-};
-#[cfg(feature = "cuda")]
-use powdr_openvm::PowdrSdkGpu;
 #[cfg(feature = "cuda")]
 use powdr_openvm::ExtendedVmConfigGpuBuilder;
 #[cfg(not(feature = "cuda"))]
 use powdr_openvm::PowdrSdkCpu;
+#[cfg(feature = "cuda")]
+use powdr_openvm::PowdrSdkGpu;
+use powdr_openvm::{
+    CompiledProgram, ExtendedVmConfig, ExtendedVmConfigCpuBuilder, OriginalCompiledProgram,
+    SpecializedConfig, SpecializedConfigCpuBuilder,
+};
 
 use powdr_openvm_hints_circuit::HintsExtension;
 pub use reth_primitives;
@@ -372,7 +372,7 @@ pub async fn run_reth_benchmark(
             eyre::bail!("unknown chain ID: {}", provider_config.chain_id);
         }
     };
-    
+
     let chain_id = provider_config.chain_id;
 
     let client_input =
@@ -419,18 +419,14 @@ pub async fn run_reth_benchmark(
     tracing::info!("Load agg pk");
     specialized_sdk.set_agg_pk(agg_pk).map_err(|_| ()).unwrap();
 
-    // Create an SDK based on the `SpecializedConfig` we generated
-    #[cfg(feature = "cuda")]
-    let generic_sdk = PowdrSdkGpu::new(args.benchmark.app_config(vm_config.clone()))?;
-    #[cfg(not(feature = "cuda"))]
-    let generic_sdk = PowdrSdkCpu::new(args.benchmark.app_config(vm_config.clone()))?;
-    let specialized_sdk = generic_sdk
-        .with_agg_config(args.benchmark.agg_config())
-        .with_agg_tree_config(args.benchmark.agg_tree_config);
-
     let program_name = format!("reth.{}.block_{}", args.mode, args.block_number);
     // NOTE: args.benchmark.app_config resets SegmentationLimits if max_segment_length is set
     args.benchmark.max_segment_length = None;
+
+    // `prover` can be called over both `elf` and `exe`.
+    // We had a bug before where `prover(elf)` was called and silently didn't use any apcs.
+    // So we drop `elf` here to make sure it's never used later.
+    drop(elf);
 
     run_with_metric_collection("OUTPUT_PATH", || {
         info_span!("reth-block", block_number = args.block_number).in_scope(
@@ -459,7 +455,7 @@ pub async fn run_reth_benchmark(
                 // Execute for benchmarking:
                 if !args.skip_comparison {
                     let pvs = info_span!("sdk.execute", group = program_name)
-                        .in_scope(|| specialized_sdk.execute(elf.clone(), stdin.clone()))?;
+                        .in_scope(|| specialized_sdk.execute(exe.clone(), stdin.clone()))?;
                     let block_hash = pvs;
                     println!("block_hash (execute): {}", ToHexExt::encode_hex(&block_hash));
                 }
@@ -491,14 +487,14 @@ pub async fn run_reth_benchmark(
                     }
                     BenchMode::ProveApp => {
                         let mut prover =
-                            specialized_sdk.app_prover(elf)?.with_program_name(program_name);
+                            specialized_sdk.app_prover(exe)?.with_program_name(program_name);
                         let (_, app_vk) = specialized_sdk.app_keygen();
                         let proof = prover.prove(stdin)?;
                         verify_app_proof(&app_vk, &proof)?;
                     }
                     BenchMode::ProveStark => {
                         let mut prover =
-                            specialized_sdk.prover(elf)?.with_program_name(program_name);
+                            specialized_sdk.prover(exe)?.with_program_name(program_name);
                         let proof = prover.prove(stdin)?;
                         let block_hash = proof
                             .user_public_values
@@ -528,7 +524,7 @@ pub async fn run_reth_benchmark(
                     #[cfg(feature = "evm-verify")]
                     BenchMode::ProveEvm => {
                         let mut prover =
-                            specialized_sdk.evm_prover(elf)?.with_program_name(program_name);
+                            specialized_sdk.evm_prover(exe)?.with_program_name(program_name);
                         let halo2_pk = specialized_sdk.halo2_pk();
                         tracing::info!(
                             "halo2_outer_k: {}",
@@ -543,7 +539,8 @@ pub async fn run_reth_benchmark(
                         println!("block_hash (prove_evm): {}", ToHexExt::encode_hex(block_hash));
                     }
                     BenchMode::GenerateFixtures => {
-                        let mut prover = specialized_sdk.prover(elf)?.with_program_name(program_name);
+                        let mut prover =
+                            specialized_sdk.prover(exe)?.with_program_name(program_name);
                         let app_proof = prover.app_prover.prove(stdin)?;
                         let leaf_proofs = prover.agg_prover.generate_leaf_proofs(&app_proof)?;
                         let fixture_path = args.fixtures_path.unwrap();
