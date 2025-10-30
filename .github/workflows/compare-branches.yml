@@ -1,15 +1,16 @@
-name: "Compare Benchmarks"
-run-name: "Compare Benchmarks (block ${{ inputs.block_number || github.event.inputs.block_number }})"
+name: "Compare Branches"
+run-name: "Compare Branches: ${{ inputs.base_ref }} vs ${{ inputs.target_ref }} (block ${{ inputs.block_number }})"
 
 on:
   workflow_dispatch:
     inputs:
-      base_rev:
-        description: "Base OpenVM revision to compare (defaults to latest main)"
+      base_ref:
+        description: "Base branch/ref to compare (defaults to main)"
         required: false
         type: string
-      target_rev:
-        description: "Target OpenVM revision to compare"
+        default: main
+      target_ref:
+        description: "Target branch/ref to compare"
         required: true
         type: string
       benchmark_mode:
@@ -47,63 +48,48 @@ on:
 
 jobs:
   run-base-benchmark:
-    name: "Run Base Benchmark"
-    uses: ./.github/workflows/update-patches.yml
+    name: "Run Base Benchmark (${{ inputs.base_ref }})"
+    uses: ./.github/workflows/reth-benchmark.yml
     with:
-      OPENVM_REV: ${{ github.event.inputs.base_rev }}
-      run_benchmark: true
-      benchmark_mode: ${{ github.event.inputs.benchmark_mode }}
-      benchmark_block_number: ${{ fromJSON(inputs.block_number || github.event.inputs.block_number || '23100006') }}
-      instance_family: ${{ github.event.inputs.instance_family }}
-    secrets: inherit
-
-  # Only create branch because github workflow_call must run all jobs for "needs"
-  patch-target:
-    name: "Patch Target"
-    uses: ./.github/workflows/update-patches.yml
-    with:
-      OPENVM_REV: ${{ github.event.inputs.target_rev }}
-      run_benchmark: false
+      ref: ${{ inputs.base_ref }}
+      mode: ${{ inputs.benchmark_mode }}
+      block_number: ${{ fromJSON(inputs.block_number || '23100006') }}
+      instance_family: ${{ inputs.instance_family }}
+      profiling: none
     secrets: inherit
 
   run-target-benchmark:
-    name: "Run Target Benchmark"
+    name: "Run Target Benchmark (${{ inputs.target_ref }})"
     uses: ./.github/workflows/reth-benchmark.yml
-    needs: patch-target
     with:
-      mode: ${{ github.event.inputs.benchmark_mode }}
-      block_number: ${{ fromJSON(inputs.block_number || github.event.inputs.block_number || '23100006') }}
-      instance_family: ${{ github.event.inputs.instance_family }}
-      ref: ${{ needs.patch-target.outputs.branch_name }}
-      tag: ${{ needs.patch-target.outputs.tag }}
+      ref: ${{ inputs.target_ref }}
+      mode: ${{ inputs.benchmark_mode }}
+      block_number: ${{ fromJSON(inputs.block_number || '23100006') }}
+      instance_family: ${{ inputs.instance_family }}
       profiling: none
     secrets: inherit
 
   target-host-flamegraph:
     name: "Target Host Perf Flamegraph"
     uses: ./.github/workflows/reth-benchmark.yml
-    if: ${{ github.event.inputs.host_flamegraph == 'true' }}
-    needs: patch-target
+    if: ${{ inputs.host_flamegraph }}
     with:
-      mode: ${{ github.event.inputs.benchmark_mode }}
-      block_number: ${{ fromJSON(inputs.block_number || github.event.inputs.block_number || '23100006') }}
-      instance_family: ${{ github.event.inputs.instance_family }}
-      ref: ${{ needs.patch-target.outputs.branch_name }}
-      tag: ${{ needs.patch-target.outputs.tag }}
+      ref: ${{ inputs.target_ref }}
+      mode: ${{ inputs.benchmark_mode }}
+      block_number: ${{ fromJSON(inputs.block_number || '23100006') }}
+      instance_family: ${{ inputs.instance_family }}
       profiling: host
     secrets: inherit
 
   target-guest-flamegraph:
     name: "Target Guest Circuit Flamegraphs"
     uses: ./.github/workflows/reth-benchmark.yml
-    if: ${{ github.event.inputs.guest_flamegraph == 'true' }}
-    needs: patch-target
+    if: ${{ inputs.guest_flamegraph }}
     with:
-      mode: ${{ github.event.inputs.benchmark_mode }}
-      block_number: ${{ fromJSON(inputs.block_number || github.event.inputs.block_number || '23100006') }}
-      instance_family: ${{ github.event.inputs.instance_family }}
-      ref: ${{ needs.patch-target.outputs.branch_name }}
-      tag: ${{ needs.patch-target.outputs.tag }}
+      ref: ${{ inputs.target_ref }}
+      mode: ${{ inputs.benchmark_mode }}
+      block_number: ${{ fromJSON(inputs.block_number || '23100006') }}
+      instance_family: ${{ inputs.instance_family }}
       profiling: guest
     secrets: inherit
 
@@ -127,9 +113,16 @@ jobs:
           name: ${{ needs.run-target-benchmark.outputs.metric_name }}
           path: ${{ needs.run-target-benchmark.outputs.metric_name }}
 
+      - name: Get openvm REV
+        id: get-openvm-rev
+        run: |
+          RESULT=$(cargo metadata --format-version=1 | jq -r '.packages[] | select(.name=="openvm-sdk") | .source | split("#") | .[1]')
+          echo "result=${RESULT}" >> "$GITHUB_OUTPUT"
+
       - name: Install openvm-prof
         run: |
-          cargo install --git https://github.com/openvm-org/openvm.git --profile=dev --force openvm-prof
+          cargo install --git https://github.com/openvm-org/openvm.git --rev ${{ steps.get-openvm-rev.outputs.result }} --profile=dev --force openvm-prof
+
       - name: Compare metrics
         run: |
           ls
@@ -145,8 +138,8 @@ jobs:
 
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "### Workflow Inputs" >> $GITHUB_STEP_SUMMARY
-          echo "Base OpenVM Revision: ${{ github.event.inputs.base_rev }}" >> $GITHUB_STEP_SUMMARY
-          echo "Target OpenVM Revision: ${{ github.event.inputs.target_rev }}" >> $GITHUB_STEP_SUMMARY
-          echo "Instance Family: ${{ github.event.inputs.instance_family }}" >> $GITHUB_STEP_SUMMARY
-          echo "Benchmark Mode: ${{ github.event.inputs.benchmark_mode }}" >> $GITHUB_STEP_SUMMARY
-          echo "Block Number: ${{ github.event.inputs.block_number }}" >> $GITHUB_STEP_SUMMARY
+          echo "Base Ref: ${{ inputs.base_ref }}" >> $GITHUB_STEP_SUMMARY
+          echo "Target Ref: ${{ inputs.target_ref }}" >> $GITHUB_STEP_SUMMARY
+          echo "Instance Family: ${{ inputs.instance_family }}" >> $GITHUB_STEP_SUMMARY
+          echo "Benchmark Mode: ${{ inputs.benchmark_mode }}" >> $GITHUB_STEP_SUMMARY
+          echo "Block Number: ${{ inputs.block_number }}" >> $GITHUB_STEP_SUMMARY

@@ -12,15 +12,17 @@ use openvm_circuit::{
         bench::run_with_metric_collection, openvm_stark_backend::p3_field::PrimeField32,
     },
 };
-use openvm_client_executor::{io::ClientExecutorInput, CHAIN_ID_ETH_MAINNET};
+use openvm_client_executor::{io::ClientExecutorInput, ClientExecutor, CHAIN_ID_ETH_MAINNET};
 use openvm_host_executor::HostExecutor;
 pub use openvm_native_circuit::NativeConfig;
 use openvm_native_circuit::NativeCpuBuilder;
 
 use openvm_sdk::{
-    config::{AppConfig, SdkVmConfig},
+    config::{AppConfig, SdkVmBuilder, SdkVmConfig},
+    fs::read_object_from_file,
     keygen::{AggProvingKey, AppProvingKey},
     prover::verify_app_proof,
+    types::VersionedVmStarkProof,
     DefaultStarkEngine, GenericSdk, StdIn,
 };
 use openvm_stark_sdk::{
@@ -40,7 +42,7 @@ use std::{
     io::{BufReader, BufWriter},
     path::PathBuf,
 };
-use tracing::info_span;
+use tracing::{info, info_span};
 
 mod execute;
 
@@ -52,6 +54,8 @@ use crate::cli::ProviderConfig;
 /// Enum representing the execution mode of the host executable.
 #[derive(Debug, Clone, clap::ValueEnum)]
 pub enum BenchMode {
+    /// Execute natively on host.
+    ExecuteHost,
     /// Execute the VM without generating a proof.
     Execute,
     /// Execute the VM with metering to get segments information.
@@ -67,11 +71,14 @@ pub enum BenchMode {
     MakeInput,
     /// Compile with apcs, no execution.
     Compile,
+    /// Generate fixtures file for futher benchmarking.
+    GenerateFixtures,
 }
 
 impl std::fmt::Display for BenchMode {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
+            Self::ExecuteHost => write!(f, "execute_host"),
             Self::Execute => write!(f, "execute"),
             Self::ExecuteMetered => write!(f, "execute_metered"),
             Self::ProveApp => write!(f, "prove_app"),
@@ -80,9 +87,7 @@ impl std::fmt::Display for BenchMode {
             Self::ProveEvm => write!(f, "prove_evm"),
             Self::MakeInput => write!(f, "make_input"),
             Self::Compile => write!(f, "compile"),
-        }
     }
-}
 
 /// The arguments for the host executable.
 #[derive(Debug, Parser)]
@@ -116,7 +121,7 @@ pub struct HostArgs {
     #[clap(flatten)]
     benchmark: BenchmarkCli,
 
-    /// Optional path to write the input to. Only needed for mode=make_input
+    /// Optional path to the input file.
     #[arg(long)]
     pub input_path: Option<PathBuf>,
 
@@ -128,6 +133,28 @@ pub struct HostArgs {
 
     #[arg(long)]
     pgo_type: PgoType,
+    /// Path to write the fixtures to. Only needed for mode=make_input
+    #[arg(long)]
+    pub fixtures_path: Option<PathBuf>,
+
+    /// In make_input mode, this path is where the input JSON is written.
+    #[arg(long)]
+    pub generated_input_path: Option<PathBuf>,
+
+    /// If specificed, the proof and other output is written to this dir.
+    #[arg(long)]
+    pub output_dir: Option<PathBuf>,
+
+    /// If specified, loads the app proving key from this path.
+    #[arg(long)]
+    pub app_pk_path: Option<PathBuf>,
+
+    /// If specified, loads the agg proving key from this path.
+    #[arg(long)]
+    pub agg_pk_path: Option<PathBuf>,
+
+    #[arg(long, default_value_t = false)]
+    pub skip_comparison: bool,
 }
 
 pub fn reth_vm_config(app_log_blowup: usize) -> ExtendedVmConfig {
@@ -327,16 +354,7 @@ pub async fn run_reth_benchmark(
 
     // Parse the command line arguments.
     let mut args = args;
-    let provider_config = args.provider.into_provider().await?;
-
-    match provider_config.chain_id {
-        #[allow(non_snake_case)]
-        CHAIN_ID_ETH_MAINNET => (),
-        _ => {
-            eyre::bail!("unknown chain ID: {}", provider_config.chain_id);
-        }
-    };
-
+    
     let chain_id = provider_config.chain_id;
 
     let client_input =
@@ -344,6 +362,7 @@ pub async fn run_reth_benchmark(
 
     let mut stdin = StdIn::default();
     stdin.write(&client_input);
+    info!("input loaded");
 
     if matches!(args.mode, BenchMode::MakeInput) {
         let words: Vec<u32> = openvm::serde::to_vec(&client_input).unwrap();
@@ -353,7 +372,7 @@ pub async fn run_reth_benchmark(
             "input": [hex_bytes]
         });
         let input = serde_json::to_string(&input).unwrap();
-        fs::write(args.input_path.unwrap(), input)?;
+        fs::write(args.generated_input_path.unwrap(), input)?;
         return Ok(());
     }
 
@@ -398,13 +417,35 @@ pub async fn run_reth_benchmark(
     run_with_metric_collection("OUTPUT_PATH", || {
         info_span!("reth-block", block_number = args.block_number).in_scope(
             || -> eyre::Result<()> {
-                // Always execute_e1 for benchmarking:
-                {
+                // Run host execution for comparison
+                if !args.skip_comparison {
+                    let block_hash = info_span!("host.execute", group = program_name).in_scope(
+                        || -> eyre::Result<_> {
+                            let executor = ClientExecutor;
+                            // Create a child span to get the group label propagated
+                            let header = info_span!("client.execute")
+                                .in_scope(|| executor.execute(client_input.clone()))?;
+                            let block_hash =
+                                info_span!("header.hash_slow").in_scope(|| header.hash_slow());
+                            Ok(block_hash)
+                        },
+                    )?;
+                    println!("block_hash (execute-host): {}", ToHexExt::encode_hex(&block_hash));
+                }
+
+                // For ExecuteHost mode, only do host execution
+                if matches!(args.mode, BenchMode::ExecuteHost) {
+                    return Ok(());
+                }
+
+                // Execute for benchmarking:
+                if !args.skip_comparison {
                     let pvs = info_span!("sdk.execute", group = program_name)
                         .in_scope(|| specialized_sdk.execute(elf.clone(), stdin.clone()))?;
                     let block_hash = pvs;
-                    println!("block_hash: {}", ToHexExt::encode_hex(&block_hash));
+                    println!("block_hash (execute): {}", ToHexExt::encode_hex(&block_hash));
                 }
+
                 match args.mode {
                     BenchMode::Compile => {
                         // This mode is used to compile the program with APCs, no execution.
@@ -421,7 +462,7 @@ pub async fn run_reth_benchmark(
                         let executor_idx_to_air_idx = vm.executor_idx_to_air_idx();
                         let interpreter =
                             vm.executor().metered_instance(&exe, &executor_idx_to_air_idx)?;
-                        let metered_ctx = vm.build_metered_ctx();
+                        let metered_ctx = vm.build_metered_ctx(&exe);
                         let (segments, _) =
                             info_span!("interpreter.execute_metered", group = program_name)
                                 .in_scope(|| interpreter.execute_metered(stdin, metered_ctx))?;
@@ -443,7 +484,25 @@ pub async fn run_reth_benchmark(
                             .iter()
                             .map(|pv| pv.as_canonical_u32() as u8)
                             .collect::<Vec<u8>>();
-                        println!("block_hash: {}", ToHexExt::encode_hex(&block_hash));
+                        println!("block_hash (prove_stark): {}", ToHexExt::encode_hex(&block_hash));
+
+                        if let Some(state) = prover.app_prover.instance().state() {
+                            info!("state instret: {}", state.instret());
+                            if let Some(output_dir) = args.output_dir.as_ref() {
+                                fs::write(
+                                    output_dir.join("num_instret"),
+                                    state.instret().to_string(),
+                                )?;
+                                info!("wrote state instret to {}", output_dir.display());
+                            }
+                        }
+
+                        if let Some(output_dir) = args.output_dir.as_ref() {
+                            let versioned_proof = VersionedVmStarkProof::new(proof)?;
+                            let json = serde_json::to_vec_pretty(&versioned_proof)?;
+                            fs::write(output_dir.join("proof.json"), json)?;
+                            println!("wrote proof json to {}", output_dir.display());
+                        }
                     }
                     #[cfg(feature = "evm-verify")]
                     BenchMode::ProveEvm => {
@@ -460,9 +519,31 @@ pub async fn run_reth_benchmark(
                         );
                         let proof = prover.prove_evm(stdin)?;
                         let block_hash = &proof.user_public_values;
-                        println!("block_hash: {}", ToHexExt::encode_hex(block_hash));
+                        println!("block_hash (prove_evm): {}", ToHexExt::encode_hex(block_hash));
                     }
-                    BenchMode::MakeInput => {
+                    BenchMode::GenerateFixtures => {
+                        let mut prover = sdk.prover(elf)?.with_program_name(program_name);
+                        let app_proof = prover.app_prover.prove(stdin)?;
+                        let leaf_proofs = prover.agg_prover.generate_leaf_proofs(&app_proof)?;
+                        let fixture_path = args.fixtures_path.unwrap();
+
+                        let mut app_proof_path = fixture_path.clone();
+                        app_proof_path.push("app_proof.bitcode");
+                        fs::write(app_proof_path, bitcode::serialize(&app_proof)?)?;
+
+                        let mut leaf_proofs_path = fixture_path.clone();
+                        leaf_proofs_path.push("leaf_proofs.bitcode");
+                        fs::write(leaf_proofs_path, bitcode::serialize(&leaf_proofs)?)?;
+
+                        let mut app_pk_path = fixture_path.clone();
+                        app_pk_path.push("app_pk.bitcode");
+                        fs::write(app_pk_path, bitcode::serialize(sdk.app_pk())?)?;
+
+                        let mut agg_pk_path = fixture_path.clone();
+                        agg_pk_path.push("agg_pk.bitcode");
+                        fs::write(agg_pk_path, bitcode::serialize(sdk.agg_pk())?)?;
+                    }
+                    _ => {
                         // This case is handled earlier and should not reach here
                         unreachable!();
                     }

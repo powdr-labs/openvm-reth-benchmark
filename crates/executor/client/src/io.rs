@@ -1,12 +1,16 @@
 use std::iter::once;
 
 use bumpalo::Bump;
-use eyre::{bail, OptionExt, Result};
+use eyre::{bail, Result};
 use itertools::Itertools;
-use openvm_witness_db::WitnessDb;
+use openvm_mpt::{EthereumState, EthereumStateBytes, Mpt};
+use reth_evm::execute::ProviderError;
 use reth_primitives::{Block, Header, TransactionSigned};
 use reth_trie::TrieAccount;
-use revm::state::{AccountInfo, Bytecode};
+use revm::{
+    state::{AccountInfo, Bytecode},
+    DatabaseRef,
+};
 use revm_primitives::{keccak256, map::DefaultHashBuilder, Address, HashMap, B256, U256};
 use serde::{Deserialize, Serialize};
 use serde_with::serde_as;
@@ -29,9 +33,7 @@ pub struct ClientExecutorInput {
     #[serde_as(as = "Vec<alloy_consensus::serde_bincode_compat::Header>")]
     pub ancestor_headers: Vec<Header>,
     /// Network state as of the parent block.
-    pub parent_state_bytes: mptnew::EthereumStateBytes,
-    /// Requests to account state and storage slots.
-    pub state_requests: HashMap<Address, Vec<U256>>,
+    pub parent_state_bytes: EthereumStateBytes,
     /// Account bytecodes.
     pub bytecodes: Vec<Bytecode>,
 }
@@ -39,7 +41,7 @@ pub struct ClientExecutorInput {
 #[derive(Debug, Clone)]
 pub struct ClientExecutorInputWithState {
     pub input: &'static ClientExecutorInput,
-    pub state: mptnew::EthereumState,
+    pub state: EthereumState,
 }
 
 impl ClientExecutorInputWithState {
@@ -50,9 +52,7 @@ impl ClientExecutorInputWithState {
 
         let state = {
             let (state_num_nodes, state_bytes) = &input.parent_state_bytes.state_trie;
-
-            let state_trie =
-                mptnew::MptTrie::decode_trie(bump, &mut state_bytes.as_ref(), *state_num_nodes)?;
+            let state_trie = Mpt::decode_trie(bump, &mut state_bytes.as_ref(), *state_num_nodes)?;
             if state_trie.hash() != input.ancestor_headers[0].state_root {
                 bail!("state root mismatch");
             }
@@ -65,22 +65,20 @@ impl ClientExecutorInputWithState {
                 &input.parent_state_bytes.storage_tries
             {
                 let account_in_trie =
-                    state_trie.get_rlp::<TrieAccount>(hashed_address.as_slice()).unwrap();
+                    state_trie.get_rlp::<TrieAccount>(hashed_address.as_slice())?;
                 let expected_storage_root =
                     account_in_trie.map_or(reth_trie::EMPTY_ROOT_HASH, |a| a.storage_root);
 
-                let storage_trie = mptnew::MptTrie::decode_trie(
-                    bump,
-                    &mut storage_trie_bytes.as_ref(),
-                    *num_nodes,
-                )?;
+                let storage_trie =
+                    Mpt::decode_trie(bump, &mut storage_trie_bytes.as_ref(), *num_nodes)?;
                 if storage_trie.hash() != expected_storage_root {
                     bail!("storage root mismatch");
                 }
 
                 storage_tries.insert(*hashed_address, storage_trie);
             }
-            mptnew::EthereumState { state_trie, storage_tries, bump }
+
+            EthereumState { state_trie, storage_tries, bump }
         };
 
         Ok(Self { input, state })
@@ -95,25 +93,20 @@ impl ClientExecutorInputWithState {
     }
 
     /// Creates a [`WitnessDb`].
-    pub fn witness_db(&self) -> Result<WitnessDb> {
+    pub fn witness_db(&self) -> Result<WitnessDb<'_>> {
         <Self as WitnessInput>::witness_db(self)
     }
 }
 
 impl WitnessInput for ClientExecutorInputWithState {
     #[inline(always)]
-    fn state(&self) -> &mptnew::EthereumState {
+    fn state(&self) -> &EthereumState {
         &self.state
     }
 
     #[inline(always)]
     fn state_anchor(&self) -> B256 {
         self.parent_header().state_root
-    }
-
-    #[inline(always)]
-    fn state_requests(&self) -> impl Iterator<Item = (&Address, &Vec<U256>)> {
-        self.input.state_requests.iter()
     }
 
     #[inline(always)]
@@ -125,21 +118,21 @@ impl WitnessInput for ClientExecutorInputWithState {
     fn headers(&self) -> impl Iterator<Item = &Header> {
         once(&self.input.current_block.header).chain(self.input.ancestor_headers.iter())
     }
+
+    #[inline(always)]
+    fn headers_len(&self) -> usize {
+        1 + self.input.ancestor_headers.len()
+    }
 }
 
 /// A trait for constructing [`WitnessDb`].
 pub trait WitnessInput {
     /// Gets a reference to the state from which account info and storage slots are loaded.
-    fn state(&self) -> &mptnew::EthereumState;
+    fn state(&self) -> &EthereumState;
 
     /// Gets the state trie root hash that the state referenced by
     /// [state()](trait.WitnessInput#tymethod.state) must conform to.
     fn state_anchor(&self) -> B256;
-
-    /// Gets an iterator over address state requests. For each request, the account info and storage
-    /// slots are loaded from the relevant tries in the state returned by
-    /// [state()](trait.WitnessInput#tymethod.state).
-    fn state_requests(&self) -> impl Iterator<Item = (&Address, &Vec<U256>)>;
 
     /// Gets an iterator over account bytecodes.
     fn bytecodes(&self) -> impl Iterator<Item = &Bytecode>;
@@ -147,6 +140,9 @@ pub trait WitnessInput {
     /// Gets an iterator over references to a consecutive, reverse-chronological block headers
     /// starting from the current block header.
     fn headers(&self) -> impl Iterator<Item = &Header>;
+
+    /// Gets the number of headers.
+    fn headers_len(&self) -> usize;
 
     /// Creates a [`WitnessDb`] from a [`WitnessInput`] implementation. To do so, it verifies the
     /// state root, ancestor headers and account bytecodes, and constructs the account and
@@ -156,68 +152,16 @@ pub trait WitnessInput {
     /// implementing this trait causes a zkVM run to cost over 5M cycles more. To avoid this, define
     /// a method inside the type that calls this trait method instead.
     #[inline(always)]
-    fn witness_db(&self) -> Result<WitnessDb> {
+    fn witness_db(&self) -> Result<WitnessDb<'_>> {
         let state = self.state();
 
-        let bytecodes_by_hash =
+        let bytecode_by_hash =
             self.bytecodes().map(|code| (code.hash_slow(), code)).collect::<HashMap<_, _>>();
 
-        let state_requests_iter = self.state_requests();
-        let (lower, _) = state_requests_iter.size_hint();
-        let mut accounts = HashMap::with_capacity_and_hasher(lower, DefaultHashBuilder::default());
-        let mut storage = HashMap::with_capacity_and_hasher(lower, DefaultHashBuilder::default());
-
-        for (&address, slots) in state_requests_iter {
-            let hashed_address = keccak256(address);
-
-            let account_in_trie =
-                state.state_trie.get_rlp::<TrieAccount>(hashed_address.as_slice())?;
-
-            accounts.insert(
-                address,
-                match account_in_trie {
-                    Some(account_in_trie) => AccountInfo {
-                        balance: account_in_trie.balance,
-                        nonce: account_in_trie.nonce,
-                        code_hash: account_in_trie.code_hash,
-                        code: Some(
-                            (*bytecodes_by_hash
-                                .get(&account_in_trie.code_hash)
-                                .ok_or_eyre("missing bytecode")?)
-                            // Cloning here is fine as `Bytes` is cheap to clone.
-                            .to_owned(),
-                        ),
-                    },
-                    _ => Default::default(),
-                },
-            );
-
-            if !slots.is_empty() {
-                let mut address_storage =
-                    HashMap::with_capacity_and_hasher(slots.len(), DefaultHashBuilder::default());
-
-                let storage_trie = state
-                    .storage_tries
-                    .get(&hashed_address)
-                    .ok_or_eyre("parent state does not contain storage trie")?;
-
-                for &slot in slots {
-                    let slot_value = storage_trie
-                        .get_rlp::<U256>(keccak256(slot.to_be_bytes::<32>()).as_slice())?
-                        .unwrap_or_default();
-                    address_storage.insert(slot, slot_value);
-                }
-
-                storage.insert(address, address_storage);
-            }
-        }
-
         // Verify and build block hashes
-        let headers_iter = self.headers();
-        let (lower, _) = headers_iter.size_hint();
         let mut block_hashes: HashMap<u64, B256, _> =
-            HashMap::with_capacity_and_hasher(lower, DefaultHashBuilder::default());
-        for (child_header, parent_header) in headers_iter.tuple_windows() {
+            HashMap::with_capacity_and_hasher(self.headers_len(), DefaultHashBuilder::default());
+        for (child_header, parent_header) in self.headers().tuple_windows() {
             if parent_header.number != child_header.number - 1 {
                 eyre::bail!("non-consecutive blocks");
             }
@@ -229,6 +173,76 @@ pub trait WitnessInput {
             block_hashes.insert(parent_header.number, child_header.parent_hash);
         }
 
-        Ok(WitnessDb { accounts, storage, block_hashes })
+        Ok(WitnessDb { inner: state, block_hashes, bytecode_by_hash })
+    }
+}
+
+#[derive(Debug)]
+pub struct WitnessDb<'a> {
+    inner: &'a EthereumState,
+    block_hashes: HashMap<u64, B256>,
+    bytecode_by_hash: HashMap<B256, &'a Bytecode>,
+}
+
+impl<'a> WitnessDb<'a> {
+    pub fn new(
+        inner: &'a EthereumState,
+        block_hashes: HashMap<u64, B256>,
+        bytecode_by_hash: HashMap<B256, &'a Bytecode>,
+    ) -> Self {
+        Self { inner, block_hashes, bytecode_by_hash }
+    }
+}
+
+impl DatabaseRef for WitnessDb<'_> {
+    /// The database error type.
+    type Error = ProviderError;
+
+    /// Get basic account information.
+    fn basic_ref(&self, address: Address) -> Result<Option<AccountInfo>, Self::Error> {
+        let hashed_address = keccak256(address);
+
+        let account_in_trie =
+            self.inner.state_trie.get_rlp::<TrieAccount>(hashed_address.as_slice()).unwrap();
+
+        let account = account_in_trie.map(|account_in_trie| AccountInfo {
+            balance: account_in_trie.balance,
+            nonce: account_in_trie.nonce,
+            code_hash: account_in_trie.code_hash,
+            code: None,
+        });
+
+        Ok(account)
+    }
+
+    /// Get account code by its hash.
+    fn code_by_hash_ref(&self, hash: B256) -> Result<Bytecode, Self::Error> {
+        // Cloning here is fine as `Bytes` is cheap to clone.
+        Ok(self.bytecode_by_hash.get(&hash).map(|code| (*code).clone()).unwrap())
+    }
+
+    /// Get storage value of address at index.
+    fn storage_ref(&self, address: Address, index: U256) -> Result<U256, Self::Error> {
+        let hashed_address = keccak256(address);
+
+        let storage_trie = self
+            .inner
+            .storage_tries
+            .get(&hashed_address)
+            .expect("A storage trie must be provided for each account");
+
+        let hashed_slot = keccak256(index.to_be_bytes::<32>());
+        Ok(storage_trie
+            .get_rlp::<U256>(hashed_slot.as_slice())
+            .expect("Can get from MPT")
+            .unwrap_or_default())
+    }
+
+    /// Get block hash by block number.
+    fn block_hash_ref(&self, number: u64) -> Result<B256, Self::Error> {
+        Ok(*self
+            .block_hashes
+            .get(&number)
+            .expect("A block hash must be provided for each block number"))
     }
 }
