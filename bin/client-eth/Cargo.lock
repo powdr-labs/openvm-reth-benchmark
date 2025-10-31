@@ -276,7 +276,7 @@ dependencies = [
  "alloy-rlp",
  "alloy-serde",
  "alloy-sol-types",
- "itertools 0.13.0",
+ "itertools 0.14.0",
  "serde",
  "serde_json",
  "thiserror",
@@ -2166,15 +2166,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "openvm-bigint-guest"
-version = "1.4.1"
-source = "git+https://github.com/openvm-org/openvm.git?branch=main#05cb6a11bbd7ac3ac8a00c3fc56391b06f54baa2"
-dependencies = [
- "openvm-platform",
- "strum_macros 0.26.4",
-]
-
-[[package]]
 name = "openvm-client-eth"
 version = "0.0.0"
 dependencies = [
@@ -2187,6 +2178,7 @@ dependencies = [
  "openvm-keccak256-guest",
  "openvm-pairing",
  "revm-precompile",
+ "serde",
  "tracing",
 ]
 
@@ -2266,8 +2258,8 @@ dependencies = [
 
 [[package]]
 name = "openvm-kzg"
-version = "0.1.0-alpha"
-source = "git+https://github.com/axiom-crypto/openvm-kzg.git?branch=openvm-main#a0e8432906aeba2992f41365a8e1c7e2414f0e7c"
+version = "0.2.0-alpha"
+source = "git+https://github.com/axiom-crypto/openvm-kzg.git?branch=openvm-main#3dcd8f4e64e9cff2b1f6be97efdba19fb5e97e7b"
 dependencies = [
  "bls12_381",
  "hex",
@@ -3430,8 +3422,9 @@ dependencies = [
 
 [[package]]
 name = "ruint"
-version = "1.14.0"
-source = "git+https://github.com/openvm-org/openvm.git?branch=main#05cb6a11bbd7ac3ac8a00c3fc56391b06f54baa2"
+version = "1.16.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "9ecb38f82477f20c5c3d62ef52d7c4e536e38ea9b73fb570a20c5cae0e14bcf6"
 dependencies = [
  "alloy-rlp",
  "ark-ff 0.3.0",
@@ -3442,7 +3435,6 @@ dependencies = [
  "num-bigint",
  "num-integer",
  "num-traits",
- "openvm-bigint-guest",
  "parity-scale-codec",
  "primitive-types",
  "proptest",
@@ -3458,7 +3450,8 @@ dependencies = [
 [[package]]
 name = "ruint-macro"
 version = "1.2.1"
-source = "git+https://github.com/openvm-org/openvm.git?branch=main#05cb6a11bbd7ac3ac8a00c3fc56391b06f54baa2"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "48fd7bd8a6377e15ad9d42a8ec25371b94ddc67abe7c8b9127bec79bebaaae18"
 
 [[package]]
 name = "rustc-hash"

@@ -30,6 +30,8 @@ tracing = { version = "0.1", features = [
     "max_level_off",
     "release_max_level_off",
 ] }
+# TEMPORARY: remove when updating reth
+serde = "=1.0.219"
 
 [features]
 default = ["kzg-intrinsics"]
@@ -49,10 +51,8 @@ revm-state = { git = "https://github.com/axiom-crypto/revm", branch = "v75-openv
 revm-bytecode = { git = "https://github.com/axiom-crypto/revm", branch = "v75-openvm" }
 k256 = { git = "https://github.com/openvm-org/openvm.git", branch = "main" }
 p256 = { git = "https://github.com/openvm-org/openvm.git", branch = "main" }
-ruint = { git = "https://github.com/openvm-org/openvm.git", branch = "main" }
 # k256 = { path = "../../../openvm-org/openvm/guest-libs/k256" }
 # p256 = { path = "../../../openvm-org/openvm/guest-libs/p256" }
-# ruint = { path = "../../../openvm-org/openvm/guest-libs/ruint" }
 
 # Local Patching:
 # revm = { path = "../../../revm/crates/revm" }
