@@ -49,6 +49,7 @@ openvm-native-compiler = { workspace = true }
 openvm-benchmarks-prove = { workspace = true, features = ["parallel"] }
 openvm-stark-sdk = { workspace = true }
 openvm-sdk = { workspace = true }
+openvm-cuda-backend = { workspace = true }
 derive_more.workspace = true
 toml.workspace = true
 

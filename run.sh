@@ -24,7 +24,7 @@ cd ../..
 
 mkdir -p rpc-cache
 source .env
-# MODE=execute # can be compile, execute, execute-metered, prove-app, prove-stark, or prove-evm (needs "evm-verify" feature)
+# MODE=execute # can be compile, execute, execute-metered, prove-mock, prove-app, prove-stark, or prove-evm (needs "evm-verify" feature)
 PROFILE="release"
 FEATURES="metrics,jemalloc,unprotected" # removed tco here till we have that fixed
 BLOCK_NUMBER=21882667
