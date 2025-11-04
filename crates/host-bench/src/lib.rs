@@ -666,7 +666,7 @@ mod powdr {
     use powdr_openvm::{
         compile_exe_with_elf, default_powdr_openvm_config, BabyBearOpenVmApcAdapter,
         CompiledProgram, DegreeBound, ExtendedVmConfigCpuBuilder, OriginalCompiledProgram,
-        PgoConfig, PrecompileImplementation, Prog,
+        PgoConfig, Prog,
     };
 
     /// This function is used to generate the specialized program for the Powdr APC.
@@ -728,7 +728,6 @@ mod powdr {
             original_program,
             elf,
             config,
-            PrecompileImplementation::SingleRowChip,
             pgo_config,
         )
         .unwrap()
