@@ -5464,6 +5464,7 @@ dependencies = [
  "openvm-build",
  "openvm-circuit",
  "openvm-client-executor",
+ "openvm-cuda-backend",
  "openvm-ecc-circuit",
  "openvm-host-executor",
  "openvm-native-circuit",
