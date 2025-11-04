@@ -84,7 +84,7 @@ POWDR_APC_CANDIDATES_DIR=apcs RUST_LOG="debug" OUTPUT_PATH="metrics.json" VPMM_P
   --num-children-leaf 1 \
   --num-children-internal 3 \
   --apc-cache-dir apc-cache \
-  --apc-setup-name $APC_SETUP_NAME \
+  --apc-setup-name ${APC_SETUP_NAME}_${APC}_${APC_SKIP}_${PGO_TYPE}_${BLOCK_NUMBER} \
   --apc "$APC" \
   --apc-skip "$APC_SKIP" \
   --pgo-type "$PGO_TYPE"
