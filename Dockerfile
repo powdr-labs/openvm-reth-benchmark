@@ -1,3 +1,7 @@
+# when building the image, RPC_1 must be provided as a secret.
+# If RPC_1 is a host env variable, use the build arguments:
+# docker build --secret id=RPC_1,env=RPC_1 ...
+
 FROM nvidia/cuda:12.8.1-devel-ubuntu24.04 AS builder
 
 # System build deps
@@ -12,13 +16,15 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     ca-certificates \
   && rm -rf /var/lib/apt/lists/*
 
+ARG RUST_NIGHTLY=nightly-2025-10-01
+
 RUN curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y
 # Toolchains: stable for cargo-openvm, nightly for tco build
 ENV CARGO_HOME="/root/.cargo" \
     RUSTUP_HOME="/root/.rustup" \
     PATH="/root/.cargo/bin:${PATH}"
-RUN rustup toolchain install nightly-2025-08-19 \
-  && rustup component add rust-src --toolchain nightly-2025-08-19
+RUN rustup toolchain install ${RUST_NIGHTLY} \
+  && rustup component add rust-src --toolchain ${RUST_NIGHTLY}
 
 # Install cargo-openvm (builds the guest ELF)
 RUN cargo +1.86 install --git https://github.com/openvm-org/openvm.git --locked --force cargo-openvm
@@ -29,40 +35,79 @@ COPY Cargo.toml Cargo.lock rust-toolchain.toml ./
 COPY crates/ ./crates/
 COPY bin/ ./bin/
 COPY rustfmt.toml ./
+COPY println.sh ./
 
 # Build guest ELF and place where host expects it
 WORKDIR /app/bin/client-eth
-RUN cargo openvm build --no-transpile --profile=release \
+
+RUN RUSTFLAGS="-Clink-arg=--emit-relocs" cargo openvm build --no-transpile --profile=release \
   && mkdir -p ../host/elf \
   && cp target/riscv32im-risc0-zkvm-elf/release/openvm-client-eth ../host/elf/
 
 # Build host binary
 WORKDIR /app
+# TODO: slightly different in run.sh
 ENV JEMALLOC_SYS_WITH_MALLOC_CONF="retain:true,background_thread:true,metadata_thp:always,dirty_decay_ms:10000,muzzy_decay_ms:10000,abort_conf:true"
-ARG FEATURES="metrics,jemalloc,tco,unprotected,cuda"
+# ARG FEATURES="metrics,jemalloc,tco,unprotected,cuda"
+ARG FEATURES="metrics,jemalloc,unprotected,cuda"  # no tco
 ARG PROFILE="release"
 ENV CUDA_ARCH="89"
-RUN cargo +nightly-2025-08-19 build --bin openvm-reth-benchmark-bin --profile=${PROFILE} --no-default-features --features=${FEATURES}
+RUN cargo +${RUST_NIGHTLY} build --bin openvm-reth-benchmark-bin --profile=${PROFILE} --no-default-features --features=${FEATURES}
 
 # Runtime image
 FROM nvidia/cuda:12.8.1-runtime-ubuntu24.04 AS runtime
 RUN apt-get update && apt-get install -y --no-install-recommends ca-certificates python3 python3-venv curl tar gzip \
    && rm -rf /var/lib/apt/lists/*
-RUN S5CMD_VER=$(curl -s https://api.github.com/repos/peak/s5cmd/releases/latest | \
-    grep tag_name | cut -d '"' -f 4) && \
-    S5CMD_VER_TRIMMED=$(printf "%s" "$S5CMD_VER" | sed 's/^v//') && \
-    curl -L -o /tmp/s5cmd.tar.gz "https://github.com/peak/s5cmd/releases/download/${S5CMD_VER}/s5cmd_${S5CMD_VER_TRIMMED}_Linux-64bit.tar.gz" && \
-    tar xvf /tmp/s5cmd.tar.gz -C /usr/local/bin s5cmd && \
-    rm /tmp/s5cmd.tar.gz
+
+# RUN S5CMD_VER=$(curl -s https://api.github.com/repos/peak/s5cmd/releases/latest | \
+#     grep tag_name | cut -d '"' -f 4) && \
+#     S5CMD_VER_TRIMMED=$(printf "%s" "$S5CMD_VER" | sed 's/^v//') && \
+#     curl -L -o /tmp/s5cmd.tar.gz "https://github.com/peak/s5cmd/releases/download/${S5CMD_VER}/s5cmd_${S5CMD_VER_TRIMMED}_Linux-64bit.tar.gz" && \
+#     tar xvf /tmp/s5cmd.tar.gz -C /usr/local/bin s5cmd && \
+#     rm /tmp/s5cmd.tar.gz
 
 WORKDIR /app
 COPY --from=builder /app/target/release/openvm-reth-benchmark-bin /usr/local/bin/openvm-reth-benchmark-bin
 COPY --from=builder /app/bin/host/elf/openvm-client-eth /app/bin/host/elf/openvm-client-eth
-COPY server /app/server
+# COPY server /app/server
 
-RUN python3 -m venv /opt/venv \
-  && . /opt/venv/bin/activate \
-  && pip install --no-cache-dir -r /app/server/requirements.txt
+# Generate guest setup (apcs and pk/vk)
+ENV POWDR_APC_CANDIDATES_DIR="apcs"
+# ENV RUST_LOG="debug"
+ENV RUST_LOG="info"
+ENV MAX_SEGMENT_LENGTH="4194204"
+ENV SEGMENT_MAX_CELLS="700000000"
+ENV APC_SETUP_NAME="reth-setup"
+# TODO: maybe these should be ARGs?
+ENV BLOCK_NUMBER="23100006"
+ENV APC="10"
+ENV APC_SKIP="0"
+ENV PGO_TYPE="cell"
+ENV RUST_BACKTRACE="1"
+RUN --mount=type=secret,id=RPC_1,env=RPC_1 \
+  /usr/local/bin/openvm-reth-benchmark-bin \
+#  --kzg-params-dir $PARAMS_DIR \
+  --mode "compile" \
+  --block-number $BLOCK_NUMBER \
+  --rpc-url $RPC_1 \
+  --cache-dir rpc-cache \
+  --app-log-blowup 1 \
+  --leaf-log-blowup 1 \
+  --internal-log-blowup 2 \
+  --root-log-blowup 3 \
+  --max-segment-length $MAX_SEGMENT_LENGTH \
+  --segment-max-cells $SEGMENT_MAX_CELLS \
+  --num-children-leaf 1 \
+  --num-children-internal 3 \
+  --apc-cache-dir apc-cache \
+  --apc-setup-name $APC_SETUP_NAME \
+  --apc $APC \
+  --apc-skip $APC_SKIP \
+  --pgo-type $PGO_TYPE
+
+# RUN python3 -m venv /opt/venv \
+#   && . /opt/venv/bin/activate \
+#   && pip install --no-cache-dir -r /app/server/requirements.txt
 
 ENV RUST_LOG="info,p3_=warn" \
     OUTPUT_PATH="metrics.json" \
@@ -75,7 +120,6 @@ VOLUME ["/app/rpc-cache", "/root/.openvm/params"]
 ENV PATH="/opt/venv/bin:${PATH}" \
     OVM_BIN="/usr/local/bin/openvm-reth-benchmark-bin"
 
-EXPOSE 8000
-ENTRYPOINT ["uvicorn", "server.main:app", "--host", "0.0.0.0", "--port", "8000"]
-
-
+# EXPOSE 8000
+# ENTRYPOINT ["uvicorn", "server.main:app", "--host", "0.0.0.0", "--port", "8000"]
+CMD ["bash"]
