@@ -35,7 +35,6 @@ COPY Cargo.toml Cargo.lock rust-toolchain.toml ./
 COPY crates/ ./crates/
 COPY bin/ ./bin/
 COPY rustfmt.toml ./
-COPY println.sh ./
 
 # Build guest ELF and place where host expects it
 WORKDIR /app/bin/client-eth
