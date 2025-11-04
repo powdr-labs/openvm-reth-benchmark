@@ -79,5 +79,6 @@ cuda = [
     "openvm-native-circuit/cuda",
     "openvm-sdk/cuda",
     "powdr-openvm/cuda",
+    "dep:openvm-cuda-backend",
 ]
 unprotected = ["openvm-sdk/unprotected"]
