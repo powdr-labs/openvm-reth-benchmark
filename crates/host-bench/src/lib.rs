@@ -8,6 +8,7 @@ use clap::Parser;
 use openvm_benchmarks_prove::util::BenchmarkCli;
 use openvm_circuit::{
     arch::*,
+    arch::execution_mode::Segment,
     openvm_stark_sdk::{
         bench::run_with_metric_collection, openvm_stark_backend::p3_field::PrimeField32,
     },
@@ -20,7 +21,7 @@ use openvm_native_circuit::NativeCpuBuilder;
 use openvm_sdk::{
     config::{AppConfig, SdkVmConfig},
     keygen::{AggProvingKey, AppProvingKey},
-    prover::verify_app_proof,
+    prover::{verify_app_proof, vm::new_local_prover},
     types::VersionedVmStarkProof,
     DefaultStarkEngine, GenericSdk, StdIn,
 };
@@ -35,6 +36,8 @@ use powdr_openvm::ExtendedVmConfigGpuBuilder;
 use powdr_openvm::PowdrSdkCpu;
 #[cfg(feature = "cuda")]
 use powdr_openvm::PowdrSdkGpu;
+#[cfg(feature = "cuda")]
+pub use openvm_cuda_backend::engine::GpuBabyBearPoseidon2Engine;
 use powdr_openvm::{
     CompiledProgram, ExtendedVmConfig, ExtendedVmConfigCpuBuilder, OriginalCompiledProgram,
     SpecializedConfig, SpecializedConfigCpuBuilder,
@@ -67,6 +70,8 @@ pub enum BenchMode {
     Execute,
     /// Execute the VM with metering to get segments information.
     ExecuteMetered,
+    /// Execute, generate trace, and check constraints and bus interactions without proving.
+    ProveMock,
     /// Generate sequence of app proofs for continuation segments.
     ProveApp,
     /// Generate a full end-to-end STARK proof with aggregation.
@@ -88,6 +93,7 @@ impl std::fmt::Display for BenchMode {
             Self::ExecuteHost => write!(f, "execute_host"),
             Self::Execute => write!(f, "execute"),
             Self::ExecuteMetered => write!(f, "execute_metered"),
+            Self::ProveMock => write!(f, "prove_mock"),
             Self::ProveApp => write!(f, "prove_app"),
             Self::ProveStark => write!(f, "prove_stark"),
             #[cfg(feature = "evm-verify")]
@@ -484,6 +490,58 @@ pub async fn run_reth_benchmark(
                             info_span!("interpreter.execute_metered", group = program_name)
                                 .in_scope(|| interpreter.execute_metered(stdin, metered_ctx))?;
                         println!("Number of segments: {}", segments.len());
+                    }
+                    BenchMode::ProveMock => {
+                        // Build owned vm instance, so we can mutate it later
+                        let vm_builder = specialized_sdk.app_vm_builder().clone();
+                        let vm_pk = specialized_sdk.app_pk().app_vm_pk.clone();
+                        let exe = specialized_sdk.convert_to_exe(exe.clone())?;
+                        let mut vm_instance: VmInstance<_, _> = new_local_prover(vm_builder, &vm_pk, exe.clone())?;
+                
+                        vm_instance.reset_state(stdin.clone());
+                        let metered_ctx = vm_instance.vm.build_metered_ctx(&exe);
+                        let metered_interpreter = vm_instance.vm.metered_interpreter(vm_instance.exe())?;
+                        let (segments, _) = metered_interpreter.execute_metered(stdin.clone(), metered_ctx)?;
+                        let mut state = vm_instance.state_mut().take();
+                
+                        // Get reusable inputs for `debug_proving_ctx`, the mock prover API from OVM.
+                        let vm = &mut vm_instance.vm;
+                        let air_inv = vm.config().create_airs().unwrap();
+                        #[cfg(feature = "cuda")]
+                        let pk = air_inv.keygen::<GpuBabyBearPoseidon2Engine>(&vm.engine);
+                        #[cfg(not(feature = "cuda"))]
+                        let pk = air_inv.keygen::<BabyBearPoseidon2Engine>(&vm.engine);
+                
+                        for (seg_idx, segment) in segments.into_iter().enumerate() {
+                            let _segment_span = info_span!("prove_segment", segment = seg_idx).entered();
+                            // We need a separate span so the metric label includes "segment" from _segment_span
+                            let _prove_span = info_span!("total_proof").entered();
+                            let Segment {
+                                instret_start,
+                                num_insns,
+                                trace_heights,
+                            } = segment;
+                            assert_eq!(state.as_ref().unwrap().instret(), instret_start);
+                            let from_state = Option::take(&mut state).unwrap();
+                            vm.transport_init_memory_to_device(&from_state.memory);
+                            let PreflightExecutionOutput {
+                                system_records,
+                                record_arenas,
+                                to_state,
+                            } = vm.execute_preflight(
+                                &mut vm_instance.interpreter,
+                                from_state,
+                                Some(num_insns),
+                                &trace_heights,
+                            )?;
+                            state = Some(to_state);
+                
+                            // Generate proving context for each segment
+                            let ctx = vm.generate_proving_ctx(system_records, record_arenas)?;
+                
+                            // Run the mock prover for each segment
+                            debug_proving_ctx(vm, &pk, &ctx);
+                        }
                     }
                     BenchMode::ProveApp => {
                         let mut prover =

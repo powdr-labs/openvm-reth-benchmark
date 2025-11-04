@@ -147,11 +147,19 @@ openvm-native-compiler = { git = "https://github.com/openvm-org/openvm.git", tag
 openvm-native-recursion = { git = "https://github.com/openvm-org/openvm.git", tag = "v1.4.1", default-features = false }
 
 # powdr
-powdr-openvm = { git = "https://github.com/powdr-labs/powdr.git", rev = "14ef2ee", default-features = false }
-powdr-riscv-elf = { git = "https://github.com/powdr-labs/powdr.git", rev = "14ef2ee", default-features = false }
-powdr-number = { git = "https://github.com/powdr-labs/powdr.git", rev = "14ef2ee", default-features = false }
-powdr-autoprecompiles = { git = "https://github.com/powdr-labs/powdr.git", rev = "14ef2ee", default-features = false }
-powdr-openvm-hints-circuit = { git = "https://github.com/powdr-labs/powdr.git", rev = "14ef2ee", default-features = false }
+powdr-openvm = { git = "https://github.com/powdr-labs/powdr.git", rev = "81bcf35", default-features = false }
+powdr-riscv-elf = { git = "https://github.com/powdr-labs/powdr.git", rev = "81bcf35", default-features = false }
+powdr-number = { git = "https://github.com/powdr-labs/powdr.git", rev = "81bcf35", default-features = false }
+powdr-autoprecompiles = { git = "https://github.com/powdr-labs/powdr.git", rev = "81bcf35", default-features = false }
+powdr-openvm-hints-circuit = { git = "https://github.com/powdr-labs/powdr.git", rev = "81bcf35", default-features = false }
+
+# Comment out the following to use a local powdr.
+# [patch."https://github.com/openvm-org/openvm.git"]
+# powdr-openvm = { path = "../powdr/openvm", default-features = false }
+# powdr-riscv-elf = { path = "../powdr/riscv-elf", default-features = false }
+# powdr-number = { path = "../powdr/number", default-features = false }
+# powdr-autoprecompiles = { path = "../powdr/autoprecompiles", default-features = false }
+# powdr-openvm-hints-circuit = { path = "../powdr/openvm/extensions/hints-circuit", default-features = false }
 
 [workspace.lints]
 rust.missing_debug_implementations = "warn"
