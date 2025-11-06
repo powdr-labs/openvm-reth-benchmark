@@ -276,6 +276,7 @@ pub async fn precompute_prover_data(
 
     let cache_file_path = args.apc_cache_dir.join(&args.apc_setup_name).with_extension("bin");
 
+    let start = std::time::Instant::now();
     if let Some(compiled_program) =
         File::open(&cache_file_path).ok().map(BufReader::new).map(|mut file| {
             bincode::serde::decode_from_std_read(&mut file, bincode::config::standard())
@@ -283,8 +284,11 @@ pub async fn precompute_prover_data(
         })
     {
         tracing::info!("Precomputed prover data for key {} found in cache", args.apc_setup_name);
+        println!(">>> Time to load precomputed prover data: {elapsed:?}");
         return Ok(compiled_program);
     }
+    let elapsed = start.elapsed();
+
 
     tracing::info!(
         "Precomputed prover data for key {} not found in cache. Precomputing prover data.",
@@ -295,6 +299,7 @@ pub async fn precompute_prover_data(
 
     let mut pgo_stdins = Vec::new();
 
+    let start = std::time::Instant::now();
     for block_id in PGO_BLOCK_NUMBERS {
         let pgo_client_input =
             get_client_input(&provider_config, &args.cache_dir, PGO_CHAIN_ID, block_id)
@@ -305,6 +310,8 @@ pub async fn precompute_prover_data(
         pgo_stdin.write(&pgo_client_input);
         pgo_stdins.push(pgo_stdin);
     }
+    let elapsed = start.elapsed();
+    println!(">>> Time to get_client_input for PGO blocks: {elapsed:?}");
 
     let app_log_blowup = args.benchmark.app_log_blowup.unwrap();
 
@@ -314,10 +321,17 @@ pub async fn precompute_prover_data(
     let sdk: GenericSdk<BabyBearPoseidon2Engine, ExtendedVmConfigCpuBuilder, NativeCpuBuilder> =
         GenericSdk::new(app_config.clone())?
             .with_agg_config(args.benchmark.agg_config())
-            .with_agg_tree_config(args.benchmark.agg_tree_config);
+        .with_agg_tree_config(args.benchmark.agg_tree_config);
+    let start = std::time::Instant::now();
     let elf = Elf::decode(openvm_client_eth_elf, MEM_SIZE as u32)?;
+    let elapsed = start.elapsed();
+    println!(">>> Time to decode elf: {elapsed:?}");
+    let start = std::time::Instant::now();
     let exe = sdk.convert_to_exe(elf.clone())?;
+    let elapsed = start.elapsed();
+    println!(">>> Time to convert to exe: {elapsed:?}");
 
+    let start = std::time::Instant::now();
     let program = powdr::apc(
         OriginalCompiledProgram { exe, vm_config },
         openvm_client_eth_elf,
@@ -326,6 +340,8 @@ pub async fn precompute_prover_data(
         args.pgo_type,
         pgo_stdins,
     );
+    let elapsed = start.elapsed();
+    println!(">>> Time to powdr::apc: {elapsed:?}");
 
     // Precompute proving keys
     let specialized_sdk: GenericSdk<
@@ -336,21 +352,27 @@ pub async fn precompute_prover_data(
         .with_agg_config(args.benchmark.agg_config())
         .with_agg_tree_config(args.benchmark.agg_tree_config);
 
+    let start = std::time::Instant::now();
     tracing::info!("Run app keygen");
     let (app_pk, _) = specialized_sdk.app_keygen();
     tracing::info!("Run agg keygen");
     let (agg_pk, _) = specialized_sdk.agg_keygen().unwrap();
+    let elapsed = start.elapsed();
+    println!(">>> Time to generate proving keys: {elapsed:?}");
 
     let setup = PrecomputedProverData { program, app_pk, agg_pk };
 
     tracing::info!("Saving prover data to cache at {}", cache_file_path.display());
     std::fs::create_dir_all(&args.apc_cache_dir).unwrap();
+    let start = std::time::Instant::now();
     bincode::serde::encode_into_std_write(
         &setup,
         &mut BufWriter::new(File::create(cache_file_path).unwrap()),
         bincode::config::standard(),
     )
     .unwrap();
+    let elapsed = start.elapsed();
+    println!(">>> Time to save prover data: {elapsed:?}");
 
     Ok(setup)
 }
