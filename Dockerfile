@@ -48,27 +48,14 @@ WORKDIR /app
 # TODO: slightly different in run.sh
 ENV JEMALLOC_SYS_WITH_MALLOC_CONF="retain:true,background_thread:true,metadata_thp:always,dirty_decay_ms:10000,muzzy_decay_ms:10000,abort_conf:true"
 # ARG FEATURES="metrics,jemalloc,tco,unprotected,cuda"
-ARG FEATURES="metrics,jemalloc,unprotected,cuda"  # no tco
+ARG FEATURES="metrics,jemalloc,unprotected" # no tco
+ARG FEATURES_CUDA="${FEATURES},cuda"
 ARG PROFILE="release"
 ENV CUDA_ARCH="89"
+
+# first we build without cuda:
+# we don't have access to the GPU during "docker build", so we need to run a "non-cuda" build first to generate the APC setup
 RUN cargo +${RUST_NIGHTLY} build --bin openvm-reth-benchmark-bin --profile=${PROFILE} --no-default-features --features=${FEATURES}
-
-# Runtime image
-FROM nvidia/cuda:12.8.1-runtime-ubuntu24.04 AS runtime
-RUN apt-get update && apt-get install -y --no-install-recommends ca-certificates python3 python3-venv curl tar gzip \
-   && rm -rf /var/lib/apt/lists/*
-
-# RUN S5CMD_VER=$(curl -s https://api.github.com/repos/peak/s5cmd/releases/latest | \
-#     grep tag_name | cut -d '"' -f 4) && \
-#     S5CMD_VER_TRIMMED=$(printf "%s" "$S5CMD_VER" | sed 's/^v//') && \
-#     curl -L -o /tmp/s5cmd.tar.gz "https://github.com/peak/s5cmd/releases/download/${S5CMD_VER}/s5cmd_${S5CMD_VER_TRIMMED}_Linux-64bit.tar.gz" && \
-#     tar xvf /tmp/s5cmd.tar.gz -C /usr/local/bin s5cmd && \
-#     rm /tmp/s5cmd.tar.gz
-
-WORKDIR /app
-COPY --from=builder /app/target/release/openvm-reth-benchmark-bin /usr/local/bin/openvm-reth-benchmark-bin
-COPY --from=builder /app/bin/host/elf/openvm-client-eth /app/bin/host/elf/openvm-client-eth
-# COPY server /app/server
 
 # Generate guest setup (apcs and pk/vk)
 ENV POWDR_APC_CANDIDATES_DIR="apcs"
@@ -76,15 +63,15 @@ ENV POWDR_APC_CANDIDATES_DIR="apcs"
 ENV RUST_LOG="info"
 ENV MAX_SEGMENT_LENGTH="4194204"
 ENV SEGMENT_MAX_CELLS="700000000"
-ENV APC_SETUP_NAME="reth-setup"
 # TODO: maybe these should be ARGs?
 ENV BLOCK_NUMBER="23100006"
 ENV APC="10"
 ENV APC_SKIP="0"
 ENV PGO_TYPE="cell"
+ENV APC_SETUP_NAME="reth-setup"
 ENV RUST_BACKTRACE="1"
 RUN --mount=type=secret,id=RPC_1,env=RPC_1 \
-  /usr/local/bin/openvm-reth-benchmark-bin \
+  target/${PROFILE}/openvm-reth-benchmark-bin \
 #  --kzg-params-dir $PARAMS_DIR \
   --mode "compile" \
   --block-number $BLOCK_NUMBER \
@@ -99,14 +86,36 @@ RUN --mount=type=secret,id=RPC_1,env=RPC_1 \
   --num-children-leaf 1 \
   --num-children-internal 3 \
   --apc-cache-dir apc-cache \
-  --apc-setup-name $APC_SETUP_NAME \
+  --apc-setup-name ${APC_SETUP_NAME}_${APC}_${APC_SKIP}_${PGO_TYPE} \
   --apc $APC \
   --apc-skip $APC_SKIP \
-  --pgo-type $PGO_TYPE
+  --pgo-type $PGO_TYPE \
+  --skip-comparison
 
-# RUN python3 -m venv /opt/venv \
-#   && . /opt/venv/bin/activate \
-#   && pip install --no-cache-dir -r /app/server/requirements.txt
+# now, build with cude for the runtime image
+RUN cargo +${RUST_NIGHTLY} build --bin openvm-reth-benchmark-bin --profile=${PROFILE} --no-default-features --features=${FEATURES_CUDA}
+
+# Runtime image
+FROM nvidia/cuda:12.8.1-runtime-ubuntu24.04 AS runtime
+RUN apt-get update && apt-get install -y --no-install-recommends ca-certificates python3 python3-venv curl tar gzip \
+   && rm -rf /var/lib/apt/lists/*
+
+# RUN S5CMD_VER=$(curl -s https://api.github.com/repos/peak/s5cmd/releases/latest | \
+#     grep tag_name | cut -d '"' -f 4) && \
+#     S5CMD_VER_TRIMMED=$(printf "%s" "$S5CMD_VER" | sed 's/^v//') && \
+#     curl -L -o /tmp/s5cmd.tar.gz "https://github.com/peak/s5cmd/releases/download/${S5CMD_VER}/s5cmd_${S5CMD_VER_TRIMMED}_Linux-64bit.tar.gz" && \
+#     tar xvf /tmp/s5cmd.tar.gz -C /usr/local/bin s5cmd && \
+#     rm /tmp/s5cmd.tar.gz
+
+WORKDIR /app
+COPY --from=builder /app/apc-cache /app/apc-cache
+COPY --from=builder /app/target/release/openvm-reth-benchmark-bin /usr/local/bin/openvm-reth-benchmark-bin
+COPY --from=builder /app/bin/host/elf/openvm-client-eth /app/bin/host/elf/openvm-client-eth
+COPY ethproofs /app/ethproofs
+
+RUN python3 -m venv /app/venv \
+   && . /app/venv/bin/activate \
+   && pip install --no-cache-dir -r /app/ethproofs/requirements.txt
 
 ENV RUST_LOG="info,p3_=warn" \
     OUTPUT_PATH="metrics.json" \
@@ -114,9 +123,9 @@ ENV RUST_LOG="info,p3_=warn" \
     KZG_PARAMS_DIR="/root/.openvm/params"
 
 # Useful mounts for cache/params
-VOLUME ["/app/rpc-cache", "/root/.openvm/params"]
+VOLUME ["/app/apc-cache", "/app/rpc-cache", "/root/.openvm/params"]
 
-ENV PATH="/opt/venv/bin:${PATH}" \
+ENV PATH="/app/venv/bin:${PATH}" \
     OVM_BIN="/usr/local/bin/openvm-reth-benchmark-bin"
 
 # EXPOSE 8000
