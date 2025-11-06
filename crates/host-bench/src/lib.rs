@@ -284,10 +284,10 @@ pub async fn precompute_prover_data(
         })
     {
         tracing::info!("Precomputed prover data for key {} found in cache", args.apc_setup_name);
+        let elapsed = start.elapsed();
         println!(">>> Time to load precomputed prover data: {elapsed:?}");
         return Ok(compiled_program);
     }
-    let elapsed = start.elapsed();
 
 
     tracing::info!(
