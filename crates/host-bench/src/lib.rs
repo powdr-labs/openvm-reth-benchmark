@@ -381,14 +381,23 @@ pub async fn run_reth_benchmark(
 
     let chain_id = provider_config.chain_id;
 
+    let start = std::time::Instant::now();
+
     let client_input =
         get_client_input(&provider_config, &args.cache_dir, chain_id, args.block_number).await?;
 
+    let elapsed = start.elapsed();
+    println!(">>> Time to get client input: {elapsed:?}");
+
+    let start = std::time::Instant::now();
     let mut stdin = StdIn::default();
     stdin.write(&client_input);
     info!("input loaded");
+    let elapsed = start.elapsed();
+    println!(">>> Time to load input: {elapsed:?}");
 
     if matches!(args.mode, BenchMode::MakeInput) {
+        let start = std::time::Instant::now();
         let words: Vec<u32> = openvm::serde::to_vec(&client_input).unwrap();
         let bytes: Vec<u8> = words.into_iter().flat_map(|w| w.to_le_bytes()).collect();
         let hex_bytes = String::from("0x01") + &hex::encode(&bytes);
@@ -397,6 +406,8 @@ pub async fn run_reth_benchmark(
         });
         let input = serde_json::to_string(&input).unwrap();
         fs::write(args.generated_input_path.unwrap(), input)?;
+        let elapsed = start.elapsed();
+        println!(">>> Time to make input: {elapsed:?}");
         return Ok(());
     }
 
@@ -405,11 +416,16 @@ pub async fn run_reth_benchmark(
     let vm_config = reth_vm_config(app_log_blowup);
     let app_config = args.benchmark.app_config(vm_config.clone());
 
+    let start = std::time::Instant::now();
     let elf = Elf::decode(openvm_client_eth_elf, MEM_SIZE as u32)?;
+    let elapsed = start.elapsed();
+    println!(">>> Time to elf decode: {elapsed:?}");
+
 
     let PrecomputedProverData { program: CompiledProgram { exe, vm_config }, app_pk, agg_pk } =
         setup;
 
+    let start = std::time::Instant::now();
     // Create an SDK based on the `SpecializedConfig` we generated
     #[cfg(feature = "cuda")]
     let generic_sdk = PowdrSdkGpu::new(args.benchmark.app_config(vm_config.clone()))?;
@@ -433,12 +449,15 @@ pub async fn run_reth_benchmark(
     // We had a bug before where `prover(elf)` was called and silently didn't use any apcs.
     // So we drop `elf` here to make sure it's never used later.
     drop(elf);
+    let elapsed = start.elapsed();
+    println!(">>> Time to create SDK: {elapsed:?}");
 
     run_with_metric_collection("OUTPUT_PATH", || {
         info_span!("reth-block", block_number = args.block_number).in_scope(
             || -> eyre::Result<()> {
                 // Run host execution for comparison
                 if !args.skip_comparison {
+                    let start = std::time::Instant::now();
                     let block_hash = info_span!("host.execute", group = program_name).in_scope(
                         || -> eyre::Result<_> {
                             let executor = ClientExecutor;
@@ -450,6 +469,8 @@ pub async fn run_reth_benchmark(
                             Ok(block_hash)
                         },
                     )?;
+                    let elapsed = start.elapsed();
+                    println!(">>> Time to host execute for comparison: {elapsed:?}");
                     println!("block_hash (execute-host): {}", ToHexExt::encode_hex(&block_hash));
                 }
 
@@ -460,9 +481,12 @@ pub async fn run_reth_benchmark(
 
                 // Execute for benchmarking:
                 if !args.skip_comparison {
+                    let start = std::time::Instant::now();
                     let pvs = info_span!("sdk.execute", group = program_name)
                         .in_scope(|| specialized_sdk.execute(exe.clone(), stdin.clone()))?;
                     let block_hash = pvs;
+                    let elapsed = start.elapsed();
+                    println!(">>> Time to sdk execute for comparison: {elapsed:?}");
                     println!("block_hash (execute): {}", ToHexExt::encode_hex(&block_hash));
                 }
 
@@ -551,9 +575,12 @@ pub async fn run_reth_benchmark(
                         verify_app_proof(&app_vk, &proof)?;
                     }
                     BenchMode::ProveStark => {
+                        let start = std::time::Instant::now();
                         let mut prover =
                             specialized_sdk.prover(exe)?.with_program_name(program_name);
                         let proof = prover.prove(stdin)?;
+                        let elapsed = start.elapsed();
+                        println!(">>> Time to sdk prove: {elapsed:?}");
                         let block_hash = proof
                             .user_public_values
                             .iter()
@@ -573,9 +600,12 @@ pub async fn run_reth_benchmark(
                         }
 
                         if let Some(output_dir) = args.output_dir.as_ref() {
+                            let start = std::time::Instant::now();
                             let versioned_proof = VersionedVmStarkProof::new(proof)?;
                             let json = serde_json::to_vec_pretty(&versioned_proof)?;
                             fs::write(output_dir.join("proof.json"), json)?;
+                            let elapsed = start.elapsed();
+                            println!(">>> Time to write proof: {elapsed:?}");
                             println!("wrote proof json to {}", output_dir.display());
                         }
                     }
