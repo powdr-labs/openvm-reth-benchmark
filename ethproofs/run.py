@@ -11,7 +11,7 @@ def read_env_var_or_error(v):
         raise RuntimeError(f"Environment variable {v} must be set")
     return ev
 
-RPC_URL = read_env_var_or_error("RPC_URL")
+RPC_URL = read_env_var_or_error("RPC_1")
 
 def get_latest_block():
     """Fetch the latest Ethereum block number from the RPC."""
