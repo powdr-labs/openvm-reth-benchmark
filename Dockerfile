@@ -63,8 +63,10 @@ ENV POWDR_APC_CANDIDATES_DIR="apcs"
 ENV RUST_LOG="info"
 ENV MAX_SEGMENT_LENGTH="4194204"
 ENV SEGMENT_MAX_CELLS="700000000"
-# TODO: maybe these should be ARGs?
+# TODO: maybe the following should be ARGs?
 ENV BLOCK_NUMBER="23100006"
+# For a faster docker build, make sure the above block is cached under /rpc-cache
+COPY rpc-cache/ ./rpc-cache/
 ENV APC="10"
 ENV APC_SKIP="0"
 ENV PGO_TYPE="cell"
@@ -95,7 +97,9 @@ RUN --mount=type=secret,id=RPC_1,env=RPC_1 \
 # now, build with cude for the runtime image
 RUN cargo +${RUST_NIGHTLY} build --bin openvm-reth-benchmark-bin --profile=${PROFILE} --no-default-features --features=${FEATURES_CUDA}
 
-# Runtime image
+##########################################################################
+# Setup runtime image
+
 FROM nvidia/cuda:12.8.1-runtime-ubuntu24.04 AS runtime
 RUN apt-get update && apt-get install -y --no-install-recommends ca-certificates python3 python3-venv curl tar gzip \
    && rm -rf /var/lib/apt/lists/*
