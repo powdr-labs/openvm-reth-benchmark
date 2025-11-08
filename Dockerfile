@@ -29,6 +29,10 @@ RUN rustup toolchain install ${RUST_NIGHTLY} \
 # Install cargo-openvm (builds the guest ELF)
 RUN cargo +1.86 install --git https://github.com/openvm-org/openvm.git --locked --force cargo-openvm
 
+# TODO: checkout ovm, build openvm-prof and add to runtime?
+
+# TODO: checkout powdr and copy python scripts to runtime?
+
 WORKDIR /app
 # Copy only Rust workspace files to keep build cache stable when server/ changes
 COPY Cargo.toml Cargo.lock rust-toolchain.toml ./

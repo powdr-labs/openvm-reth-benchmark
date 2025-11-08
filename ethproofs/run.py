@@ -1,9 +1,15 @@
 import os
+import subprocess
 import sys
+from pathlib import Path
 
 import time
 import requests
 
+import ethproofs_api as api
+
+MACHINE_ID=1
+VERIFIER_ID="powdr_verifier"
 
 def read_env_var_or_error(v):
     ev = os.getenv(v)
@@ -28,9 +34,39 @@ def get_latest_block():
 def prove(block):
     """The function to run every 100 blocks."""
     print(f"Proving block {block}")
+    script_path = Path(__file__).parent / "prove_block.sh"
+
+    # api.submit_queued(block, MACHINE_ID)
+
+    # download block and prepare input
+    status = subprocess.Popen([script_path, str(block), "make-input"]).wait()
+    if status != 0:
+        RuntimeError(f"make-input failed for block {block}")
+
+    # api.submit_proving(block, MACHINE_ID)
+
+    # do the proof
+    status = subprocess.Popen([script_path, str(block)]).wait()
+    if status != 0:
+        RuntimeError(f"proving failed for block {block}")
+
+    # TODO: load proving_cycles from ...
+
+    # TODO: load proving_time from 'latency_ms' file
+
+    # TODO: load proof from 'proof.json' file
+
+    # api.submit_proof(block, MACHINE_ID, proving_time, proving_cycles, proof, VERIFIER_ID)
+    print(f"Done proving block {block}")
 
 
 def main():
+    # ensure the machine id exists in ethproofs
+    data = api.get_clusters()
+    machine_ids = [c["id"] for c in data]
+    if MACHINE_ID not in machine_ids:
+        raise RuntimeError(f'Machine ID {MACHINE_ID} not found in ethproofs clusters. Available IDs: {machine_ids}')
+
     last_checked = 0
     while True:
         try:

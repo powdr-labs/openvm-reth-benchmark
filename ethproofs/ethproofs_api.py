@@ -122,4 +122,4 @@ def get_clusters():
     if not isinstance(data, list):
         raise RuntimeError(f"Unexpected response format: {data!r}")
 
-    print(data)
+    return data
