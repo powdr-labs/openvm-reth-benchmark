@@ -12,7 +12,9 @@ use openvm_circuit::{
         bench::run_with_metric_collection, openvm_stark_backend::p3_field::PrimeField32,
     },
 };
-use openvm_client_executor::{io::ClientExecutorInput, ClientExecutor, CHAIN_ID_ETH_MAINNET};
+use openvm_client_executor::{
+    io::ClientExecutorInput, ChainVariant, ClientExecutor, CHAIN_ID_ETH_MAINNET,
+};
 use openvm_host_executor::HostExecutor;
 pub use openvm_native_circuit::NativeConfig;
 use openvm_native_circuit::NativeCpuBuilder;
@@ -52,8 +54,6 @@ use std::{
     path::PathBuf,
 };
 use tracing::{info, info_span};
-
-mod execute;
 
 mod cli;
 use cli::ProviderArgs;
@@ -442,8 +442,9 @@ pub async fn run_reth_benchmark(
                         || -> eyre::Result<_> {
                             let executor = ClientExecutor;
                             // Create a child span to get the group label propagated
-                            let header = info_span!("client.execute")
-                                .in_scope(|| executor.execute(client_input.clone()))?;
+                            let header = info_span!("client.execute").in_scope(|| {
+                                executor.execute(ChainVariant::Mainnet, client_input.clone())
+                            })?;
                             let block_hash =
                                 info_span!("header.hash_slow").in_scope(|| header.hash_slow());
                             Ok(block_hash)
@@ -639,7 +640,7 @@ fn try_load_input_from_cache(
     block_number: u64,
 ) -> eyre::Result<Option<ClientExecutorInput>> {
     Ok(if let Some(cache_dir) = cache_dir {
-        let cache_path = cache_dir.join(format!("input/{}/{}.bin", chain_id, block_number));
+        let cache_path = cache_dir.join(format!("input/{chain_id}/{block_number}.bin"));
 
         if cache_path.exists() {
             // TODO: prune the cache if invalid instead
