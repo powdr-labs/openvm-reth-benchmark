@@ -2,13 +2,15 @@ import os
 import subprocess
 import sys
 from pathlib import Path
+import json
+import base64
 
 import time
 import requests
 
 import ethproofs_api as api
 
-MACHINE_ID=1
+MACHINE_ID=3
 VERIFIER_ID="powdr_verifier"
 
 def read_env_var_or_error(v):
@@ -18,6 +20,7 @@ def read_env_var_or_error(v):
     return ev
 
 RPC_URL = read_env_var_or_error("RPC_1")
+APC = read_env_var_or_error("APC")
 
 def get_latest_block():
     """Fetch the latest Ethereum block number from the RPC."""
@@ -31,43 +34,88 @@ def get_latest_block():
     response.raise_for_status()
     return int(response.json()["result"], 16)
 
+def json_to_base64(path):
+    # Read JSON file
+    with open(path, "r", encoding="utf-8") as f:
+        data = json.load(f)
+
+    # Serialize to canonical JSON string (no whitespace)
+    json_bytes = json.dumps(data, separators=(",", ":"), ensure_ascii=False).encode("utf-8")
+
+    # Base64 encode
+    encoded = base64.b64encode(json_bytes).decode("utf-8")
+
+    return encoded
+
+def read_number(path):
+    with open(path, "r") as f:
+        return int(f.read().strip())
+
+def extract_total_number(path):
+    with open(path, "r") as f:
+        lines = f.readlines()
+
+    line = lines[2].strip()
+
+    # Example line:
+    # | Total |  121.09 |  7.69 |
+    parts = [p.strip() for p in line.split("|") if p.strip()]
+
+    total_number = float(parts[1])
+
+    return total_number
+
 def prove(block):
     """The function to run every 100 blocks."""
     print(f"Proving block {block}")
     script_path = Path(__file__).parent / "prove_block.sh"
 
-    # api.submit_queued(block, MACHINE_ID)
+    api.submit_queued(block, api.POWDR_OPENVM_SINGLE_MACHINE_ID)
+    print(f"would submit submit_queued block {block}")
 
     # download block and prepare input
     status = subprocess.Popen([script_path, str(block), "make-input"]).wait()
     if status != 0:
         RuntimeError(f"make-input failed for block {block}")
 
-    # api.submit_proving(block, MACHINE_ID)
+    api.submit_proving(block, api.POWDR_OPENVM_SINGLE_MACHINE_ID)
+    print(f"would submit submit_proving block {block}")
 
     # do the proof
     status = subprocess.Popen([script_path, str(block)]).wait()
     if status != 0:
         RuntimeError(f"proving failed for block {block}")
 
-    # TODO: load proving_cycles from ...
+    output_dir = f"output-{block}-apc-{APC}"
 
-    # TODO: load proving_time from 'latency_ms' file
+    cycles_file = f"{output_dir}/num_instret"
+    cycles = read_number(cycles_file)
 
-    # TODO: load proof from 'proof.json' file
+    # call openvm prof
+    prof_bin_path = '/workspace/openvm/target/debug/openvm-prof'
+    metrics_file = f"{output_dir}/metrics.json"
+    status = subprocess.Popen([prof_bin_path, '--json-paths', metrics_file]).wait()
 
-    # api.submit_proof(block, MACHINE_ID, proving_time, proving_cycles, proof, VERIFIER_ID)
+    proof_time_file = f"{output_dir}/metrics.md"
+    proof_time = extract_total_number(proof_time_file) * 1000
+
+    proof_json = f"{output_dir}/proof.json"
+    proof = json_to_base64(proof_json)
+
+    api.submit_proof(block, MACHINE_ID, proof_time, cycles, proof, "powdr")
+    print(f"would submit submit_proof block {block}, proof_time {proof_time}, cycles {cycles}, proof file {proof_json}")
     print(f"Done proving block {block}")
-
 
 def main():
     # ensure the machine id exists in ethproofs
     data = api.get_clusters()
+    print(data)
     machine_ids = [c["id"] for c in data]
+    print(machine_ids)
     if MACHINE_ID not in machine_ids:
         raise RuntimeError(f'Machine ID {MACHINE_ID} not found in ethproofs clusters. Available IDs: {machine_ids}')
 
-    last_checked = 0
+    last_checked = 23802100
     while True:
         try:
             latest_block = get_latest_block()

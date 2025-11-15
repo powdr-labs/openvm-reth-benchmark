@@ -43,8 +43,6 @@ def submit_proving(block_number, cluster_id):
     else:
         print("Failed to submit proving proof. Status:", response.status_code)
 
-#submit_proving(23668650, POWDR_OPENVM_SINGLE_MACHINE_ID)
-
 def submit_queued(block_number, cluster_id):
     payload = {
         "block_number": block_number,
@@ -78,9 +76,6 @@ def submit_proof(block_number, cluster_id, proving_time, proving_cycles, proof, 
     else:
         print("Failed to submit proof. Status:", response.status_code)
 
-#submit_proof(23668650, POWDR_OPENVM_SINGLE_MACHINE_ID, 60_000, 200_000_000, "proof", "powdr_verifier")
-
-# Already ran this once, returned id=1
 def create_single_machine():
     payload = {
         "nickname": "powdr-OpenVM",
@@ -90,19 +85,19 @@ def create_single_machine():
         "cycle_type": "OpenVM-RISCV-powdr-autoprecompiles",
         "proof_type": "FRI-based STARKs",
         "machine": {
-            "cpu_model": "Intel(R) Xeon(R) Gold 5412U @ 0.8GHz",
-            "cpu_cores": 24,
-            "gpu_models": ["none"],
+            "cpu_model": "AMD Ryzen 9 7950X",
+            "cpu_cores": 16,
+            "gpu_models": ["NVIDIA RTX 4090"],
             "gpu_count": [1],
-            "gpu_memory_gb": [1],
-            "memory_size_gb": [256],
-            "memory_count": [8],
+            "gpu_memory_gb": [24],
+            "memory_size_gb": [41],
+            "memory_count": [1],
             "memory_type": ["DDR5-5600 ECC"],
-            "storage_size_gb": 3084,
+            "storage_size_gb": 100,
             "total_tera_flops": 450,
             "network_between_machines": "Dual-port 100GbE NIC"
         },
-        "cloud_instance_name": "m6i.2xlarge"
+        "cloud_instance_name": "NVIDIA RTX 4090-1"
     }
 
     response = requests.post(CREATE_SINGLE_MACHINE_ENDPOINT, json=payload, headers=headers)

@@ -11,8 +11,6 @@ fi
 
 BLOCK_NUMBER="$1"
 # bench params
-OUTPUT_DIR="output-${BLOCK_NUMBER}"
-OUTPUT_PATH="${OUTPUT_PATH:-metrics.json}"
 APP_LOG_BLOWUP="${APP_LOG_BLOWUP:-1}"
 LEAF_LOG_BLOWUP="${LEAF_LOG_BLOWUP:-1}"
 INTERNAL_LOG_BLOWUP="${INTERNAL_LOG_BLOWUP:-2}"
@@ -26,6 +24,10 @@ APC="${APC:-0}"
 APC_SKIP="${APC_SKIP:-0}"
 PGO_TYPE="${PGO_TYPE:-cell}"
 APC_SETUP_NAME="${APC_SETUP_NAME:-reth-setup}"
+
+# output params
+OUTPUT_DIR="output-${BLOCK_NUMBER}-apc-${APC}"
+OUTPUT_PATH="${OUTPUT_PATH:-metrics.json}"
 
 echo "[prove_block.sh] Downloading block ${BLOCK_NUMBER}" >&2
 
