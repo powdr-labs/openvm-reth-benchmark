@@ -695,6 +695,9 @@ mod powdr {
         let sdk: GenericSdk<BabyBearPoseidon2Engine, ExtendedVmConfigCpuBuilder, NativeCpuBuilder> =
             GenericSdk::new(app_config).unwrap();
 
+        assert_eq!(pgo_stdin.len(), 1, "Currently only support 1 stdin for PGO");
+        let inputs = pgo_stdin[0].clone();
+
         let execute = || {
             for stdin in pgo_stdin {
                 sdk.execute(original_program.exe.clone(), stdin).unwrap();
@@ -722,6 +725,6 @@ mod powdr {
             config = config.with_apc_candidates_dir(path);
         }
 
-        compile_exe(original_program, config, pgo_config).unwrap()
+        compile_exe(original_program, config, pgo_config, inputs).unwrap()
     }
 }

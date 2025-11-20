@@ -170,6 +170,7 @@ rustdoc.all = "warn"
 
 [profile.release]
 lto = "thin"
+debug = true
 
 [profile.profiling]
 inherits = "maxperf"

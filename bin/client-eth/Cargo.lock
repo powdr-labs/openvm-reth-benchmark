@@ -4527,3 +4527,23 @@ dependencies = [
 name = "p256"
 version = "0.13.2"
 source = "git+https://github.com/openvm-org/openvm.git?branch=main#05cb6a11bbd7ac3ac8a00c3fc56391b06f54baa2"
+
+[[patch.unused]]
+name = "powdr-autoprecompiles"
+version = "0.1.4"
+
+[[patch.unused]]
+name = "powdr-number"
+version = "0.1.4"
+
+[[patch.unused]]
+name = "powdr-openvm"
+version = "0.1.4"
+
+[[patch.unused]]
+name = "powdr-openvm-hints-circuit"
+version = "0.1.4"
+
+[[patch.unused]]
+name = "powdr-riscv-elf"
+version = "0.1.4"
