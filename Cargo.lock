@@ -6797,7 +6797,6 @@ dependencies = [
  "powdr-riscv-elf",
  "rustc-demangle",
  "serde",
- "serde_json",
  "struct-reflection",
  "toml 0.8.23",
  "tracing",

@@ -30,7 +30,7 @@ use openvm_stark_sdk::{
     config::baby_bear_poseidon2::BabyBearPoseidon2Engine, engine::StarkFriEngine,
 };
 use openvm_transpiler::{elf::Elf, openvm_platform::memory::MEM_SIZE};
-use powdr_autoprecompiles::PgoType;
+use powdr_autoprecompiles::{PgoType, PowdrConfig};
 #[cfg(feature = "cuda")]
 use powdr_openvm::ExtendedVmConfigGpuBuilder;
 #[cfg(not(feature = "cuda"))]
@@ -38,10 +38,9 @@ use powdr_openvm::PowdrSdkCpu;
 #[cfg(feature = "cuda")]
 use powdr_openvm::PowdrSdkGpu;
 use powdr_openvm::{
-    CompiledProgram, ExtendedVmConfig, ExtendedVmConfigCpuBuilder, OriginalCompiledProgram,
-    SpecializedConfig, SpecializedConfigCpuBuilder,
+    detect_empirical_constraints, CompiledProgram, ExtendedVmConfig, ExtendedVmConfigCpuBuilder,
+    OriginalCompiledProgram, SpecializedConfig, SpecializedConfigCpuBuilder,
 };
-
 use powdr_openvm_hints_circuit::HintsExtension;
 pub use reth_primitives;
 use serde::{Deserialize, Serialize};
@@ -189,7 +188,10 @@ pub const RETH_DEFAULT_APP_LOG_BLOWUP: usize = 1;
 pub const RETH_DEFAULT_LEAF_LOG_BLOWUP: usize = 1;
 
 const PGO_CHAIN_ID: u64 = CHAIN_ID_ETH_MAINNET;
-const PGO_BLOCK_NUMBERS: [u64; 1] = [23100006];
+// const PGO_BLOCK_NUMBERS: [u64; 3] = [23100006, 21882667, 23843209];
+// const PGO_BLOCK_NUMBERS: [u64; 1] = [23100006];
+const PGO_BLOCK_NUMBERS: [u64; 1] = [1];
+// const PGO_BLOCK_NUMBERS: [u64; 1] = [23843209];
 const APP_LOG_BLOWUP: usize = 1;
 
 #[derive(Serialize, Deserialize)]
@@ -657,6 +659,7 @@ fn try_load_input_from_cache(
 }
 
 mod powdr {
+    use openvm_build::GuestOptions;
     use openvm_native_circuit::NativeCpuBuilder;
     use openvm_sdk::{
         config::{AppConfig, DEFAULT_APP_LOG_BLOWUP},
@@ -664,9 +667,16 @@ mod powdr {
     };
     use openvm_stark_sdk::config::FriParameters;
     use powdr_autoprecompiles::{execution_profile::execution_profile, PgoType};
+
+    use powdr_autoprecompiles::empirical_constraints::{
+        EmpiricalConstraints, EmpiricalConstraintsJson,
+    };
+
+    use powdr_autoprecompiles::PowdrConfig;
     use powdr_openvm::{
-        compile_exe, default_powdr_openvm_config, BabyBearOpenVmApcAdapter, CompiledProgram,
-        DegreeBound, ExtendedVmConfigCpuBuilder, OriginalCompiledProgram, PgoConfig, Prog,
+        compile_exe, compile_openvm, default_powdr_openvm_config, detect_empirical_constraints,
+        BabyBearOpenVmApcAdapter, CompiledProgram, DegreeBound, ExtendedVmConfigCpuBuilder,
+        OriginalCompiledProgram, PgoConfig, Prog,
     };
 
     /// This function is used to generate the specialized program for the Powdr APC.
@@ -699,8 +709,8 @@ mod powdr {
         let inputs = pgo_stdin[0].clone();
 
         let execute = || {
-            for stdin in pgo_stdin {
-                sdk.execute(original_program.exe.clone(), stdin).unwrap();
+            for stdin in &pgo_stdin {
+                sdk.execute(original_program.exe.clone(), stdin.clone()).unwrap();
             }
         };
 
@@ -725,6 +735,39 @@ mod powdr {
             config = config.with_apc_candidates_dir(path);
         }
 
-        compile_exe(original_program, config, pgo_config, inputs).unwrap()
+        let guest_opts = GuestOptions::default();
+        let guest_program = compile_openvm(
+            "/home/leo/devel/powdr/openvm-reth-benchmark/bin/client-eth",
+            guest_opts.clone(),
+        )
+        .unwrap();
+        let empirical_constraints =
+            maybe_compute_empirical_constraints(&guest_program, &config, pgo_stdin[0].clone());
+        compile_exe(original_program, config, pgo_config, empirical_constraints).unwrap()
+    }
+
+    fn maybe_compute_empirical_constraints(
+        guest_program: &OriginalCompiledProgram,
+        powdr_config: &PowdrConfig,
+        stdin: StdIn,
+    ) -> EmpiricalConstraints {
+        tracing::warn!(
+            "Optimistic precompiles are not implemented yet. Computing empirical constraints..."
+        );
+        let (empirical_constraints, debug_info) =
+            detect_empirical_constraints(guest_program, powdr_config.degree_bound, vec![stdin]);
+        if let Some(path) = &powdr_config.apc_candidates_dir_path {
+            tracing::info!(
+                "Saving empirical constraints debug info to {}/empirical_constraints.json",
+                path.display()
+            );
+            let export = EmpiricalConstraintsJson {
+                empirical_constraints: empirical_constraints.clone(),
+                debug_info,
+            };
+            let json = serde_json::to_string_pretty(&export).unwrap();
+            std::fs::write(path.join("empirical_constraints.json"), json).unwrap();
+        }
+        empirical_constraints
     }
 }

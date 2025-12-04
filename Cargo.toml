@@ -154,7 +154,7 @@ powdr-autoprecompiles = { git = "https://github.com/powdr-labs/powdr.git", rev =
 powdr-openvm-hints-circuit = { git = "https://github.com/powdr-labs/powdr.git", rev = "e666cb4", default-features = false }
 
 # Comment out the following to use a local powdr.
-# [patch."https://github.com/openvm-org/openvm.git"]
+# [patch."https://github.com/powdr-labs/powdr.git"]
 # powdr-openvm = { path = "../powdr/openvm", default-features = false }
 # powdr-riscv-elf = { path = "../powdr/riscv-elf", default-features = false }
 # powdr-number = { path = "../powdr/number", default-features = false }
