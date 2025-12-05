@@ -189,8 +189,8 @@ pub const RETH_DEFAULT_LEAF_LOG_BLOWUP: usize = 1;
 
 const PGO_CHAIN_ID: u64 = CHAIN_ID_ETH_MAINNET;
 // const PGO_BLOCK_NUMBERS: [u64; 3] = [23100006, 21882667, 23843209];
-// const PGO_BLOCK_NUMBERS: [u64; 1] = [23100006];
-const PGO_BLOCK_NUMBERS: [u64; 1] = [1];
+const PGO_BLOCK_NUMBERS: [u64; 1] = [23100006];
+// const PGO_BLOCK_NUMBERS: [u64; 1] = [1];
 // const PGO_BLOCK_NUMBERS: [u64; 1] = [23843209];
 const APP_LOG_BLOWUP: usize = 1;
 
@@ -679,6 +679,8 @@ mod powdr {
         OriginalCompiledProgram, PgoConfig, Prog,
     };
 
+    use std::{fs, path::PathBuf};
+
     /// This function is used to generate the specialized program for the Powdr APC.
     /// It takes:
     /// - `original_program`: The original program, including the original vm config.
@@ -746,11 +748,28 @@ mod powdr {
         compile_exe(original_program, config, pgo_config, empirical_constraints).unwrap()
     }
 
+    fn load_empirical_constraints(prefix: Option<PathBuf>) -> Option<EmpiricalConstraintsJson> {
+        // Determine full path
+        let mut path = prefix.unwrap_or_default();
+        path.push("empirical_constraints.json");
+
+        // Try reading the file; if not present or unreadable, return None.
+        let contents = fs::read_to_string(&path).ok()?;
+
+        // Try to deserialize; on error return None.
+        serde_json::from_str(&contents).ok()
+    }
+
     fn maybe_compute_empirical_constraints(
         guest_program: &OriginalCompiledProgram,
         powdr_config: &PowdrConfig,
         stdin: StdIn,
     ) -> EmpiricalConstraints {
+        if let Some(ec) = load_empirical_constraints(powdr_config.apc_candidates_dir_path.clone()) {
+            tracing::info!("Loaded previously generated empirical_constraints");
+            return ec.empirical_constraints;
+        }
+
         tracing::warn!(
             "Optimistic precompiles are not implemented yet. Computing empirical constraints..."
         );
