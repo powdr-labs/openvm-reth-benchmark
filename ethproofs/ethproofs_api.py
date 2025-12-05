@@ -1,12 +1,12 @@
 import os
 import requests
 
-# API: https://staging--ethproofs.netlify.app/api.html
-
-POWDR_OPENVM_SINGLE_MACHINE_ID = 1
+# STATING API: https://staging--ethproofs.netlify.app/api.html
+# PROD API: https://ethproofs.org/api.html
 
 # Configuration
-API_BASE = "https://staging--ethproofs.netlify.app/api/v0"
+API_BASE_STAGING = "https://staging--ethproofs.netlify.app/api/v0"
+API_BASE = "https://ethproofs.org/api/v0"
 
 CREATE_SINGLE_MACHINE_ENDPOINT = f"{API_BASE}/single-machine"
 GET_CLUSTERS_ENDPOINT = f"{API_BASE}/clusters"
@@ -15,13 +15,14 @@ PROOFS_QUEUED = f"{PROOFS_BASE}/queued"
 PROOFS_PROVING = f"{PROOFS_BASE}/proving"
 PROOFS_PROVED = f"{PROOFS_BASE}/proved"
 
-API_KEY = os.getenv("ETHPROOFS_API_KEY_STAGING")
+#API_KEY = os.getenv("ETHPROOFS_API_KEY_STAGING")
+API_KEY = os.getenv("ETHPROOFS_API_KEY_PROD")
 if not API_KEY:
-    raise RuntimeError("Environment variable ETHPROOFS_API_KEY_STAGING must be set")
+    raise RuntimeError("Environment variable ETHPROOFS_API_KEY_PROD must be set")
 
 SUCCESS_STATUS_CODE = 200
 
-ZKVM_ID_OPENVM_1_4_0 = 14
+ZKVM_ID_OPENVM_1_4_0 = 17
 
 # Headers including API key
 headers = {
@@ -39,9 +40,9 @@ def submit_proving(block_number, cluster_id):
 
     if response.status_code == SUCCESS_STATUS_CODE:
         data = response.json()
-        print("Proving proof submited with proof_id:", data.get("proof_id"))
+        print("[info] Proving proof submitted with proof_id:", data.get("proof_id"))
     else:
-        print("Failed to submit proving proof. Status:", response.status_code)
+        print("[error] Failed to submit proving proof. Status:", response.status_code)
 
 def submit_queued(block_number, cluster_id):
     payload = {

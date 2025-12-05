@@ -10,7 +10,7 @@ import requests
 
 import ethproofs_api as api
 
-MACHINE_ID=3
+MACHINE_ID=1
 VERIFIER_ID="powdr_verifier"
 
 def read_env_var_or_error(v):
@@ -65,46 +65,58 @@ def extract_total_number(path):
 
     return total_number
 
-def prove(block):
-    """The function to run every 100 blocks."""
-    print(f"Proving block {block}")
-    script_path = Path(__file__).parent / "prove_block.sh"
-
-    api.submit_queued(block, api.POWDR_OPENVM_SINGLE_MACHINE_ID)
-    print(f"would submit submit_queued block {block}")
-
-    # download block and prepare input
-    status = subprocess.Popen([script_path, str(block), "make-input"]).wait()
-    if status != 0:
-        RuntimeError(f"make-input failed for block {block}")
-
-    api.submit_proving(block, api.POWDR_OPENVM_SINGLE_MACHINE_ID)
-    print(f"would submit submit_proving block {block}")
-
-    # do the proof
-    status = subprocess.Popen([script_path, str(block)]).wait()
-    if status != 0:
-        RuntimeError(f"proving failed for block {block}")
-
-    output_dir = f"output-{block}-apc-{APC}"
-
+def submit_proved(block, output_dir):
     cycles_file = f"{output_dir}/num_instret"
     cycles = read_number(cycles_file)
 
-    # call openvm prof
-    prof_bin_path = '/workspace/openvm/target/debug/openvm-prof'
-    metrics_file = f"{output_dir}/metrics.json"
-    status = subprocess.Popen([prof_bin_path, '--json-paths', metrics_file]).wait()
+    latency_file = f"{output_dir}/latency_ms.txt"
+    latency_ms = read_number(latency_file)
 
-    proof_time_file = f"{output_dir}/metrics.md"
-    proof_time = extract_total_number(proof_time_file) * 1000
+    # now we only read time from latency file
+    #proof_time_file = f"{output_dir}/metrics.md"
+    #proof_time = int(extract_total_number(proof_time_file) * 1000)
 
     proof_json = f"{output_dir}/proof.json"
     proof = json_to_base64(proof_json)
 
-    api.submit_proof(block, MACHINE_ID, proof_time, cycles, proof, "powdr")
-    print(f"would submit submit_proof block {block}, proof_time {proof_time}, cycles {cycles}, proof file {proof_json}")
-    print(f"Done proving block {block}")
+    api.submit_proof(block, MACHINE_ID, latency_ms, cycles, proof, "powdr")
+    print(f"[info] Submitted submit_proof block {block}, proof_time {latency_ms}, cycles {cycles}, proof file {proof_json}")
+
+def prove(block):
+    print(f"[info] Proving block {block}")
+    script_path = Path(__file__).parent / "prove_block.sh"
+
+    api.submit_queued(block, MACHINE_ID)
+    print(f"[info] Submitted submit_queued block {block}")
+
+    # download block and prepare input
+    while True:
+        status = subprocess.Popen([script_path, str(block), "make-input"]).wait()
+        if status != 0:
+            print(f"[error] make-input failed for block {block}, trying again in 5s...")
+            time.sleep(5)
+        else:
+            break
+
+    api.submit_proving(block, MACHINE_ID)
+    print(f"[info] Submitted submit_proving block {block}")
+
+    # do the proof
+    status = subprocess.Popen([script_path, str(block)]).wait()
+    if status != 0:
+        RuntimeError(f"[error] proving failed for block {block}")
+
+    output_dir = f"output-{block}-apc-{APC}"
+
+    # no need to call openvm prof anymore
+    # call openvm prof
+    #prof_bin_path = '/workspace/openvm/target/debug/openvm-prof'
+    #metrics_file = f"{output_dir}/metrics.json"
+    #status = subprocess.Popen([prof_bin_path, '--json-paths', metrics_file]).wait()
+
+    submit_proved(block, output_dir)
+
+    print(f"[info] Done proving block {block}")
 
 def main():
     # ensure the machine id exists in ethproofs
@@ -113,16 +125,16 @@ def main():
     machine_ids = [c["id"] for c in data]
     print(machine_ids)
     if MACHINE_ID not in machine_ids:
-        raise RuntimeError(f'Machine ID {MACHINE_ID} not found in ethproofs clusters. Available IDs: {machine_ids}')
+        raise RuntimeError(f'[error] Machine ID {MACHINE_ID} not found in ethproofs clusters. Available IDs: {machine_ids}')
 
-    last_checked = 23802100
+    last_checked = 23946500
     while True:
         try:
             latest_block = get_latest_block()
-            print(f"Latest Ethereum block is {latest_block}")
+            print(f"[info] Latest Ethereum block is {latest_block}")
 
             if last_checked >= latest_block:
-                raise RuntimeError(f"Last checked block {last_checked} >= latest Ethereum block {latest_block}")
+                raise RuntimeError(f"[error] Last checked block {last_checked} >= latest Ethereum block {latest_block}")
 
             next_target = latest_block // 100 * 100
             if next_target != last_checked:
@@ -133,10 +145,10 @@ def main():
                 blocks_until_next = 100 - (latest_block % 100)
                 # assume average 12s per block, estimate wait time
                 est_wait = blocks_until_next * 12
-                print(f"Waiting ~{est_wait:.1f}s until next check...")
+                print(f"[info] Waiting ~{est_wait:.1f}s until next check...")
                 time.sleep(est_wait)
         except Exception as e:
-            print(f"Error: {e}")
+            print(f"[error] Error: {e}")
             time.sleep(10)
 
 if __name__ == "__main__":
