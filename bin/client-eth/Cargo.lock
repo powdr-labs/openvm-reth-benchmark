@@ -2430,6 +2430,7 @@ dependencies = [
 name = "openvm-primitives"
 version = "0.3.0"
 dependencies = [
+ "alloy-eips",
  "alloy-hardforks",
  "alloy-rpc-types",
  "eyre",
