@@ -189,7 +189,8 @@ pub const RETH_DEFAULT_APP_LOG_BLOWUP: usize = 1;
 pub const RETH_DEFAULT_LEAF_LOG_BLOWUP: usize = 1;
 
 const PGO_CHAIN_ID: u64 = CHAIN_ID_ETH_MAINNET;
-const PGO_BLOCK_NUMBERS: [u64; 1] = [23100006];
+//const PGO_BLOCK_NUMBERS: [u64; 1] = [23100006];
+const PGO_BLOCK_NUMBERS: [u64; 1] = [24019000];
 const APP_LOG_BLOWUP: usize = 1;
 
 #[derive(Serialize, Deserialize)]
