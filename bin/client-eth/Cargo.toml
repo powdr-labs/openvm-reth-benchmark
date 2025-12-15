@@ -11,9 +11,9 @@ getrandom = { version = "0.2", features = ["custom"] }
 openvm-client-executor = { path = "../../crates/executor/client" }
 
 # openvm
-# openvm = { git = "https://github.com/openvm-org/openvm.git", tag = "v1.3.0", features = [
-#   "std",
-# ] }
+openvm = { git = "https://github.com/openvm-org/openvm.git", tag = "v1.3.0", features = [
+  "std",
+] }
 # openvm-keccak256-guest = { git = "https://github.com/openvm-org/openvm.git", tag = "v1.3.0" }
 # openvm-algebra-guest = { git = "https://github.com/openvm-org/openvm.git", tag = "v1.3.0" }
 # openvm-ecc-guest = { git = "https://github.com/openvm-org/openvm.git", tag = "v1.3.0" }
@@ -43,7 +43,7 @@ bincode = { version = "2.0.0", default-features = false, features = [
 # getrandom = "=0.3.3"
 
 [features]
-# heap-embedded-alloc = ["openvm/heap-embedded-alloc"]
+heap-embedded-alloc = ["openvm/heap-embedded-alloc"]
 
 [patch.crates-io]
 sp1_bls12_381 = { path = "../../../bls12_381" }
