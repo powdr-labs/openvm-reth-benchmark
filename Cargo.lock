@@ -1929,6 +1929,18 @@ dependencies = [
 ]
 
 [[package]]
+name = "crepe"
+version = "0.1.8"
+source = "git+https://github.com/powdr-labs/crepe?rev=powdr-0.1.10#2bce709790e5452f06d4cc728dc1b1929f824f44"
+dependencies = [
+ "petgraph",
+ "proc-macro-error",
+ "proc-macro2",
+ "quote",
+ "syn 2.0.102",
+]
+
+[[package]]
 name = "criterion"
 version = "0.6.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -6677,6 +6689,7 @@ dependencies = [
 name = "powdr-autoprecompiles"
 version = "0.1.4"
 dependencies = [
+ "derive_more 0.99.20",
  "itertools 0.13.0",
  "log",
  "metrics",
@@ -6699,6 +6712,7 @@ version = "0.1.4"
 dependencies = [
  "auto_enums",
  "bitvec",
+ "crepe",
  "derive_more 0.99.20",
  "itertools 0.13.0",
  "log",
@@ -6931,6 +6945,30 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "edce586971a4dfaa28950c6f18ed55e0406c1ab88bbce2c6f6293a7aaba73d35"
 dependencies = [
  "toml_edit 0.22.27",
+]
+
+[[package]]
+name = "proc-macro-error"
+version = "1.0.4"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "da25490ff9892aab3fcf7c36f08cfb902dd3e71ca0f9f9517bea02a73a5ce38c"
+dependencies = [
+ "proc-macro-error-attr",
+ "proc-macro2",
+ "quote",
+ "syn 1.0.109",
+ "version_check",
+]
+
+[[package]]
+name = "proc-macro-error-attr"
+version = "1.0.4"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "a1be40180e52ecc98ad80b184934baf3d0d29f979574e439af5a55274b35f869"
+dependencies = [
+ "proc-macro2",
+ "quote",
+ "version_check",
 ]
 
 [[package]]

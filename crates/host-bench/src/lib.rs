@@ -30,7 +30,7 @@ use openvm_stark_sdk::{
     config::baby_bear_poseidon2::BabyBearPoseidon2Engine, engine::StarkFriEngine,
 };
 use openvm_transpiler::{elf::Elf, openvm_platform::memory::MEM_SIZE};
-use powdr_autoprecompiles::{PgoType, PowdrConfig};
+use powdr_autoprecompiles::PgoType;
 #[cfg(feature = "cuda")]
 use powdr_openvm::ExtendedVmConfigGpuBuilder;
 #[cfg(not(feature = "cuda"))]
@@ -668,9 +668,7 @@ mod powdr {
     use openvm_stark_sdk::config::FriParameters;
     use powdr_autoprecompiles::{execution_profile::execution_profile, PgoType};
 
-    use powdr_autoprecompiles::empirical_constraints::{
-        EmpiricalConstraints, EmpiricalConstraintsJson,
-    };
+    use powdr_autoprecompiles::empirical_constraints::EmpiricalConstraints;
 
     use powdr_autoprecompiles::PowdrConfig;
     use powdr_openvm::{
@@ -748,7 +746,7 @@ mod powdr {
         compile_exe(original_program, config, pgo_config, empirical_constraints).unwrap()
     }
 
-    fn load_empirical_constraints(prefix: Option<PathBuf>) -> Option<EmpiricalConstraintsJson> {
+    fn load_empirical_constraints(prefix: Option<PathBuf>) -> Option<EmpiricalConstraints> {
         // Determine full path
         let mut path = prefix.unwrap_or_default();
         path.push("empirical_constraints.json");
@@ -767,24 +765,20 @@ mod powdr {
     ) -> EmpiricalConstraints {
         if let Some(ec) = load_empirical_constraints(powdr_config.apc_candidates_dir_path.clone()) {
             tracing::info!("Loaded previously generated empirical_constraints");
-            return ec.empirical_constraints;
+            return ec;
         }
 
         tracing::warn!(
             "Optimistic precompiles are not implemented yet. Computing empirical constraints..."
         );
-        let (empirical_constraints, debug_info) =
+        let empirical_constraints =
             detect_empirical_constraints(guest_program, powdr_config.degree_bound, vec![stdin]);
         if let Some(path) = &powdr_config.apc_candidates_dir_path {
             tracing::info!(
                 "Saving empirical constraints debug info to {}/empirical_constraints.json",
                 path.display()
             );
-            let export = EmpiricalConstraintsJson {
-                empirical_constraints: empirical_constraints.clone(),
-                debug_info,
-            };
-            let json = serde_json::to_string_pretty(&export).unwrap();
+            let json = serde_json::to_string_pretty(&empirical_constraints).unwrap();
             std::fs::write(path.join("empirical_constraints.json"), json).unwrap();
         }
         empirical_constraints
