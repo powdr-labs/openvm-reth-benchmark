@@ -12,7 +12,7 @@ source .env
 # MODE=execute # can be execute-host, execute, execute-metered, prove-app, prove-stark, or prove-evm (needs "evm-verify" feature)
 
 cd bin/client-eth
-RUSTFLAGS="-Clink-arg=--emit-relocs" cargo openvm build --no-transpile
+#RUSTFLAGS="-Clink-arg=--emit-relocs" cargo openvm build --no-transpile
 mkdir -p ../host/elf
 SRC="target/riscv32im-risc0-zkvm-elf/release/openvm-client-eth"
 DEST="../host/elf/openvm-client-eth"
@@ -27,14 +27,17 @@ source .env
 # MODE=execute # can be compile, execute, execute-metered, prove-mock, prove-app, prove-stark, or prove-evm (needs "evm-verify" feature)
 PROFILE="release"
 FEATURES="metrics,jemalloc,unprotected" # removed tco here till we have that fixed
-BLOCK_NUMBER=21882667
+#BLOCK_NUMBER=21882667
+# BLOCK_NUMBER=1
+# BLOCK_NUMBER=23843209
+BLOCK_NUMBER=23100006
 # switch to +nightly-2025-08-19 if using tco
 TOOLCHAIN="+nightly-2025-08-19" # "+stable"
 BIN_NAME="openvm-reth-benchmark-bin"
 MAX_SEGMENT_LENGTH=$((1 << 22))
 SEGMENT_MAX_CELLS=1200000000
 VPMM_PAGE_SIZE=$((4 << 20))
-VPMM_PAGES=$((12 * $MAX_SEGMENT_LENGTH/ $VPMM_PAGE_SIZE))
+VPMM_PAGES=$((12 * $MAX_SEGMENT_LENGTH / $VPMM_PAGE_SIZE))
 
 if [ "$USE_CUDA" = "true" ]; then
   FEATURES="$FEATURES,cuda"
