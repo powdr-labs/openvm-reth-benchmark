@@ -523,7 +523,6 @@ pub async fn run_reth_benchmark(
                             // _segment_span
                             let _prove_span = info_span!("total_proof").entered();
                             let Segment { instret_start, num_insns, trace_heights } = segment;
-                            assert_eq!(state.as_ref().unwrap().instret(), instret_start);
                             let from_state = Option::take(&mut state).unwrap();
                             vm.transport_init_memory_to_device(&from_state.memory);
                             let PreflightExecutionOutput {

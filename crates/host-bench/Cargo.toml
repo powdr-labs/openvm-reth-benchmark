@@ -67,7 +67,7 @@ powdr-openvm-hints-circuit = { workspace = true }
 default = ["mimalloc", "metrics"]
 metrics = ["openvm-benchmarks-prove/metrics", "powdr-openvm/metrics"]
 tco = ["openvm-sdk/tco", "powdr-openvm/tco"]
-aot = ["openvm-sdk/aot"]
+aot = ["openvm-sdk/aot", "powdr-openvm/aot"]
 evm-prove = ["openvm-sdk/evm-prove", "halo2-axiom"]
 evm-verify = ["evm-prove", "openvm-sdk/evm-verify", "halo2-axiom"]
 perf-metrics = ["openvm-sdk/perf-metrics", "openvm-benchmarks-prove/perf-metrics"]
