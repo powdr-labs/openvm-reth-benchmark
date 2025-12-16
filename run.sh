@@ -179,7 +179,7 @@ arm64|aarch64)
     ;;
 x86_64|amd64)
     RUSTFLAGS="-Ctarget-cpu=native"
-    FEATURES="$FEATURES,aot"
+    FEATURES="$FEATURES"
     ;;
 *)
 echo "Unsupported architecture: $arch"
