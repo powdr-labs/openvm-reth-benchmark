@@ -158,17 +158,17 @@ openvm-k256 = { git = "https://github.com/openvm-org/openvm.git", package = "k25
 openvm-p256 = { git = "https://github.com/openvm-org/openvm.git", package = "p256", branch = "main" }
 
 # powdr
-# powdr-openvm = { git = "https://github.com/powdr-labs/powdr.git", rev = "v1.4.2-powdr", default-features = false }
-# powdr-riscv-elf = { git = "https://github.com/powdr-labs/powdr.git", rev = "v1.4.2-powdr", default-features = false }
-# powdr-number = { git = "https://github.com/powdr-labs/powdr.git", rev = "v1.4.2-powdr", default-features = false }
-# powdr-autoprecompiles = { git = "https://github.com/powdr-labs/powdr.git", rev = "v1.4.2-powdr", default-features = false }
-# powdr-openvm-hints-circuit = { git = "https://github.com/powdr-labs/powdr.git", rev = "v1.4.2-powdr", default-features = false }
+powdr-openvm = { git = "https://github.com/powdr-labs/powdr.git", rev = "v1.4.2-powdr", default-features = false }
+powdr-riscv-elf = { git = "https://github.com/powdr-labs/powdr.git", rev = "v1.4.2-powdr", default-features = false }
+powdr-number = { git = "https://github.com/powdr-labs/powdr.git", rev = "v1.4.2-powdr", default-features = false }
+powdr-autoprecompiles = { git = "https://github.com/powdr-labs/powdr.git", rev = "v1.4.2-powdr", default-features = false }
+powdr-openvm-hints-circuit = { git = "https://github.com/powdr-labs/powdr.git", rev = "v1.4.2-powdr", default-features = false }
 
-powdr-openvm = { path = "../powdr/openvm", default-features = false }
-powdr-riscv-elf = { path = "../powdr/riscv-elf", default-features = false }
-powdr-number = { path = "../powdr/number", default-features = false }
-powdr-autoprecompiles = { path = "../powdr/autoprecompiles", default-features = false }
-powdr-openvm-hints-circuit = { path = "../powdr/openvm/extensions/hints-circuit", default-features = false }
+# powdr-openvm = { path = "../powdr/openvm", default-features = false }
+# powdr-riscv-elf = { path = "../powdr/riscv-elf", default-features = false }
+# powdr-number = { path = "../powdr/number", default-features = false }
+# powdr-autoprecompiles = { path = "../powdr/autoprecompiles", default-features = false }
+# powdr-openvm-hints-circuit = { path = "../powdr/openvm/extensions/hints-circuit", default-features = false }
 
 [workspace.lints]
 rust.missing_debug_implementations = "warn"
