@@ -652,7 +652,9 @@ mod powdr {
         GenericSdk, StdIn,
     };
     use openvm_stark_sdk::config::FriParameters;
-    use powdr_autoprecompiles::{execution_profile::execution_profile, PgoType};
+    use powdr_autoprecompiles::{
+        empirical_constraints::EmpiricalConstraints, execution_profile::execution_profile, PgoType,
+    };
     use powdr_openvm::{
         compile_exe, default_powdr_openvm_config, BabyBearOpenVmApcAdapter, CompiledProgram,
         DegreeBound, ExtendedVmConfigCpuBuilder, OriginalCompiledProgram, PgoConfig, Prog,
@@ -711,6 +713,7 @@ mod powdr {
             config = config.with_apc_candidates_dir(path);
         }
 
-        compile_exe(original_program, config, pgo_config).unwrap()
+        // TODO: Compute and pass empirical constraints
+        compile_exe(original_program, config, pgo_config, EmpiricalConstraints::default()).unwrap()
     }
 }
