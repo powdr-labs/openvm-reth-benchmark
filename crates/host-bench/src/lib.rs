@@ -38,8 +38,8 @@ use powdr_openvm::PowdrSdkCpu;
 #[cfg(feature = "cuda")]
 use powdr_openvm::PowdrSdkGpu;
 use powdr_openvm::{
-    detect_empirical_constraints, CompiledProgram, ExtendedVmConfig, ExtendedVmConfigCpuBuilder,
-    OriginalCompiledProgram, SpecializedConfig, SpecializedConfigCpuBuilder,
+    CompiledProgram, ExtendedVmConfig, ExtendedVmConfigCpuBuilder, OriginalCompiledProgram,
+    SpecializedConfig, SpecializedConfigCpuBuilder,
 };
 use powdr_openvm_hints_circuit::HintsExtension;
 pub use reth_primitives;
@@ -705,9 +705,6 @@ mod powdr {
         let sdk: GenericSdk<BabyBearPoseidon2Engine, ExtendedVmConfigCpuBuilder, NativeCpuBuilder> =
             GenericSdk::new(app_config).unwrap();
 
-        assert_eq!(pgo_stdin.len(), 1, "Currently only support 1 stdin for PGO");
-        let inputs = pgo_stdin[0].clone();
-
         let execute = || {
             for stdin in &pgo_stdin {
                 sdk.execute(original_program.exe.clone(), stdin.clone()).unwrap();
@@ -742,7 +739,7 @@ mod powdr {
         )
         .unwrap();
         let empirical_constraints =
-            maybe_compute_empirical_constraints(&guest_program, &config, pgo_stdin[0].clone());
+            maybe_compute_empirical_constraints(&guest_program, &config, pgo_stdin);
         compile_exe(original_program, config, pgo_config, empirical_constraints).unwrap()
     }
 
@@ -761,7 +758,7 @@ mod powdr {
     fn maybe_compute_empirical_constraints(
         guest_program: &OriginalCompiledProgram,
         powdr_config: &PowdrConfig,
-        stdin: StdIn,
+        stdins: Vec<StdIn>,
     ) -> EmpiricalConstraints {
         if let Some(ec) = load_empirical_constraints(powdr_config.apc_candidates_dir_path.clone()) {
             tracing::info!("Loaded previously generated empirical_constraints");
@@ -772,7 +769,7 @@ mod powdr {
             "Optimistic precompiles are not implemented yet. Computing empirical constraints..."
         );
         let empirical_constraints =
-            detect_empirical_constraints(guest_program, powdr_config.degree_bound, vec![stdin]);
+            detect_empirical_constraints(guest_program, powdr_config.degree_bound, stdins);
         if let Some(path) = &powdr_config.apc_candidates_dir_path {
             tracing::info!(
                 "Saving empirical constraints debug info to {}/empirical_constraints.json",
