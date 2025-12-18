@@ -686,7 +686,7 @@ mod powdr {
 
         let execute = || {
             for stdin in pgo_stdin {
-                sdk.execute(original_program.exe.clone(), stdin).unwrap();
+                sdk.execute_interpreted(original_program.exe.clone(), stdin).unwrap();
             }
         };
 
