@@ -179,7 +179,8 @@ arm64|aarch64)
     ;;
 x86_64|amd64)
     RUSTFLAGS="-Ctarget-cpu=native"
-    FEATURES="$FEATURES,aot"
+    # Note: Axiom uses "aot" feature instead of "tco"
+    FEATURES="$FEATURES,tco"
     ;;
 *)
 echo "Unsupported architecture: $arch"
