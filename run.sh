@@ -171,21 +171,7 @@ if [ "$MODE" = "prove-evm" ]; then
   FEATURES="$FEATURES,evm-verify"
 fi
 
-arch=$(uname -m)
-case $arch in
-arm64|aarch64)
-    RUSTFLAGS="-Ctarget-cpu=native"
-    FEATURES="$FEATURES,tco"
-    ;;
-x86_64|amd64)
-    RUSTFLAGS="-Ctarget-cpu=native"
-    FEATURES="$FEATURES,aot"
-    ;;
-*)
-echo "Unsupported architecture: $arch"
-exit 1
-;;
-esac
+RUSTFLAGS="-Ctarget-cpu=native"
 export JEMALLOC_SYS_WITH_MALLOC_CONF="retain:true,background_thread:true,metadata_thp:always,dirty_decay_ms:10000,muzzy_decay_ms:10000,abort_conf:true"
 RUSTFLAGS=$RUSTFLAGS cargo $TOOLCHAIN build --bin $BIN_NAME --profile=$PROFILE --no-default-features --features=$FEATURES
 PARAMS_DIR="$HOME/.openvm/params/"
