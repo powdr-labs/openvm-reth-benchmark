@@ -156,6 +156,9 @@ source .env
 PROFILE="release"
 FEATURES="metrics,jemalloc,unprotected,nightly-features"
 BLOCK_NUMBER=23992138
+# Comma-separated list of block numbers for PGO
+PGO_BLOCK_NUMBERS="23100006"
+PGO_BLOCK_NUMBERS_ESCAPED="${PGO_BLOCK_NUMBERS//,/_}"
 # switch to +nightly-2025-08-19 if using tco
 TOOLCHAIN="+nightly-2025-08-19" # "+stable"
 BIN_NAME="openvm-reth-benchmark-bin"
@@ -208,6 +211,7 @@ POWDR_APC_CANDIDATES_DIR=apcs RUST_LOG="debug" OUTPUT_PATH="metrics.json" VPMM_P
   --kzg-params-dir $PARAMS_DIR \
   --mode $MODE \
   --block-number $BLOCK_NUMBER \
+  --pgo-block-numbers $PGO_BLOCK_NUMBERS \
   --rpc-url $RPC_1 \
   --cache-dir rpc-cache \
   --app-log-blowup 1 \
@@ -219,7 +223,7 @@ POWDR_APC_CANDIDATES_DIR=apcs RUST_LOG="debug" OUTPUT_PATH="metrics.json" VPMM_P
   --num-children-leaf 1 \
   --num-children-internal 3 \
   --apc-cache-dir apc-cache \
-  --apc-setup-name ${APC_SETUP_NAME}_${APC}_${APC_SKIP}_${PGO_TYPE}_${BLOCK_NUMBER} \
+  --apc-setup-name ${APC_SETUP_NAME}_${APC}_${APC_SKIP}_${PGO_TYPE}_${PGO_BLOCK_NUMBERS_ESCAPED} \
   --apc "$APC" \
   --apc-skip "$APC_SKIP" \
   --pgo-type "$PGO_TYPE"
