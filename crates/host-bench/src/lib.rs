@@ -716,45 +716,29 @@ mod powdr {
             config = config.with_apc_candidates_dir(path);
         }
 
-        let empirical_constraints =
-            maybe_compute_empirical_constraints(&original_program, &config, pgo_stdin);
+        let empirical_constraints = if let Ok(_) = std::env::var("POWDR_OPTIMISTIC_PRECOMPILES") {
+            compute_empirical_constraints(&original_program, &config, pgo_stdin)
+        } else {
+            EmpiricalConstraints::default()
+        };
+
         compile_exe(original_program, config, pgo_config, empirical_constraints).unwrap()
     }
 
-    fn load_empirical_constraints(prefix: Option<PathBuf>) -> Option<EmpiricalConstraints> {
-        // Determine full path
-        let mut path = prefix.unwrap_or_default();
-        path.push("empirical_constraints.json");
-
-        // Try reading the file; if not present or unreadable, return None.
-        let contents = fs::read_to_string(&path).ok()?;
-
-        // Try to deserialize; on error return None.
-        serde_json::from_str(&contents).ok()
-    }
-
-    fn maybe_compute_empirical_constraints(
+    fn compute_empirical_constraints(
         guest_program: &OriginalCompiledProgram,
         powdr_config: &PowdrConfig,
         stdins: Vec<StdIn>,
     ) -> EmpiricalConstraints {
-        if let Some(ec) = load_empirical_constraints(powdr_config.apc_candidates_dir_path.clone()) {
-            tracing::info!("Loaded previously generated empirical_constraints");
-            return ec;
-        }
-
-        tracing::warn!(
-            "Optimistic precompiles are not implemented yet. Computing empirical constraints..."
-        );
+        tracing::info!("Computing empirical constraints...");
+        tracing::warn!("Optimistic precompiles currently lead to invalid proofs!");
         let empirical_constraints =
             detect_empirical_constraints(guest_program, powdr_config.degree_bound, stdins);
         if let Some(path) = &powdr_config.apc_candidates_dir_path {
-            tracing::info!(
-                "Saving empirical constraints debug info to {}/empirical_constraints.json",
-                path.display()
-            );
+            let path = path.join("empirical_constraints.json");
+            tracing::info!("Saving empirical constraints debug info to {}", path.display());
             let json = serde_json::to_string_pretty(&empirical_constraints).unwrap();
-            std::fs::write(path.join("empirical_constraints.json"), json).unwrap();
+            std::fs::write(path, json).unwrap();
         }
         empirical_constraints
     }
