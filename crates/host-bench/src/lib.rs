@@ -661,7 +661,7 @@ mod powdr {
         BabyBearOpenVmApcAdapter, CompiledProgram, DegreeBound, ExtendedVmConfigCpuBuilder,
         OriginalCompiledProgram, PgoConfig, Prog,
     };
-    use std::{fs, path::PathBuf};
+    use std::{fs, os, path::PathBuf};
 
     /// This function is used to generate the specialized program for the Powdr APC.
     /// It takes:
@@ -713,6 +713,7 @@ mod powdr {
         config.degree_bound = DegreeBound { identities: 3, bus_interactions: 2 };
 
         if let Ok(path) = std::env::var("POWDR_APC_CANDIDATES_DIR") {
+            os::create_dir_all(&path).unwrap();
             config = config.with_apc_candidates_dir(path);
         }
 
