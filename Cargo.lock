@@ -7383,7 +7383,7 @@ dependencies = [
 [[package]]
 name = "powdr-autoprecompiles"
 version = "0.1.4"
-source = "git+https://github.com/powdr-labs/powdr.git?branch=main#0c2185d9145306a4fb291fb90830c1f67d1b9584"
+source = "git+https://github.com/powdr-labs/powdr.git?branch=main#dcb5477d0aa3ffe9805e411ab2ebf196b4c86afd"
 dependencies = [
  "deepsize2",
  "derivative",
@@ -7407,7 +7407,7 @@ dependencies = [
 [[package]]
 name = "powdr-constraint-solver"
 version = "0.1.4"
-source = "git+https://github.com/powdr-labs/powdr.git?branch=main#0c2185d9145306a4fb291fb90830c1f67d1b9584"
+source = "git+https://github.com/powdr-labs/powdr.git?branch=main#dcb5477d0aa3ffe9805e411ab2ebf196b4c86afd"
 dependencies = [
  "auto_enums",
  "bitvec",
@@ -7424,7 +7424,7 @@ dependencies = [
 [[package]]
 name = "powdr-expression"
 version = "0.1.4"
-source = "git+https://github.com/powdr-labs/powdr.git?branch=main#0c2185d9145306a4fb291fb90830c1f67d1b9584"
+source = "git+https://github.com/powdr-labs/powdr.git?branch=main#dcb5477d0aa3ffe9805e411ab2ebf196b4c86afd"
 dependencies = [
  "derive_more 0.99.20",
  "itertools 0.13.0",
@@ -7437,12 +7437,12 @@ dependencies = [
 [[package]]
 name = "powdr-isa-utils"
 version = "0.1.4"
-source = "git+https://github.com/powdr-labs/powdr.git?branch=main#0c2185d9145306a4fb291fb90830c1f67d1b9584"
+source = "git+https://github.com/powdr-labs/powdr.git?branch=main#dcb5477d0aa3ffe9805e411ab2ebf196b4c86afd"
 
 [[package]]
 name = "powdr-number"
 version = "0.1.4"
-source = "git+https://github.com/powdr-labs/powdr.git?branch=main#0c2185d9145306a4fb291fb90830c1f67d1b9584"
+source = "git+https://github.com/powdr-labs/powdr.git?branch=main#dcb5477d0aa3ffe9805e411ab2ebf196b4c86afd"
 dependencies = [
  "ark-bn254 0.4.0",
  "ark-ff 0.4.2",
@@ -7465,7 +7465,7 @@ dependencies = [
 [[package]]
 name = "powdr-openvm"
 version = "0.1.4"
-source = "git+https://github.com/powdr-labs/powdr.git?branch=main#0c2185d9145306a4fb291fb90830c1f67d1b9584"
+source = "git+https://github.com/powdr-labs/powdr.git?branch=main#dcb5477d0aa3ffe9805e411ab2ebf196b4c86afd"
 dependencies = [
  "cfg-if",
  "clap",
@@ -7524,7 +7524,7 @@ dependencies = [
 [[package]]
 name = "powdr-openvm-hints-circuit"
 version = "0.1.4"
-source = "git+https://github.com/powdr-labs/powdr.git?branch=main#0c2185d9145306a4fb291fb90830c1f67d1b9584"
+source = "git+https://github.com/powdr-labs/powdr.git?branch=main#dcb5477d0aa3ffe9805e411ab2ebf196b4c86afd"
 dependencies = [
  "crypto-bigint 0.6.1",
  "elliptic-curve",
@@ -7542,7 +7542,7 @@ dependencies = [
 [[package]]
 name = "powdr-openvm-hints-guest"
 version = "0.1.4"
-source = "git+https://github.com/powdr-labs/powdr.git?branch=main#0c2185d9145306a4fb291fb90830c1f67d1b9584"
+source = "git+https://github.com/powdr-labs/powdr.git?branch=main#dcb5477d0aa3ffe9805e411ab2ebf196b4c86afd"
 dependencies = [
  "openvm-custom-insn",
  "openvm-platform",
@@ -7553,7 +7553,7 @@ dependencies = [
 [[package]]
 name = "powdr-openvm-hints-transpiler"
 version = "0.1.4"
-source = "git+https://github.com/powdr-labs/powdr.git?branch=main#0c2185d9145306a4fb291fb90830c1f67d1b9584"
+source = "git+https://github.com/powdr-labs/powdr.git?branch=main#dcb5477d0aa3ffe9805e411ab2ebf196b4c86afd"
 dependencies = [
  "openvm-instructions",
  "openvm-instructions-derive",
@@ -7567,7 +7567,7 @@ dependencies = [
 [[package]]
 name = "powdr-riscv-elf"
 version = "0.1.4"
-source = "git+https://github.com/powdr-labs/powdr.git?branch=main#0c2185d9145306a4fb291fb90830c1f67d1b9584"
+source = "git+https://github.com/powdr-labs/powdr.git?branch=main#dcb5477d0aa3ffe9805e411ab2ebf196b4c86afd"
 dependencies = [
  "gimli",
  "goblin",
@@ -7584,7 +7584,7 @@ dependencies = [
 [[package]]
 name = "powdr-riscv-types"
 version = "0.1.4"
-source = "git+https://github.com/powdr-labs/powdr.git?branch=main#0c2185d9145306a4fb291fb90830c1f67d1b9584"
+source = "git+https://github.com/powdr-labs/powdr.git?branch=main#dcb5477d0aa3ffe9805e411ab2ebf196b4c86afd"
 dependencies = [
  "powdr-isa-utils",
 ]
@@ -7592,7 +7592,7 @@ dependencies = [
 [[package]]
 name = "powdr-syscalls"
 version = "0.1.4"
-source = "git+https://github.com/powdr-labs/powdr.git?branch=main#0c2185d9145306a4fb291fb90830c1f67d1b9584"
+source = "git+https://github.com/powdr-labs/powdr.git?branch=main#dcb5477d0aa3ffe9805e411ab2ebf196b4c86afd"
 
 [[package]]
 name = "powerfmt"
