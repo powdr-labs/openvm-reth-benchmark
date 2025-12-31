@@ -7383,7 +7383,7 @@ dependencies = [
 [[package]]
 name = "powdr-autoprecompiles"
 version = "0.1.4"
-source = "git+https://github.com/powdr-labs/powdr.git?branch=main#dcb5477d0aa3ffe9805e411ab2ebf196b4c86afd"
+source = "git+https://github.com/powdr-labs/powdr.git?branch=optimistic-execution-constraints#367085ba636f97bdc16cd8a0767345b6cc626666"
 dependencies = [
  "deepsize2",
  "derivative",
@@ -7407,7 +7407,7 @@ dependencies = [
 [[package]]
 name = "powdr-constraint-solver"
 version = "0.1.4"
-source = "git+https://github.com/powdr-labs/powdr.git?branch=main#dcb5477d0aa3ffe9805e411ab2ebf196b4c86afd"
+source = "git+https://github.com/powdr-labs/powdr.git?branch=optimistic-execution-constraints#367085ba636f97bdc16cd8a0767345b6cc626666"
 dependencies = [
  "auto_enums",
  "bitvec",
@@ -7424,7 +7424,7 @@ dependencies = [
 [[package]]
 name = "powdr-expression"
 version = "0.1.4"
-source = "git+https://github.com/powdr-labs/powdr.git?branch=main#dcb5477d0aa3ffe9805e411ab2ebf196b4c86afd"
+source = "git+https://github.com/powdr-labs/powdr.git?branch=optimistic-execution-constraints#367085ba636f97bdc16cd8a0767345b6cc626666"
 dependencies = [
  "derive_more 0.99.20",
  "itertools 0.13.0",
@@ -7437,12 +7437,12 @@ dependencies = [
 [[package]]
 name = "powdr-isa-utils"
 version = "0.1.4"
-source = "git+https://github.com/powdr-labs/powdr.git?branch=main#dcb5477d0aa3ffe9805e411ab2ebf196b4c86afd"
+source = "git+https://github.com/powdr-labs/powdr.git?branch=optimistic-execution-constraints#367085ba636f97bdc16cd8a0767345b6cc626666"
 
 [[package]]
 name = "powdr-number"
 version = "0.1.4"
-source = "git+https://github.com/powdr-labs/powdr.git?branch=main#dcb5477d0aa3ffe9805e411ab2ebf196b4c86afd"
+source = "git+https://github.com/powdr-labs/powdr.git?branch=optimistic-execution-constraints#367085ba636f97bdc16cd8a0767345b6cc626666"
 dependencies = [
  "ark-bn254 0.4.0",
  "ark-ff 0.4.2",
@@ -7465,7 +7465,7 @@ dependencies = [
 [[package]]
 name = "powdr-openvm"
 version = "0.1.4"
-source = "git+https://github.com/powdr-labs/powdr.git?branch=main#dcb5477d0aa3ffe9805e411ab2ebf196b4c86afd"
+source = "git+https://github.com/powdr-labs/powdr.git?branch=optimistic-execution-constraints#367085ba636f97bdc16cd8a0767345b6cc626666"
 dependencies = [
  "cfg-if",
  "clap",
@@ -7524,7 +7524,7 @@ dependencies = [
 [[package]]
 name = "powdr-openvm-hints-circuit"
 version = "0.1.4"
-source = "git+https://github.com/powdr-labs/powdr.git?branch=main#dcb5477d0aa3ffe9805e411ab2ebf196b4c86afd"
+source = "git+https://github.com/powdr-labs/powdr.git?branch=optimistic-execution-constraints#367085ba636f97bdc16cd8a0767345b6cc626666"
 dependencies = [
  "crypto-bigint 0.6.1",
  "elliptic-curve",
@@ -7542,7 +7542,7 @@ dependencies = [
 [[package]]
 name = "powdr-openvm-hints-guest"
 version = "0.1.4"
-source = "git+https://github.com/powdr-labs/powdr.git?branch=main#dcb5477d0aa3ffe9805e411ab2ebf196b4c86afd"
+source = "git+https://github.com/powdr-labs/powdr.git?branch=optimistic-execution-constraints#367085ba636f97bdc16cd8a0767345b6cc626666"
 dependencies = [
  "openvm-custom-insn",
  "openvm-platform",
@@ -7553,7 +7553,7 @@ dependencies = [
 [[package]]
 name = "powdr-openvm-hints-transpiler"
 version = "0.1.4"
-source = "git+https://github.com/powdr-labs/powdr.git?branch=main#dcb5477d0aa3ffe9805e411ab2ebf196b4c86afd"
+source = "git+https://github.com/powdr-labs/powdr.git?branch=optimistic-execution-constraints#367085ba636f97bdc16cd8a0767345b6cc626666"
 dependencies = [
  "openvm-instructions",
  "openvm-instructions-derive",
@@ -7567,7 +7567,7 @@ dependencies = [
 [[package]]
 name = "powdr-riscv-elf"
 version = "0.1.4"
-source = "git+https://github.com/powdr-labs/powdr.git?branch=main#dcb5477d0aa3ffe9805e411ab2ebf196b4c86afd"
+source = "git+https://github.com/powdr-labs/powdr.git?branch=optimistic-execution-constraints#367085ba636f97bdc16cd8a0767345b6cc626666"
 dependencies = [
  "gimli",
  "goblin",
@@ -7584,7 +7584,7 @@ dependencies = [
 [[package]]
 name = "powdr-riscv-types"
 version = "0.1.4"
-source = "git+https://github.com/powdr-labs/powdr.git?branch=main#dcb5477d0aa3ffe9805e411ab2ebf196b4c86afd"
+source = "git+https://github.com/powdr-labs/powdr.git?branch=optimistic-execution-constraints#367085ba636f97bdc16cd8a0767345b6cc626666"
 dependencies = [
  "powdr-isa-utils",
 ]
@@ -7592,7 +7592,7 @@ dependencies = [
 [[package]]
 name = "powdr-syscalls"
 version = "0.1.4"
-source = "git+https://github.com/powdr-labs/powdr.git?branch=main#dcb5477d0aa3ffe9805e411ab2ebf196b4c86afd"
+source = "git+https://github.com/powdr-labs/powdr.git?branch=optimistic-execution-constraints#367085ba636f97bdc16cd8a0767345b6cc626666"
 
 [[package]]
 name = "powerfmt"
