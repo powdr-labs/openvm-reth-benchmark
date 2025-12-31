@@ -717,10 +717,11 @@ mod powdr {
             config = config.with_apc_candidates_dir(path);
         }
 
-        let empirical_constraints = if let Ok(_) = std::env::var("POWDR_OPTIMISTIC_PRECOMPILES") {
-            compute_empirical_constraints(&original_program, &config, pgo_stdin)
-        } else {
-            EmpiricalConstraints::default()
+        let empirical_constraints = match std::env::var("POWDR_OPTIMISTIC_PRECOMPILES") {
+            Ok(use_op) if use_op == "1" => {
+                compute_empirical_constraints(&original_program, &config, pgo_stdin)
+            }
+            _ => EmpiricalConstraints::default(),
         };
 
         compile_exe(original_program, config, pgo_config, empirical_constraints).unwrap()
