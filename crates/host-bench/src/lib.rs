@@ -109,6 +109,11 @@ pub struct HostArgs {
     /// The block number of the block to execute.
     #[clap(long)]
     block_number: u64,
+
+    /// The block numbers to do PGO on (comma-separated).
+    #[clap(long, value_delimiter = ',')]
+    pgo_block_numbers: Vec<u64>,
+
     #[clap(flatten)]
     provider: ProviderArgs,
 
@@ -189,7 +194,6 @@ pub const RETH_DEFAULT_APP_LOG_BLOWUP: usize = 1;
 pub const RETH_DEFAULT_LEAF_LOG_BLOWUP: usize = 1;
 
 const PGO_CHAIN_ID: u64 = CHAIN_ID_ETH_MAINNET;
-const PGO_BLOCK_NUMBERS: [u64; 1] = [23100006];
 const APP_LOG_BLOWUP: usize = 1;
 
 #[derive(Serialize, Deserialize)]
@@ -294,9 +298,9 @@ pub async fn precompute_prover_data(
 
     let mut pgo_stdins = Vec::new();
 
-    for block_id in PGO_BLOCK_NUMBERS {
+    for block_id in args.pgo_block_numbers.iter() {
         let pgo_client_input =
-            get_client_input(&provider_config, &args.cache_dir, PGO_CHAIN_ID, block_id)
+            get_client_input(&provider_config, &args.cache_dir, PGO_CHAIN_ID, *block_id)
                 .await
                 .unwrap();
 
