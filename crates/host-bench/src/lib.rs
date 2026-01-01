@@ -723,6 +723,15 @@ mod powdr {
 
         let empirical_constraints = match std::env::var("POWDR_OPTIMISTIC_PRECOMPILES") {
             Ok(use_op) if use_op == "1" => {
+                // println!("Loading empirical constraints from file for optimistic precompiles");
+                // let path =
+                // "/home/georg/openvm-reth-benchmark/results/apcs_optimistic/empirical_constraints.
+                // json"; let file = fs::File::open(path).unwrap();
+                // let reader = std::io::BufReader::new(file);
+                // let empirical_constraints: EmpiricalConstraints =
+                //     serde_json::from_reader(reader).unwrap();
+                // println!("Done loading empirical constraints from file");
+                // empirical_constraints
                 compute_empirical_constraints(&original_program, &config, pgo_stdin)
             }
             _ => EmpiricalConstraints::default(),
