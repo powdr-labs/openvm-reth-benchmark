@@ -658,11 +658,14 @@ mod powdr {
     use openvm_stark_sdk::config::FriParameters;
     use powdr_autoprecompiles::{
         empirical_constraints::EmpiricalConstraints, execution_profile::execution_profile, PgoType,
+        PowdrConfig,
     };
     use powdr_openvm::{
-        compile_exe, default_powdr_openvm_config, BabyBearOpenVmApcAdapter, CompiledProgram,
-        DegreeBound, ExtendedVmConfigCpuBuilder, OriginalCompiledProgram, PgoConfig, Prog,
+        compile_exe, default_powdr_openvm_config, detect_empirical_constraints,
+        BabyBearOpenVmApcAdapter, CompiledProgram, DegreeBound, ExtendedVmConfigCpuBuilder,
+        OriginalCompiledProgram, PgoConfig, Prog,
     };
+    use std::fs;
 
     /// This function is used to generate the specialized program for the Powdr APC.
     /// It takes:
@@ -691,8 +694,8 @@ mod powdr {
             GenericSdk::new(app_config).unwrap();
 
         let execute = || {
-            for stdin in pgo_stdin {
-                sdk.execute_interpreted(original_program.exe.clone(), stdin).unwrap();
+            for stdin in &pgo_stdin {
+                sdk.execute_interpreted(original_program.exe.clone(), stdin.clone()).unwrap();
             }
         };
 
@@ -714,10 +717,35 @@ mod powdr {
         config.degree_bound = DegreeBound { identities: 3, bus_interactions: 2 };
 
         if let Ok(path) = std::env::var("POWDR_APC_CANDIDATES_DIR") {
+            fs::create_dir_all(&path).unwrap();
             config = config.with_apc_candidates_dir(path);
         }
 
-        // TODO: Compute and pass empirical constraints
-        compile_exe(original_program, config, pgo_config, EmpiricalConstraints::default()).unwrap()
+        let empirical_constraints = match std::env::var("POWDR_OPTIMISTIC_PRECOMPILES") {
+            Ok(use_op) if use_op == "1" => {
+                compute_empirical_constraints(&original_program, &config, pgo_stdin)
+            }
+            _ => EmpiricalConstraints::default(),
+        };
+
+        compile_exe(original_program, config, pgo_config, empirical_constraints).unwrap()
+    }
+
+    fn compute_empirical_constraints(
+        guest_program: &OriginalCompiledProgram,
+        powdr_config: &PowdrConfig,
+        stdins: Vec<StdIn>,
+    ) -> EmpiricalConstraints {
+        tracing::info!("Computing empirical constraints...");
+        tracing::warn!("Optimistic precompiles currently lead to invalid proofs!");
+        let empirical_constraints =
+            detect_empirical_constraints(guest_program, powdr_config.degree_bound, stdins);
+        if let Some(path) = &powdr_config.apc_candidates_dir_path {
+            let path = path.join("empirical_constraints.json");
+            tracing::info!("Saving empirical constraints debug info to {}", path.display());
+            let json = serde_json::to_string_pretty(&empirical_constraints).unwrap();
+            std::fs::write(path, json).unwrap();
+        }
+        empirical_constraints
     }
 }
