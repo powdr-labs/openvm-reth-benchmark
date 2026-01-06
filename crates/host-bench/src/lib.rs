@@ -718,6 +718,6 @@ mod powdr {
         }
 
         // TODO: Compute and pass empirical constraints
-        compile_exe(original_program, config, pgo_config, EmpiricalConstraints::default()).unwrap()
+        compile_exe(original_program, config, pgo_config).unwrap()
     }
 }
