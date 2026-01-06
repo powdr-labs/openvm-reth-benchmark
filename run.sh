@@ -178,7 +178,8 @@ arch=$(uname -m)
 case $arch in
 arm64|aarch64)
     RUSTFLAGS="-Ctarget-cpu=native"
-    FEATURES="$FEATURES,tco"
+    # Note: TCO feature is disabled because PowdrExecutor doesn't support it yet.                                                                                                                                                                                                   
+    # Falls back to trampoline (interpreted) execution. 
     ;;
 x86_64|amd64)
     RUSTFLAGS="-Ctarget-cpu=native"
