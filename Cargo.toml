@@ -158,11 +158,11 @@ openvm-k256 = { git = "https://github.com/openvm-org/openvm.git", package = "k25
 openvm-p256 = { git = "https://github.com/openvm-org/openvm.git", package = "p256", branch = "main" }
 
 # powdr
-powdr-openvm = { git = "https://github.com/powdr-labs/powdr.git", branch = "debug-reth-aot", default-features = false }
-powdr-riscv-elf = { git = "https://github.com/powdr-labs/powdr.git", branch = "debug-reth-aot", default-features = false }
-powdr-number = { git = "https://github.com/powdr-labs/powdr.git", branch = "debug-reth-aot", default-features = false }
-powdr-autoprecompiles = { git = "https://github.com/powdr-labs/powdr.git", branch = "debug-reth-aot", default-features = false }
-powdr-openvm-hints-circuit = { git = "https://github.com/powdr-labs/powdr.git", branch = "debug-reth-aot", default-features = false }
+powdr-openvm = { git = "https://github.com/powdr-labs/powdr.git", branch = "main", default-features = false }
+powdr-riscv-elf = { git = "https://github.com/powdr-labs/powdr.git", branch = "main", default-features = false }
+powdr-number = { git = "https://github.com/powdr-labs/powdr.git", branch = "main", default-features = false }
+powdr-autoprecompiles = { git = "https://github.com/powdr-labs/powdr.git", branch = "main", default-features = false }
+powdr-openvm-hints-circuit = { git = "https://github.com/powdr-labs/powdr.git", branch = "main", default-features = false }
 
 # powdr-openvm = { path = "../powdr/openvm", default-features = false }
 # powdr-riscv-elf = { path = "../powdr/riscv-elf", default-features = false }
