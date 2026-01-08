@@ -155,9 +155,9 @@ source .env
 # MODE=execute # can be compile, execute, execute-metered, prove-mock, prove-app, prove-stark, or prove-evm (needs "evm-verify" feature)
 PROFILE="release"
 FEATURES="metrics,jemalloc,unprotected,nightly-features"
-BLOCK_NUMBER=23992138
+BLOCK_NUMBER=24171377
 # Comma-separated list of block numbers for PGO
-PGO_BLOCK_NUMBERS="23100006"
+PGO_BLOCK_NUMBERS="24171377"
 PGO_BLOCK_NUMBERS_ESCAPED="${PGO_BLOCK_NUMBERS//,/_}"
 # switch to +nightly-2025-08-19 if using tco
 TOOLCHAIN="+nightly-2025-08-19" # "+stable"
