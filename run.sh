@@ -6,8 +6,8 @@
 #   --mode <MODE>               Set the proving mode (default: execute)
 #                               Valid modes: execute, execute-host, execute-metered, prove-mock, prove-app, prove-stark, prove-evm
 #   --cuda                      Force CUDA acceleration (auto-detected if nvidia-smi available)
-#   --block-number <NUM>        Block number to benchmark (default: 23992138)
-#   --pgo-block-numbers <NUMS>  Comma-separated block numbers for PGO (default: 23100006)
+#   --block-number <NUM>        Block number to benchmark (default: 24171377)
+#   --pgo-block-numbers <NUMS>  Comma-separated block numbers for PGO (default: 24171377)
 #   --apc <NUM>                 Number of autoprecompiles to generate (default: 0)
 #
 # Examples:
