@@ -3,14 +3,19 @@
 # Usage: ./run.sh [OPTIONS]
 #
 # Options:
-#   --mode <MODE>   Set the proving mode (default: prove-app)
-#                   Valid modes: prove-app, prove-stark
-#   --cuda          Force CUDA acceleration (auto-detected if nvidia-smi available)
+#   --mode <MODE>               Set the proving mode (default: execute)
+#                               Valid modes: execute, execute-host, execute-metered, prove-mock, prove-app, prove-stark, prove-evm
+#   --cuda                      Force CUDA acceleration (auto-detected if nvidia-smi available)
+#   --block-number <NUM>        Block number to benchmark (default: 24171377)
+#   --pgo-block-numbers <NUMS>  Comma-separated block numbers for PGO (default: 24171377)
+#   --apc <NUM>                 Number of autoprecompiles to generate (default: 0)
 #
 # Examples:
-#   ./run.sh                          # Run with defaults
-#   ./run.sh --mode prove-stark       # Run in prove-stark mode
-#   ./run.sh --cuda --mode prove-app  # Force CUDA with prove-app mode
+#   ./run.sh                                                # Run with defaults
+#   ./run.sh --mode prove-stark                             # Run in prove-stark mode
+#   ./run.sh --cuda --mode prove-app                        # Force CUDA with prove-app mode
+#   ./run.sh --block-number 21345144                        # Benchmark a specific block
+#   ./run.sh --apc 5 --pgo-block-numbers 21345144,21345145  # Use multiple blocks for PGO to generate 5 APCs
 #
 
 set -e
@@ -98,6 +103,9 @@ fi
 MODE_OVERRIDE=""
 USE_CUDA=false
 CUDA_REASON=""
+BLOCK_NUMBER_OVERRIDE=""
+PGO_BLOCK_NUMBERS_OVERRIDE=""
+APC_OVERRIDE=""
 
 while [[ $# -gt 0 ]]; do
     case $1 in
@@ -109,6 +117,18 @@ while [[ $# -gt 0 ]]; do
             USE_CUDA=true
             CUDA_REASON="requested via script argument"
             shift
+            ;;
+        --block-number)
+            BLOCK_NUMBER_OVERRIDE="$2"
+            shift 2
+            ;;
+        --pgo-block-numbers)
+            PGO_BLOCK_NUMBERS_OVERRIDE="$2"
+            shift 2
+            ;;
+        --apc)
+            APC_OVERRIDE="$2"
+            shift 2
             ;;
         *)
             echo "Unknown argument: $1"
@@ -155,9 +175,10 @@ source .env
 # MODE=execute # can be compile, execute, execute-metered, prove-mock, prove-app, prove-stark, or prove-evm (needs "evm-verify" feature)
 PROFILE="release"
 FEATURES="metrics,jemalloc,unprotected,nightly-features"
-BLOCK_NUMBER=24171377
+BLOCK_NUMBER="${BLOCK_NUMBER_OVERRIDE:-24171377}"
 # Comma-separated list of block numbers for PGO
-PGO_BLOCK_NUMBERS="24171377"
+PGO_BLOCK_NUMBERS="${PGO_BLOCK_NUMBERS_OVERRIDE:-24171377}"
+APC="${APC_OVERRIDE:-0}"
 PGO_BLOCK_NUMBERS_ESCAPED="${PGO_BLOCK_NUMBERS//,/_}"
 # switch to +nightly-2025-08-19 if using tco
 TOOLCHAIN="+nightly-2025-08-19" # "+stable"
@@ -203,8 +224,6 @@ fi
 
 # Default options if not set
 : "${APC_SETUP_NAME:=my-setup}"
-: "${MODE:=execute}"
-: "${APC:=0}"
 : "${APC_SKIP:=0}"
 : "${PGO_TYPE:=cell}"
 
