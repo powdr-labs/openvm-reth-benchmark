@@ -7415,11 +7415,12 @@ dependencies = [
 [[package]]
 name = "powdr-autoprecompiles"
 version = "0.1.4"
-source = "git+https://github.com/powdr-labs/powdr.git?branch=main#0538e789d572ff9389ccbbd04dd55732fbf73e72"
+source = "git+https://github.com/powdr-labs/powdr.git?branch=copilot%2Fcompute-circuit-effectiveness#f6cd185bdc368e16e0b68ded13db5be612292277"
 dependencies = [
  "deepsize2",
  "derivative",
  "derive_more 0.99.20",
+ "indicatif",
  "itertools 0.13.0",
  "log",
  "metrics",
@@ -7439,7 +7440,7 @@ dependencies = [
 [[package]]
 name = "powdr-constraint-solver"
 version = "0.1.4"
-source = "git+https://github.com/powdr-labs/powdr.git?branch=main#0538e789d572ff9389ccbbd04dd55732fbf73e72"
+source = "git+https://github.com/powdr-labs/powdr.git?branch=copilot%2Fcompute-circuit-effectiveness#f6cd185bdc368e16e0b68ded13db5be612292277"
 dependencies = [
  "auto_enums",
  "bitvec",
@@ -7456,7 +7457,7 @@ dependencies = [
 [[package]]
 name = "powdr-expression"
 version = "0.1.4"
-source = "git+https://github.com/powdr-labs/powdr.git?branch=main#0538e789d572ff9389ccbbd04dd55732fbf73e72"
+source = "git+https://github.com/powdr-labs/powdr.git?branch=copilot%2Fcompute-circuit-effectiveness#f6cd185bdc368e16e0b68ded13db5be612292277"
 dependencies = [
  "derive_more 0.99.20",
  "itertools 0.13.0",
@@ -7469,12 +7470,12 @@ dependencies = [
 [[package]]
 name = "powdr-isa-utils"
 version = "0.1.4"
-source = "git+https://github.com/powdr-labs/powdr.git?branch=main#0538e789d572ff9389ccbbd04dd55732fbf73e72"
+source = "git+https://github.com/powdr-labs/powdr.git?branch=copilot%2Fcompute-circuit-effectiveness#f6cd185bdc368e16e0b68ded13db5be612292277"
 
 [[package]]
 name = "powdr-number"
 version = "0.1.4"
-source = "git+https://github.com/powdr-labs/powdr.git?branch=main#0538e789d572ff9389ccbbd04dd55732fbf73e72"
+source = "git+https://github.com/powdr-labs/powdr.git?branch=copilot%2Fcompute-circuit-effectiveness#f6cd185bdc368e16e0b68ded13db5be612292277"
 dependencies = [
  "ark-bn254 0.4.0",
  "ark-ff 0.4.2",
@@ -7497,7 +7498,7 @@ dependencies = [
 [[package]]
 name = "powdr-openvm"
 version = "0.1.4"
-source = "git+https://github.com/powdr-labs/powdr.git?branch=main#0538e789d572ff9389ccbbd04dd55732fbf73e72"
+source = "git+https://github.com/powdr-labs/powdr.git?branch=copilot%2Fcompute-circuit-effectiveness#f6cd185bdc368e16e0b68ded13db5be612292277"
 dependencies = [
  "cfg-if",
  "clap",
@@ -7557,7 +7558,7 @@ dependencies = [
 [[package]]
 name = "powdr-openvm-hints-circuit"
 version = "0.1.4"
-source = "git+https://github.com/powdr-labs/powdr.git?branch=main#0538e789d572ff9389ccbbd04dd55732fbf73e72"
+source = "git+https://github.com/powdr-labs/powdr.git?branch=copilot%2Fcompute-circuit-effectiveness#f6cd185bdc368e16e0b68ded13db5be612292277"
 dependencies = [
  "crypto-bigint 0.6.1",
  "elliptic-curve",
@@ -7575,7 +7576,7 @@ dependencies = [
 [[package]]
 name = "powdr-openvm-hints-guest"
 version = "0.1.4"
-source = "git+https://github.com/powdr-labs/powdr.git?branch=main#0538e789d572ff9389ccbbd04dd55732fbf73e72"
+source = "git+https://github.com/powdr-labs/powdr.git?branch=copilot%2Fcompute-circuit-effectiveness#f6cd185bdc368e16e0b68ded13db5be612292277"
 dependencies = [
  "openvm-custom-insn",
  "openvm-platform",
@@ -7586,7 +7587,7 @@ dependencies = [
 [[package]]
 name = "powdr-openvm-hints-transpiler"
 version = "0.1.4"
-source = "git+https://github.com/powdr-labs/powdr.git?branch=main#0538e789d572ff9389ccbbd04dd55732fbf73e72"
+source = "git+https://github.com/powdr-labs/powdr.git?branch=copilot%2Fcompute-circuit-effectiveness#f6cd185bdc368e16e0b68ded13db5be612292277"
 dependencies = [
  "openvm-instructions",
  "openvm-instructions-derive",
@@ -7600,7 +7601,7 @@ dependencies = [
 [[package]]
 name = "powdr-riscv-elf"
 version = "0.1.4"
-source = "git+https://github.com/powdr-labs/powdr.git?branch=main#0538e789d572ff9389ccbbd04dd55732fbf73e72"
+source = "git+https://github.com/powdr-labs/powdr.git?branch=copilot%2Fcompute-circuit-effectiveness#f6cd185bdc368e16e0b68ded13db5be612292277"
 dependencies = [
  "gimli",
  "goblin",
@@ -7617,7 +7618,7 @@ dependencies = [
 [[package]]
 name = "powdr-riscv-types"
 version = "0.1.4"
-source = "git+https://github.com/powdr-labs/powdr.git?branch=main#0538e789d572ff9389ccbbd04dd55732fbf73e72"
+source = "git+https://github.com/powdr-labs/powdr.git?branch=copilot%2Fcompute-circuit-effectiveness#f6cd185bdc368e16e0b68ded13db5be612292277"
 dependencies = [
  "powdr-isa-utils",
 ]
@@ -7625,7 +7626,7 @@ dependencies = [
 [[package]]
 name = "powdr-syscalls"
 version = "0.1.4"
-source = "git+https://github.com/powdr-labs/powdr.git?branch=main#0538e789d572ff9389ccbbd04dd55732fbf73e72"
+source = "git+https://github.com/powdr-labs/powdr.git?branch=copilot%2Fcompute-circuit-effectiveness#f6cd185bdc368e16e0b68ded13db5be612292277"
 
 [[package]]
 name = "powerfmt"
