@@ -27,7 +27,7 @@ RUN rustup toolchain install ${RUST_NIGHTLY} \
   && rustup component add rust-src --toolchain ${RUST_NIGHTLY}
 
 # Install cargo-openvm (builds the guest ELF)
-RUN cargo +1.86 install --git https://github.com/openvm-org/openvm.git --locked --force cargo-openvm
+RUN cargo +1.90 install --git https://github.com/openvm-org/openvm.git --locked --force cargo-openvm
 
 # TODO: checkout ovm, build openvm-prof and add to runtime?
 

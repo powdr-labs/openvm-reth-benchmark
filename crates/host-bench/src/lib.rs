@@ -109,6 +109,11 @@ pub struct HostArgs {
     /// The block number of the block to execute.
     #[clap(long)]
     block_number: u64,
+
+    /// The block numbers to do PGO on (comma-separated).
+    #[clap(long, value_delimiter = ',')]
+    pgo_block_numbers: Vec<u64>,
+
     #[clap(flatten)]
     provider: ProviderArgs,
 
@@ -189,8 +194,6 @@ pub const RETH_DEFAULT_APP_LOG_BLOWUP: usize = 1;
 pub const RETH_DEFAULT_LEAF_LOG_BLOWUP: usize = 1;
 
 const PGO_CHAIN_ID: u64 = CHAIN_ID_ETH_MAINNET;
-//const PGO_BLOCK_NUMBERS: [u64; 1] = [23100006];
-const PGO_BLOCK_NUMBERS: [u64; 1] = [24019000];
 const APP_LOG_BLOWUP: usize = 1;
 
 #[derive(Serialize, Deserialize)]
@@ -295,9 +298,9 @@ pub async fn precompute_prover_data(
 
     let mut pgo_stdins = Vec::new();
 
-    for block_id in PGO_BLOCK_NUMBERS {
+    for block_id in args.pgo_block_numbers.iter() {
         let pgo_client_input =
-            get_client_input(&provider_config, &args.cache_dir, PGO_CHAIN_ID, block_id)
+            get_client_input(&provider_config, &args.cache_dir, PGO_CHAIN_ID, *block_id)
                 .await
                 .unwrap();
 
@@ -524,7 +527,6 @@ pub async fn run_reth_benchmark(
                             // _segment_span
                             let _prove_span = info_span!("total_proof").entered();
                             let Segment { instret_start, num_insns, trace_heights } = segment;
-                            assert_eq!(state.as_ref().unwrap().instret(), instret_start);
                             let from_state = Option::take(&mut state).unwrap();
                             vm.transport_init_memory_to_device(&from_state.memory);
                             let PreflightExecutionOutput {
@@ -563,17 +565,6 @@ pub async fn run_reth_benchmark(
                             .map(|pv| pv.as_canonical_u32() as u8)
                             .collect::<Vec<u8>>();
                         println!("block_hash (prove_stark): {}", ToHexExt::encode_hex(&block_hash));
-
-                        if let Some(state) = prover.app_prover.instance().state() {
-                            info!("state instret: {}", state.instret());
-                            if let Some(output_dir) = args.output_dir.as_ref() {
-                                fs::write(
-                                    output_dir.join("num_instret"),
-                                    state.instret().to_string(),
-                                )?;
-                                info!("wrote state instret to {}", output_dir.display());
-                            }
-                        }
 
                         if let Some(output_dir) = args.output_dir.as_ref() {
                             let versioned_proof = VersionedVmStarkProof::new(proof)?;
@@ -665,11 +656,16 @@ mod powdr {
         GenericSdk, StdIn,
     };
     use openvm_stark_sdk::config::FriParameters;
-    use powdr_autoprecompiles::{execution_profile::execution_profile, PgoType};
-    use powdr_openvm::{
-        compile_exe, default_powdr_openvm_config, BabyBearOpenVmApcAdapter, CompiledProgram,
-        DegreeBound, ExtendedVmConfigCpuBuilder, OriginalCompiledProgram, PgoConfig, Prog,
+    use powdr_autoprecompiles::{
+        empirical_constraints::EmpiricalConstraints, execution_profile::execution_profile, PgoType,
+        PowdrConfig,
     };
+    use powdr_openvm::{
+        compile_exe, default_powdr_openvm_config, detect_empirical_constraints,
+        BabyBearOpenVmApcAdapter, CompiledProgram, DegreeBound, ExtendedVmConfigCpuBuilder,
+        OriginalCompiledProgram, PgoConfig, Prog,
+    };
+    use std::fs;
 
     /// This function is used to generate the specialized program for the Powdr APC.
     /// It takes:
@@ -698,8 +694,8 @@ mod powdr {
             GenericSdk::new(app_config).unwrap();
 
         let execute = || {
-            for stdin in pgo_stdin {
-                sdk.execute(original_program.exe.clone(), stdin).unwrap();
+            for stdin in &pgo_stdin {
+                sdk.execute_interpreted(original_program.exe.clone(), stdin.clone()).unwrap();
             }
         };
 
@@ -721,9 +717,52 @@ mod powdr {
         config.degree_bound = DegreeBound { identities: 3, bus_interactions: 2 };
 
         if let Ok(path) = std::env::var("POWDR_APC_CANDIDATES_DIR") {
+            fs::create_dir_all(&path).unwrap();
             config = config.with_apc_candidates_dir(path);
         }
 
-        compile_exe(original_program, config, pgo_config).unwrap()
+        let empirical_constraints = match std::env::var("POWDR_OPTIMISTIC_PRECOMPILES") {
+            Ok(use_op) if use_op == "1" => {
+                match std::env::var("POWDR_EMPIRICAL_CONSTRAINTS_PATH") {
+                    Ok(path) => {
+                        tracing::info!("Loading empirical constraints from file: {path}");
+                        let file = fs::File::open(path).unwrap();
+                        let reader = std::io::BufReader::new(file);
+                        let empirical_constraints: EmpiricalConstraints =
+                            serde_json::from_reader(reader).unwrap();
+                        empirical_constraints
+                    }
+                    Err(_) => {
+                        tracing::info!(
+                            "Computing empirical constraints using PGO stdins ({} inputs)...",
+                            pgo_stdin.len()
+                        );
+                        tracing::info!("This can take a while. If you have precomputed constraints, you can set the POWDR_EMPIRICAL_CONSTRAINTS_PATH environment variable to load them from a file.");
+                        compute_empirical_constraints(&original_program, &config, pgo_stdin)
+                    }
+                }
+            }
+            _ => EmpiricalConstraints::default(),
+        };
+
+        compile_exe(original_program, config, pgo_config, empirical_constraints).unwrap()
+    }
+
+    fn compute_empirical_constraints(
+        guest_program: &OriginalCompiledProgram,
+        powdr_config: &PowdrConfig,
+        stdins: Vec<StdIn>,
+    ) -> EmpiricalConstraints {
+        tracing::info!("Computing empirical constraints...");
+        tracing::warn!("Optimistic precompiles currently lead to invalid proofs!");
+        let empirical_constraints =
+            detect_empirical_constraints(guest_program, powdr_config.degree_bound, stdins);
+        if let Some(path) = &powdr_config.apc_candidates_dir_path {
+            let path = path.join("empirical_constraints.json");
+            tracing::info!("Saving empirical constraints debug info to {}", path.display());
+            let json = serde_json::to_string_pretty(&empirical_constraints).unwrap();
+            std::fs::write(path, json).unwrap();
+        }
+        empirical_constraints
     }
 }

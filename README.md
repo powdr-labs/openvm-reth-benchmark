@@ -48,6 +48,16 @@ Note that even when utilizing a cached input, the host still needs access to the
 
 ## Running Benchmarks
 
+### Syncing with powdr main
+
+This repository depends on the `main` branch of [powdr-labs/powdr](https://github.com/powdr-labs/powdr). To update the dependency to the latest version, run:
+
+```bash
+cargo update -p powdr-openvm
+```
+
+This should always work, except when an update of both repos is in progress (which is not atomic). When it doesn't work, it means that powdr us using an older version of `openvm-reth-benchmark`. You can find the latest supported version in [this file](https://github.com/powdr-labs/powdr/blob/main/.github/actions/patch-openvm-reth-benchmark/action.yml).
+
 ### Helper Script
 
 We describe the different steps and commands needed to run the benchmark in subsequent sections, but to ease the process, we provide a helper script in [`run.sh`](./run.sh) that you can run directly. You only need to edit the `$MODE` variable in the script depending on your usage.
