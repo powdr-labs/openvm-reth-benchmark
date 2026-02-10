@@ -227,6 +227,7 @@ fi
 : "${APC_SKIP:=0}"
 : "${PGO_TYPE:=cell}"
 
+set -x
 POWDR_APC_CANDIDATES_DIR=apcs RUST_LOG="debug" OUTPUT_PATH="metrics.json" VPMM_PAGES=$VPMM_PAGES VPMM_PAGE_SIZE=$VPMM_PAGE_SIZE ./target/$TARGET_DIR/$BIN_NAME \
   --kzg-params-dir $PARAMS_DIR \
   --mode $MODE \
@@ -247,3 +248,4 @@ POWDR_APC_CANDIDATES_DIR=apcs RUST_LOG="debug" OUTPUT_PATH="metrics.json" VPMM_P
   --apc "$APC" \
   --apc-skip "$APC_SKIP" \
   --pgo-type "$PGO_TYPE"
+set +x
