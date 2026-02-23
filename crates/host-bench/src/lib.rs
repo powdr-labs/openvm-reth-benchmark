@@ -662,8 +662,8 @@ mod powdr {
     };
     use powdr_openvm::{
         compile_exe, default_powdr_openvm_config, detect_empirical_constraints,
-        BabyBearOpenVmApcAdapter, CompiledProgram, DegreeBound, ExtendedVmConfigCpuBuilder,
-        OriginalCompiledProgram, PgoConfig, Prog,
+        get_full_circuit_effectiveness, BabyBearOpenVmApcAdapter, CompiledProgram, DegreeBound,
+        ExtendedVmConfigCpuBuilder, OriginalCompiledProgram, PgoConfig, Prog,
     };
     use std::fs;
 
@@ -721,31 +721,13 @@ mod powdr {
             config = config.with_apc_candidates_dir(path);
         }
 
-        let empirical_constraints = match std::env::var("POWDR_OPTIMISTIC_PRECOMPILES") {
-            Ok(use_op) if use_op == "1" => {
-                match std::env::var("POWDR_EMPIRICAL_CONSTRAINTS_PATH") {
-                    Ok(path) => {
-                        tracing::info!("Loading empirical constraints from file: {path}");
-                        let file = fs::File::open(path).unwrap();
-                        let reader = std::io::BufReader::new(file);
-                        let empirical_constraints: EmpiricalConstraints =
-                            serde_json::from_reader(reader).unwrap();
-                        empirical_constraints
-                    }
-                    Err(_) => {
-                        tracing::info!(
-                            "Computing empirical constraints using PGO stdins ({} inputs)...",
-                            pgo_stdin.len()
-                        );
-                        tracing::info!("This can take a while. If you have precomputed constraints, you can set the POWDR_EMPIRICAL_CONSTRAINTS_PATH environment variable to load them from a file.");
-                        compute_empirical_constraints(&original_program, &config, pgo_stdin)
-                    }
-                }
-            }
-            _ => EmpiricalConstraints::default(),
-        };
+        let chunk_size =
+            std::env::var("POWDR_CHUNK_SIZE").ok().and_then(|s| s.parse::<usize>().ok()).unwrap();
 
-        compile_exe(original_program, config, pgo_config, empirical_constraints).unwrap()
+        let input = pgo_stdin.first().cloned().unwrap();
+        get_full_circuit_effectiveness(&original_program, input, config.degree_bound, chunk_size);
+
+        panic!()
     }
 
     fn compute_empirical_constraints(
