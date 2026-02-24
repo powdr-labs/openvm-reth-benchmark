@@ -9,6 +9,7 @@
 #   --block-number <NUM>        Block number to benchmark (default: 24171377)
 #   --pgo-block-numbers <NUMS>  Comma-separated block numbers for PGO (default: 24171377)
 #   --apc <NUM>                 Number of autoprecompiles to generate (default: 0)
+#   --no-precompiles            Build guest without ZK precompiles (software crypto)
 #
 # Examples:
 #   ./run.sh                                                # Run with defaults
@@ -106,6 +107,7 @@ CUDA_REASON=""
 BLOCK_NUMBER_OVERRIDE=""
 PGO_BLOCK_NUMBERS_OVERRIDE=""
 APC_OVERRIDE=""
+NO_PRECOMPILES=false
 
 while [[ $# -gt 0 ]]; do
     case $1 in
@@ -129,6 +131,10 @@ while [[ $# -gt 0 ]]; do
         --apc)
             APC_OVERRIDE="$2"
             shift 2
+            ;;
+        --no-precompiles)
+            NO_PRECOMPILES=true
+            shift
             ;;
         *)
             echo "Unknown argument: $1"
@@ -160,7 +166,11 @@ source .env
 # MODE=execute # can be execute-host, execute, execute-metered, prove-app, prove-stark, or prove-evm (needs "evm-verify" feature)
 
 cd "$WORKDIR/bin/client-eth"
-RUSTFLAGS="-Clink-arg=--emit-relocs" cargo openvm build --no-transpile
+if [ "$NO_PRECOMPILES" = "true" ]; then
+    RUSTFLAGS="-Clink-arg=--emit-relocs" cargo openvm build --no-transpile --no-default-features --features no-precompiles
+else
+    RUSTFLAGS="-Clink-arg=--emit-relocs" cargo openvm build --no-transpile
+fi
 mkdir -p ../host/elf
 SRC="target/riscv32im-risc0-zkvm-elf/release/openvm-client-eth"
 DEST="../host/elf/openvm-client-eth"
