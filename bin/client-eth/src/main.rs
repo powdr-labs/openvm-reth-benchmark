@@ -1,7 +1,7 @@
 use openvm::io::{println, read, reveal_bytes32};
 use openvm_client_executor::{io::ClientExecutorInput, ChainVariant, ClientExecutor};
 
-openvm::init!();
+// openvm::init!();
 
 pub fn main() {
     println("client-eth starting");

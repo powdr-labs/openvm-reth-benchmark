@@ -6,26 +6,41 @@ version = "0.3.0"
 edition = "2021"
 
 [dependencies]
+getrandom = { version = "0.2", features = ["custom"] }
+
 # workspace
-openvm-client-executor = { path = "../../crates/executor/client", features = ["openvm"] }
+openvm-client-executor = { path = "../../crates/executor/client" }
 
 # openvm
-openvm = { git = "https://github.com/openvm-org/openvm.git", branch = "main", features = [
-    "std",
+openvm = { git = "https://github.com/openvm-org/openvm.git", tag = "v1.4.2", features = [
+  "std",
 ] }
-openvm-algebra-guest = { git = "https://github.com/openvm-org/openvm.git", branch = "main" }
-openvm-ecc-guest = { git = "https://github.com/openvm-org/openvm.git", branch = "main" }
+# openvm = { git = "https://github.com/openvm-org/openvm.git", tag = "v1.4.2", features = [
+#   "std",
+# ] }
+# openvm-algebra-guest = { git = "https://github.com/openvm-org/openvm.git", branch = "main" }
+# openvm-ecc-guest = { git = "https://github.com/openvm-org/openvm.git", branch = "main" }
 
 # Statically turns off logging
 log = { version = "0.4", features = ["max_level_off", "release_max_level_off"] }
 tracing = { version = "0.1", features = [
-    "max_level_off",
-    "release_max_level_off",
+  "max_level_off",
+  "release_max_level_off",
+] }
+
+serde = { version = "1", default-features = false, features = ["derive"] }
+bincode = { version = "2.0.0", default-features = false, features = [
+  "derive",
+  "alloc",
+  "serde",
 ] }
 
 [features]
 default = []
 heap-embedded-alloc = ["openvm/heap-embedded-alloc"]
+
+[patch.crates-io]
+sp1_bls12_381 = { path = "../../../bls12_381" }
 
 [profile.release]
 panic = "abort"
