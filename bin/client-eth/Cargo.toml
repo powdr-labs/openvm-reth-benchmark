@@ -11,15 +11,6 @@ getrandom = { version = "0.2", features = ["custom"], optional = true }
 # workspace
 openvm-client-executor = { path = "../../crates/executor/client" }
 
-# openvm (powdr fork, matching root workspace patches)
-openvm = { git = "https://github.com/powdr-labs/openvm.git", rev = "v1.4.2-powdr-rc.2", features = [
-  "std",
-] }
-
-# ZK precompile guests — optional, included by default
-openvm-algebra-guest = { git = "https://github.com/powdr-labs/openvm.git", rev = "v1.4.2-powdr-rc.2", optional = true }
-openvm-ecc-guest = { git = "https://github.com/powdr-labs/openvm.git", rev = "v1.4.2-powdr-rc.2", optional = true }
-
 # BLS12-381 software patch — optional, only for no-precompiles
 sp1_bls12_381 = { git = "https://github.com/leonardoalt/bls12_381.git", branch = "patch-0.8.0-sp1-6.0.0-soft", features = ["no-precompiles"], optional = true }
 
@@ -39,6 +30,18 @@ bincode = { version = "2.0.0", default-features = false, features = [
   "alloc",
   "serde",
 ] }
+
+# zkvm-only deps
+[target.'cfg(target_os = "zkvm")'.dependencies]
+openvm = { git = "https://github.com/powdr-labs/openvm.git", rev = "v1.4.2-powdr-rc.2", features = [
+  "std",
+] }
+openvm-algebra-guest = { git = "https://github.com/powdr-labs/openvm.git", rev = "v1.4.2-powdr-rc.2", optional = true }
+openvm-ecc-guest = { git = "https://github.com/powdr-labs/openvm.git", rev = "v1.4.2-powdr-rc.2", optional = true }
+
+# wasm-only deps
+[target.'cfg(target_arch = "wasm32")'.dependencies]
+womir-guest-io = { git = "https://github.com/powdr-labs/womir-openvm.git", branch = "main" }
 
 [features]
 default = ["precompiles"]
