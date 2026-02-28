@@ -279,12 +279,10 @@ pub async fn precompute_prover_data(
 
     let cache_file_path = args.apc_cache_dir.join(&args.apc_setup_name).with_extension("bin");
 
-    if let Some(compiled_program) =
-        File::open(&cache_file_path).ok().map(BufReader::new).map(|mut file| {
-            bincode::serde::decode_from_std_read(&mut file, bincode::config::standard())
-                .expect("Found cached precomputed prover data, but deserialization failed")
-        })
-    {
+    if let Some(compiled_program) = File::open(&cache_file_path).ok().map(|file| {
+        rmp_serde::from_read::<_, PrecomputedProverData>(BufReader::new(file))
+            .expect("Found cached precomputed prover data, but deserialization failed")
+    }) {
         tracing::info!("Precomputed prover data for key {} found in cache", args.apc_setup_name);
         return Ok(compiled_program);
     }
@@ -348,12 +346,8 @@ pub async fn precompute_prover_data(
 
     tracing::info!("Saving prover data to cache at {}", cache_file_path.display());
     std::fs::create_dir_all(&args.apc_cache_dir).unwrap();
-    bincode::serde::encode_into_std_write(
-        &setup,
-        &mut BufWriter::new(File::create(cache_file_path).unwrap()),
-        bincode::config::standard(),
-    )
-    .unwrap();
+    let file = File::create(cache_file_path).unwrap();
+    rmp_serde::encode::write(&mut std::io::BufWriter::new(file), &setup).unwrap();
 
     Ok(setup)
 }

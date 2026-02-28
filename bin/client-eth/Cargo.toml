@@ -6,26 +6,84 @@ version = "0.3.0"
 edition = "2021"
 
 [dependencies]
-# workspace
-openvm-client-executor = { path = "../../crates/executor/client", features = ["openvm"] }
+getrandom = { version = "0.2", features = ["custom"], optional = true }
 
-# openvm
-openvm = { git = "https://github.com/openvm-org/openvm.git", branch = "main", features = [
-    "std",
-] }
-openvm-algebra-guest = { git = "https://github.com/openvm-org/openvm.git", branch = "main" }
-openvm-ecc-guest = { git = "https://github.com/openvm-org/openvm.git", branch = "main" }
+# workspace
+openvm-client-executor = { path = "../../crates/executor/client" }
+
+# BLS12-381 software patch — optional, only for no-precompiles
+sp1_bls12_381 = { git = "https://github.com/leonardoalt/bls12_381.git", branch = "patch-0.8.0-sp1-6.0.0-soft", features = ["no-precompiles"], optional = true }
+
+# kzg-rs activation — optional, only for no-precompiles
+revm-precompile = { version = "27.0.0", default-features = false, features = ["kzg-rs"], optional = true }
 
 # Statically turns off logging
 log = { version = "0.4", features = ["max_level_off", "release_max_level_off"] }
 tracing = { version = "0.1", features = [
-    "max_level_off",
-    "release_max_level_off",
+  "max_level_off",
+  "release_max_level_off",
 ] }
 
+serde = { version = "1", default-features = false, features = ["derive"] }
+bincode = { version = "2.0.0", default-features = false, features = [
+  "derive",
+  "alloc",
+  "serde",
+] }
+
+# zkvm-only deps
+[target.'cfg(target_os = "zkvm")'.dependencies]
+openvm = { git = "https://github.com/powdr-labs/openvm.git", rev = "v1.4.2-powdr-rc.2", features = [
+  "std",
+] }
+openvm-algebra-guest = { git = "https://github.com/powdr-labs/openvm.git", rev = "v1.4.2-powdr-rc.2", optional = true }
+openvm-ecc-guest = { git = "https://github.com/powdr-labs/openvm.git", rev = "v1.4.2-powdr-rc.2", optional = true }
+
+# wasm-only deps
+[target.'cfg(target_arch = "wasm32")'.dependencies]
+womir-guest-io = { git = "https://github.com/powdr-labs/womir-openvm.git", branch = "main" }
+
 [features]
-default = []
+default = ["precompiles"]
+precompiles = [
+  "openvm-client-executor/openvm",
+  "dep:openvm-algebra-guest",
+  "dep:openvm-ecc-guest",
+]
+no-precompiles = [
+  "dep:getrandom",
+  "dep:sp1_bls12_381",
+  "dep:revm-precompile",
+]
 heap-embedded-alloc = ["openvm/heap-embedded-alloc"]
+
+[patch.crates-io]
+sp1_bls12_381 = { git = "https://github.com/leonardoalt/bls12_381.git", branch = "patch-0.8.0-sp1-6.0.0-soft" }
+
+# Patches needed when precompiles feature pulls in openvm-revm-crypto and its transitive deps.
+# Must mirror the root workspace patches so deps resolve to the powdr fork.
+[patch."https://github.com/openvm-org/openvm.git"]
+openvm = { git = "https://github.com/powdr-labs/openvm.git", rev = "v1.4.2-powdr-rc.2" }
+openvm-algebra-guest = { git = "https://github.com/powdr-labs/openvm.git", rev = "v1.4.2-powdr-rc.2" }
+openvm-ecc-guest = { git = "https://github.com/powdr-labs/openvm.git", rev = "v1.4.2-powdr-rc.2" }
+openvm-build = { git = "https://github.com/powdr-labs/openvm.git", rev = "v1.4.2-powdr-rc.2" }
+openvm-instructions = { git = "https://github.com/powdr-labs/openvm.git", rev = "v1.4.2-powdr-rc.2" }
+openvm-instructions-derive = { git = "https://github.com/powdr-labs/openvm.git", rev = "v1.4.2-powdr-rc.2" }
+openvm-macros-common = { git = "https://github.com/powdr-labs/openvm.git", rev = "v1.4.2-powdr-rc.2" }
+openvm-platform = { git = "https://github.com/powdr-labs/openvm.git", rev = "v1.4.2-powdr-rc.2" }
+openvm-algebra-moduli-macros = { git = "https://github.com/powdr-labs/openvm.git", rev = "v1.4.2-powdr-rc.2" }
+openvm-algebra-complex-macros = { git = "https://github.com/powdr-labs/openvm.git", rev = "v1.4.2-powdr-rc.2" }
+openvm-bigint-guest = { git = "https://github.com/powdr-labs/openvm.git", rev = "v1.4.2-powdr-rc.2" }
+openvm-ecc-sw-macros = { git = "https://github.com/powdr-labs/openvm.git", rev = "v1.4.2-powdr-rc.2" }
+openvm-keccak256 = { git = "https://github.com/powdr-labs/openvm.git", rev = "v1.4.2-powdr-rc.2", default-features = false }
+openvm-keccak256-guest = { git = "https://github.com/powdr-labs/openvm.git", rev = "v1.4.2-powdr-rc.2" }
+openvm-pairing = { git = "https://github.com/powdr-labs/openvm.git", rev = "v1.4.2-powdr-rc.2", default-features = false, features = ["bn254", "bls12_381"] }
+openvm-pairing-guest = { git = "https://github.com/powdr-labs/openvm.git", rev = "v1.4.2-powdr-rc.2" }
+openvm-sha2 = { git = "https://github.com/powdr-labs/openvm.git", rev = "v1.4.2-powdr-rc.2", default-features = false }
+openvm-sha256-guest = { git = "https://github.com/powdr-labs/openvm.git", rev = "v1.4.2-powdr-rc.2" }
+openvm-rv32im-guest = { git = "https://github.com/powdr-labs/openvm.git", rev = "v1.4.2-powdr-rc.2" }
+openvm-k256 = { git = "https://github.com/powdr-labs/openvm.git", package = "k256", rev = "v1.4.2-powdr-rc.2" }
+openvm-p256 = { git = "https://github.com/powdr-labs/openvm.git", package = "p256", rev = "v1.4.2-powdr-rc.2" }
 
 [profile.release]
 panic = "abort"
