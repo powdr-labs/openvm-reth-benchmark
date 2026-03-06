@@ -23,7 +23,7 @@ elf
 # KZG trusted setup
 **/params
 
-**/rpc-cache
+#**/rpc-cache
 
 # APC compilation output
 **/apc-cache
