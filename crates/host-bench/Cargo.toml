@@ -58,16 +58,17 @@ halo2-axiom = { version = "0.5.0", default-features = false, optional = true }
 
 # powdr
 powdr-openvm = { workspace = true }
+powdr-openvm-riscv = { workspace = true }
 powdr-riscv-elf = { workspace = true }
 powdr-number = { workspace = true }
 powdr-autoprecompiles = { workspace = true }
-powdr-openvm-hints-circuit = { workspace = true }
+powdr-openvm-riscv-hints-circuit = { workspace = true }
 
 [features]
 default = ["mimalloc", "metrics"]
-metrics = ["openvm-benchmarks-prove/metrics", "powdr-openvm/metrics"]
-tco = ["openvm-sdk/tco", "powdr-openvm/tco"]
-aot = ["openvm-sdk/aot", "powdr-openvm/aot"]
+metrics = ["openvm-benchmarks-prove/metrics", "powdr-openvm-riscv/metrics"]
+tco = ["openvm-sdk/tco", "powdr-openvm-riscv/tco"]
+aot = ["openvm-sdk/aot", "powdr-openvm-riscv/aot"]
 evm-prove = ["openvm-sdk/evm-prove", "halo2-axiom"]
 evm-verify = ["evm-prove", "openvm-sdk/evm-verify", "halo2-axiom"]
 perf-metrics = ["openvm-sdk/perf-metrics", "openvm-benchmarks-prove/perf-metrics"]
@@ -79,7 +80,7 @@ halo2-asm = ["halo2-axiom?/asm"]
 cuda = [
     "openvm-native-circuit/cuda",
     "openvm-sdk/cuda",
-    "powdr-openvm/cuda",
+    "powdr-openvm-riscv/cuda",
     "dep:openvm-cuda-backend",
 ]
 unprotected = ["openvm-sdk/unprotected"]

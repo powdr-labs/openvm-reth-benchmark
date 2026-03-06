@@ -40,11 +40,12 @@ use powdr_openvm::PowdrSdkCpu;
 #[cfg(feature = "cuda")]
 use powdr_openvm::PowdrSdkGpu;
 use powdr_openvm::{
-    CompiledProgram, ExtendedVmConfig, ExtendedVmConfigCpuBuilder, OriginalCompiledProgram,
+    extraction_utils::OriginalVmConfig, CompiledProgram, OriginalCompiledProgram,
     SpecializedConfig, SpecializedConfigCpuBuilder,
 };
+use powdr_openvm_riscv::{ExtendedVmConfig, ExtendedVmConfigCpuBuilder, RiscvISA};
 
-use powdr_openvm_hints_circuit::HintsExtension;
+use powdr_openvm_riscv_hints_circuit::HintsExtension;
 pub use reth_primitives;
 use serde::{Deserialize, Serialize};
 use serde_json::json;
@@ -198,8 +199,8 @@ const APP_LOG_BLOWUP: usize = 1;
 
 #[derive(Serialize, Deserialize)]
 pub struct PrecomputedProverData {
-    program: CompiledProgram,
-    app_pk: AppProvingKey<SpecializedConfig>,
+    program: CompiledProgram<RiscvISA>,
+    app_pk: AppProvingKey<SpecializedConfig<RiscvISA>>,
     agg_pk: AggProvingKey,
 }
 
@@ -323,7 +324,7 @@ pub async fn precompute_prover_data(
     let elf = powdr_riscv_elf::load_elf_from_buffer(openvm_client_eth_elf);
 
     let program = powdr::apc(
-        OriginalCompiledProgram { exe, vm_config, elf },
+        OriginalCompiledProgram { exe, vm_config: OriginalVmConfig::new(vm_config), elf },
         args.apc,
         args.apc_skip,
         args.pgo_type,
@@ -333,7 +334,7 @@ pub async fn precompute_prover_data(
     // Precompute proving keys
     let specialized_sdk: GenericSdk<
         BabyBearPoseidon2Engine,
-        SpecializedConfigCpuBuilder,
+        SpecializedConfigCpuBuilder<RiscvISA>,
         NativeCpuBuilder,
     > = GenericSdk::new(args.benchmark.app_config(program.vm_config.clone()))?
         .with_agg_config(args.benchmark.agg_config())
@@ -650,10 +651,10 @@ fn try_load_input_from_cache(
 }
 
 mod powdr {
-    use openvm_native_circuit::NativeCpuBuilder;
+
     use openvm_sdk::{
         config::{AppConfig, DEFAULT_APP_LOG_BLOWUP},
-        GenericSdk, StdIn,
+        StdIn,
     };
     use openvm_stark_sdk::config::FriParameters;
     use powdr_autoprecompiles::{
@@ -661,10 +662,10 @@ mod powdr {
         PowdrConfig,
     };
     use powdr_openvm::{
-        compile_exe, default_powdr_openvm_config, detect_empirical_constraints,
-        BabyBearOpenVmApcAdapter, CompiledProgram, DegreeBound, ExtendedVmConfigCpuBuilder,
-        OriginalCompiledProgram, PgoConfig, Prog,
+        default_powdr_openvm_config, detect_empirical_constraints, BabyBearOpenVmApcAdapter,
+        CompiledProgram, OriginalCompiledProgram, PowdrExecutionProfileSdkCpu, Prog,
     };
+    use powdr_openvm_riscv::{compile_exe, DegreeBound, PgoConfig, RiscvISA};
     use std::fs;
 
     /// This function is used to generate the specialized program for the Powdr APC.
@@ -676,22 +677,19 @@ mod powdr {
     /// - `pgo_stdin`: The standard inputs to the program used for PGO data generation to choose
     ///   which basic blocks to accelerate.
     pub fn apc(
-        original_program: OriginalCompiledProgram,
+        original_program: OriginalCompiledProgram<RiscvISA>,
         apc: usize,
         apc_skip: usize,
         pgo_type: PgoType,
         pgo_stdin: Vec<StdIn>,
-    ) -> CompiledProgram {
+    ) -> CompiledProgram<RiscvISA> {
         // Set app configuration
         let app_fri_params =
             FriParameters::standard_with_100_bits_conjectured_security(DEFAULT_APP_LOG_BLOWUP);
-        let app_config = AppConfig::new(app_fri_params, original_program.vm_config.clone());
-
-        use openvm_stark_sdk::config::baby_bear_poseidon2::BabyBearPoseidon2Engine;
+        let app_config = AppConfig::new(app_fri_params, original_program.vm_config.config.clone());
 
         // prepare for execute
-        let sdk: GenericSdk<BabyBearPoseidon2Engine, ExtendedVmConfigCpuBuilder, NativeCpuBuilder> =
-            GenericSdk::new(app_config).unwrap();
+        let sdk = PowdrExecutionProfileSdkCpu::<RiscvISA>::new(app_config).unwrap();
 
         let execute = || {
             for stdin in &pgo_stdin {
@@ -704,10 +702,10 @@ mod powdr {
         let pgo_config = match pgo_type {
             PgoType::None => PgoConfig::None,
             PgoType::Instruction => PgoConfig::Instruction(execution_profile::<
-                BabyBearOpenVmApcAdapter,
+                BabyBearOpenVmApcAdapter<RiscvISA>,
             >(&program, execute)),
             PgoType::Cell => PgoConfig::Cell(
-                execution_profile::<BabyBearOpenVmApcAdapter>(&program, execute),
+                execution_profile::<BabyBearOpenVmApcAdapter<RiscvISA>>(&program, execute),
                 None, // max total columns
             ),
         };
@@ -749,7 +747,7 @@ mod powdr {
     }
 
     fn compute_empirical_constraints(
-        guest_program: &OriginalCompiledProgram,
+        guest_program: &OriginalCompiledProgram<RiscvISA>,
         powdr_config: &PowdrConfig,
         stdins: Vec<StdIn>,
     ) -> EmpiricalConstraints {
