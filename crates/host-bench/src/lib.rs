@@ -34,7 +34,7 @@ use openvm_stark_sdk::{
 use openvm_transpiler::{elf::Elf, openvm_platform::memory::MEM_SIZE};
 use powdr_autoprecompiles::PgoType;
 #[cfg(feature = "cuda")]
-use powdr_openvm::ExtendedVmConfigGpuBuilder;
+use powdr_openvm_riscv::ExtendedVmConfigGpuBuilder;
 #[cfg(not(feature = "cuda"))]
 use powdr_openvm::PowdrSdkCpu;
 #[cfg(feature = "cuda")]
@@ -527,7 +527,7 @@ pub async fn run_reth_benchmark(
                             // We need a separate span so the metric label includes "segment" from
                             // _segment_span
                             let _prove_span = info_span!("total_proof").entered();
-                            let Segment { instret_start, num_insns, trace_heights } = segment;
+                            let Segment { instret_start: _, num_insns, trace_heights } = segment;
                             let from_state = Option::take(&mut state).unwrap();
                             vm.transport_init_memory_to_device(&from_state.memory);
                             let PreflightExecutionOutput {
