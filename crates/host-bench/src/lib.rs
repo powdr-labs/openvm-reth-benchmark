@@ -34,7 +34,7 @@ use openvm_stark_sdk::{
 use openvm_transpiler::{elf::Elf, openvm_platform::memory::MEM_SIZE};
 use powdr_autoprecompiles::PgoType;
 #[cfg(feature = "cuda")]
-use powdr_openvm::ExtendedVmConfigGpuBuilder;
+use powdr_openvm_riscv::ExtendedVmConfigGpuBuilder;
 #[cfg(not(feature = "cuda"))]
 use powdr_openvm::PowdrSdkCpu;
 #[cfg(feature = "cuda")]
