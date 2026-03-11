@@ -160,7 +160,7 @@ source .env
 # MODE=execute # can be execute-host, execute, execute-metered, prove-app, prove-stark, or prove-evm (needs "evm-verify" feature)
 
 cd "$WORKDIR/bin/client-eth"
-RUSTFLAGS="-Clink-arg=--emit-relocs" cargo openvm build --no-transpile
+OPENVM_RUST_TOOLCHAIN=nightly-2025-10-01 RUSTFLAGS="-Clink-arg=--emit-relocs" cargo openvm build --no-transpile
 mkdir -p ../host/elf
 SRC="target/riscv32im-risc0-zkvm-elf/release/openvm-client-eth"
 DEST="../host/elf/openvm-client-eth"
@@ -174,7 +174,7 @@ mkdir -p rpc-cache
 source .env
 # MODE=execute # can be compile, execute, execute-metered, prove-mock, prove-app, prove-stark, or prove-evm (needs "evm-verify" feature)
 PROFILE="release"
-FEATURES="metrics,jemalloc,unprotected,nightly-features"
+FEATURES="parallel,metrics,jemalloc,aot,unprotected"
 BLOCK_NUMBER="${BLOCK_NUMBER_OVERRIDE:-24171377}"
 # Comma-separated list of block numbers for PGO
 PGO_BLOCK_NUMBERS="${PGO_BLOCK_NUMBERS_OVERRIDE:-24171377}"
@@ -184,7 +184,6 @@ PGO_BLOCK_NUMBERS_ESCAPED="${PGO_BLOCK_NUMBERS//,/_}"
 TOOLCHAIN="+nightly-2025-08-19" # "+stable"
 BIN_NAME="openvm-reth-benchmark-bin"
 MAX_SEGMENT_LENGTH=$((1 << 22))
-SEGMENT_MAX_CELLS=1200000000
 VPMM_PAGE_SIZE=$((4 << 20))
 VPMM_PAGES=$((12 * $MAX_SEGMENT_LENGTH/ $VPMM_PAGE_SIZE))
 
@@ -204,7 +203,6 @@ arm64|aarch64)
     ;;
 x86_64|amd64)
     RUSTFLAGS="-Ctarget-cpu=native"
-    FEATURES="$FEATURES,aot"
     ;;
 *)
 echo "Unsupported architecture: $arch"
@@ -213,7 +211,6 @@ exit 1
 esac
 export JEMALLOC_SYS_WITH_MALLOC_CONF="retain:true,background_thread:true,metadata_thp:always,dirty_decay_ms:10000,muzzy_decay_ms:10000,abort_conf:true"
 RUSTFLAGS=$RUSTFLAGS cargo $TOOLCHAIN build --bin $BIN_NAME --profile=$PROFILE --no-default-features --features=$FEATURES
-PARAMS_DIR="$HOME/.openvm/params/"
 
 # Use target/debug if profile is dev
 if [ "$PROFILE" = "dev" ]; then
@@ -225,23 +222,23 @@ fi
 # Default options if not set
 : "${APC_SETUP_NAME:=my-setup}"
 : "${APC_SKIP:=0}"
-: "${PGO_TYPE:=cell}"
+if [ "$APC" = "0" ]; then
+  : "${PGO_TYPE:=none}"
+else
+  : "${PGO_TYPE:=cell}"
+fi
 
 POWDR_APC_CANDIDATES_DIR=apcs RUST_LOG="debug" OUTPUT_PATH="metrics.json" VPMM_PAGES=$VPMM_PAGES VPMM_PAGE_SIZE=$VPMM_PAGE_SIZE ./target/$TARGET_DIR/$BIN_NAME \
-  --kzg-params-dir $PARAMS_DIR \
   --mode $MODE \
   --block-number $BLOCK_NUMBER \
   --pgo-block-numbers $PGO_BLOCK_NUMBERS \
   --rpc-url $RPC_1 \
   --cache-dir rpc-cache \
   --app-log-blowup 1 \
+  --app-l-skip 4 \
   --leaf-log-blowup 1 \
   --internal-log-blowup 2 \
-  --root-log-blowup 3 \
   --max-segment-length $MAX_SEGMENT_LENGTH \
-  --segment-max-cells $SEGMENT_MAX_CELLS \
-  --num-children-leaf 1 \
-  --num-children-internal 3 \
   --apc-cache-dir apc-cache \
   --apc-setup-name ${APC_SETUP_NAME}_${APC}_${APC_SKIP}_${PGO_TYPE}_${PGO_BLOCK_NUMBERS_ESCAPED} \
   --apc "$APC" \

@@ -19,6 +19,7 @@ workspace = true
 
 [features]
 default = ["openvm-reth-benchmark/default"]
+parallel = ["openvm-reth-benchmark/parallel"]
 metrics = ["openvm-reth-benchmark/metrics"]
 evm-verify = ["openvm-reth-benchmark/evm-verify"]
 perf-metrics = ["openvm-reth-benchmark/perf-metrics"]

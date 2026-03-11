@@ -43,15 +43,13 @@ openvm-bigint-circuit = { workspace = true }
 openvm-ecc-circuit = { workspace = true }
 openvm-pairing-circuit = { workspace = true }
 openvm-circuit = { workspace = true }
-openvm-native-circuit = { workspace = true }
-openvm-native-recursion = { workspace = true }
-openvm-native-compiler = { workspace = true }
-openvm-benchmarks-prove = { workspace = true, features = ["parallel"] }
 openvm-stark-sdk = { workspace = true }
-openvm-sdk = { workspace = true }
+sdk-v2 = { workspace = true }
+openvm-sdk-config = { workspace = true }
 openvm-cuda-backend = { workspace = true, optional = true }
 derive_more.workspace = true
 toml.workspace = true
+tokio.workspace = true
 
 # halo2
 halo2-axiom = { version = "0.5.0", default-features = false, optional = true }
@@ -66,21 +64,21 @@ powdr-openvm-riscv-hints-circuit = { workspace = true }
 
 [features]
 default = ["mimalloc", "metrics"]
-metrics = ["openvm-benchmarks-prove/metrics", "powdr-openvm-riscv/metrics"]
-tco = ["openvm-sdk/tco", "powdr-openvm-riscv/tco"]
-aot = ["openvm-sdk/aot", "powdr-openvm-riscv/aot"]
-evm-prove = ["openvm-sdk/evm-prove", "halo2-axiom"]
-evm-verify = ["evm-prove", "openvm-sdk/evm-verify", "halo2-axiom"]
-perf-metrics = ["openvm-sdk/perf-metrics", "openvm-benchmarks-prove/perf-metrics"]
-mimalloc = ["openvm-benchmarks-prove/mimalloc"]
-jemalloc = ["openvm-benchmarks-prove/jemalloc"]
-nightly-features = ["openvm-benchmarks-prove/nightly-features"]
+parallel = ["sdk-v2/parallel"]
+metrics = ["sdk-v2/metrics", "powdr-openvm-riscv/metrics"]
+tco = ["sdk-v2/tco", "powdr-openvm-riscv/tco"]
+aot = ["sdk-v2/aot", "powdr-openvm-riscv/aot"]
+evm-prove = ["halo2-axiom"]
+evm-verify = ["evm-prove", "halo2-axiom"]
+perf-metrics = ["sdk-v2/perf-metrics"]
+mimalloc = ["sdk-v2/mimalloc"]
+jemalloc = ["sdk-v2/jemalloc"]
+nightly-features = []
 # x86 only:
 halo2-asm = ["halo2-axiom?/asm"]
 cuda = [
-    "openvm-native-circuit/cuda",
-    "openvm-sdk/cuda",
     "powdr-openvm-riscv/cuda",
+    "sdk-v2/cuda",
     "dep:openvm-cuda-backend",
 ]
-unprotected = ["openvm-sdk/unprotected"]
+unprotected = ["sdk-v2/unprotected"]

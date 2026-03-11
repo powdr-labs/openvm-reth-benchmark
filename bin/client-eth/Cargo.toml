@@ -1,4 +1,6 @@
 [workspace]
+resolver = "2"
+
 [package]
 name = "openvm-client-eth"
 description = "OpenVM Reth Guest Program"
@@ -9,12 +11,12 @@ edition = "2021"
 # workspace
 openvm-client-executor = { path = "../../crates/executor/client", features = ["openvm"] }
 
-# openvm
-openvm = { git = "https://github.com/openvm-org/openvm.git", branch = "main", features = [
+# openvm (v2 from powdr fork)
+openvm = { git = "https://github.com/powdr-labs/openvm.git", branch = "v2-powdr", features = [
     "std",
 ] }
-openvm-algebra-guest = { git = "https://github.com/openvm-org/openvm.git", branch = "main" }
-openvm-ecc-guest = { git = "https://github.com/openvm-org/openvm.git", branch = "main" }
+openvm-algebra-guest = { git = "https://github.com/powdr-labs/openvm.git", branch = "v2-powdr" }
+openvm-ecc-guest = { git = "https://github.com/powdr-labs/openvm.git", branch = "v2-powdr" }
 
 # Statically turns off logging
 log = { version = "0.4", features = ["max_level_off", "release_max_level_off"] }
@@ -36,3 +38,36 @@ strip = false
 inherits = "release"
 debug = 2
 strip = false
+
+# Redirect all transitive openvm deps from the root workspace to the powdr v2 fork
+[patch."https://github.com/openvm-org/openvm.git"]
+# Core
+openvm = { git = "https://github.com/powdr-labs/openvm.git", branch = "v2-powdr" }
+openvm-platform = { git = "https://github.com/powdr-labs/openvm.git", branch = "v2-powdr" }
+openvm-custom-insn = { git = "https://github.com/powdr-labs/openvm.git", branch = "v2-powdr" }
+openvm-rv32im-guest = { git = "https://github.com/powdr-labs/openvm.git", branch = "v2-powdr" }
+
+# Algebra
+openvm-algebra-guest = { git = "https://github.com/powdr-labs/openvm.git", branch = "v2-powdr" }
+openvm-algebra-moduli-macros = { git = "https://github.com/powdr-labs/openvm.git", branch = "v2-powdr" }
+openvm-algebra-complex-macros = { git = "https://github.com/powdr-labs/openvm.git", branch = "v2-powdr" }
+
+# ECC
+openvm-ecc-guest = { git = "https://github.com/powdr-labs/openvm.git", branch = "v2-powdr" }
+openvm-ecc-sw-macros = { git = "https://github.com/powdr-labs/openvm.git", branch = "v2-powdr" }
+
+# Keccak256
+openvm-keccak256 = { git = "https://github.com/powdr-labs/openvm.git", branch = "v2-powdr" }
+openvm-keccak256-guest = { git = "https://github.com/powdr-labs/openvm.git", branch = "v2-powdr" }
+
+# SHA2
+openvm-sha2 = { git = "https://github.com/powdr-labs/openvm.git", branch = "v2-powdr" }
+openvm-sha2-guest = { git = "https://github.com/powdr-labs/openvm.git", branch = "v2-powdr" }
+
+# Pairing
+openvm-pairing = { git = "https://github.com/powdr-labs/openvm.git", branch = "v2-powdr" }
+openvm-pairing-guest = { git = "https://github.com/powdr-labs/openvm.git", branch = "v2-powdr" }
+
+# k256/p256 (package names are k256/p256 in openvm repo)
+k256 = { git = "https://github.com/powdr-labs/openvm.git", branch = "v2-powdr" }
+p256 = { git = "https://github.com/powdr-labs/openvm.git", branch = "v2-powdr" }

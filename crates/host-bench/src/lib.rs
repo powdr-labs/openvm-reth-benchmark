@@ -5,31 +5,14 @@ use alloy_provider::RootProvider;
 use alloy_rpc_client::RpcClient;
 use alloy_transport::layers::RetryBackoffLayer;
 use clap::Parser;
-use openvm_benchmarks_prove::util::BenchmarkCli;
-use openvm_circuit::{
-    arch::{execution_mode::Segment, *},
-    openvm_stark_sdk::{
-        bench::run_with_metric_collection, openvm_stark_backend::p3_field::PrimeField32,
-    },
-};
 use openvm_client_executor::{
     io::ClientExecutorInput, ChainVariant, ClientExecutor, CHAIN_ID_ETH_MAINNET,
 };
 use openvm_host_executor::HostExecutor;
-pub use openvm_native_circuit::NativeConfig;
-use openvm_native_circuit::NativeCpuBuilder;
-
-#[cfg(feature = "cuda")]
-pub use openvm_cuda_backend::engine::GpuBabyBearPoseidon2Engine;
-use openvm_sdk::{
-    config::{AppConfig, SdkVmConfig},
-    keygen::{AggProvingKey, AppProvingKey},
-    prover::{verify_app_proof, vm::new_local_prover},
-    types::VersionedVmStarkProof,
-    DefaultStarkEngine, GenericSdk, StdIn,
-};
+use openvm_sdk_config::SdkVmConfig;
 use openvm_stark_sdk::{
-    config::baby_bear_poseidon2::BabyBearPoseidon2Engine, engine::StarkFriEngine,
+    bench::run_with_metric_collection,
+    config::baby_bear_poseidon2::BabyBearPoseidon2CpuEngine,
 };
 use openvm_transpiler::{elf::Elf, openvm_platform::memory::MEM_SIZE};
 use powdr_autoprecompiles::PgoType;
@@ -39,7 +22,6 @@ use powdr_openvm::PowdrSdkCpu;
 use powdr_openvm::PowdrSdkGpu;
 use powdr_openvm::{
     extraction_utils::OriginalVmConfig, CompiledProgram, OriginalCompiledProgram,
-    SpecializedConfig, SpecializedConfigCpuBuilder,
 };
 #[cfg(feature = "cuda")]
 use powdr_openvm_riscv::ExtendedVmConfigGpuBuilder;
@@ -47,6 +29,14 @@ use powdr_openvm_riscv::{ExtendedVmConfig, ExtendedVmConfigCpuBuilder, RiscvISA}
 
 use powdr_openvm_riscv_hints_circuit::HintsExtension;
 pub use reth_primitives;
+use sdk_v2::{
+    config::{
+        default_app_params, default_internal_params, default_leaf_params,
+        AggregationSystemParams, AppConfig, DEFAULT_APP_LOG_BLOWUP, DEFAULT_APP_L_SKIP,
+        DEFAULT_INTERNAL_LOG_BLOWUP, DEFAULT_LEAF_LOG_BLOWUP,
+    },
+    GenericSdk, StdIn,
+};
 use serde::{Deserialize, Serialize};
 use serde_json::json;
 use std::{
@@ -61,6 +51,8 @@ use cli::ProviderArgs;
 
 use crate::cli::ProviderConfig;
 
+pub const DEFAULT_LOG_STACKED_HEIGHT: usize = 24;
+
 /// Enum representing the execution mode of the host executable.
 #[derive(Debug, Clone, clap::ValueEnum)]
 pub enum BenchMode {
@@ -68,23 +60,14 @@ pub enum BenchMode {
     ExecuteHost,
     /// Execute the VM without generating a proof.
     Execute,
-    /// Execute the VM with metering to get segments information.
-    ExecuteMetered,
-    /// Execute, generate trace, and check constraints and bus interactions without proving.
-    ProveMock,
     /// Generate sequence of app proofs for continuation segments.
     ProveApp,
     /// Generate a full end-to-end STARK proof with aggregation.
     ProveStark,
-    /// Generate a full end-to-end halo2 proof for EVM verifier.
-    #[cfg(feature = "evm-verify")]
-    ProveEvm,
     /// Generate input file only.
     MakeInput,
     /// Compile with apcs, no execution.
     Compile,
-    /// Generate fixtures file for futher benchmarking.
-    GenerateFixtures,
 }
 
 impl std::fmt::Display for BenchMode {
@@ -92,18 +75,43 @@ impl std::fmt::Display for BenchMode {
         match self {
             Self::ExecuteHost => write!(f, "execute_host"),
             Self::Execute => write!(f, "execute"),
-            Self::ExecuteMetered => write!(f, "execute_metered"),
-            Self::ProveMock => write!(f, "prove_mock"),
             Self::ProveApp => write!(f, "prove_app"),
             Self::ProveStark => write!(f, "prove_stark"),
-            #[cfg(feature = "evm-verify")]
-            Self::ProveEvm => write!(f, "prove_evm"),
             Self::MakeInput => write!(f, "make_input"),
             Self::Compile => write!(f, "compile"),
-            Self::GenerateFixtures => write!(f, "generate_fixtures"),
         }
     }
 }
+
+/// CLI for benchmark configuration.
+#[derive(Parser, Debug, Clone)]
+#[command(allow_external_subcommands = true)]
+pub struct BenchmarkCli {
+    /// Application level log blowup
+    #[arg(long, default_value_t = DEFAULT_APP_LOG_BLOWUP)]
+    pub app_log_blowup: usize,
+
+    /// Log of univariate skip domain size
+    #[arg(long, default_value_t = DEFAULT_APP_L_SKIP)]
+    pub app_l_skip: usize,
+
+    /// Aggregation (leaf) level log blowup
+    #[arg(long, default_value_t = DEFAULT_LEAF_LOG_BLOWUP)]
+    pub leaf_log_blowup: usize,
+
+    /// Internal level log blowup
+    #[arg(long, default_value_t = DEFAULT_INTERNAL_LOG_BLOWUP)]
+    pub internal_log_blowup: usize,
+
+    /// Max trace height per chip in segment for continuations
+    #[arg(long, alias = "max_segment_length")]
+    pub max_segment_length: Option<u32>,
+
+    /// GPU memory soft limit for segmentation
+    #[arg(long)]
+    pub segment_max_memory: Option<usize>,
+}
+
 /// The arguments for the host executable.
 #[derive(Debug, Parser)]
 pub struct HostArgs {
@@ -165,24 +173,12 @@ pub struct HostArgs {
     #[arg(long)]
     pub output_dir: Option<PathBuf>,
 
-    /// If specified, loads the app proving key from this path.
-    #[arg(long)]
-    pub app_pk_path: Option<PathBuf>,
-
-    /// If specified, loads the agg proving key from this path.
-    #[arg(long)]
-    pub agg_pk_path: Option<PathBuf>,
-
     #[arg(long, default_value_t = false)]
     pub skip_comparison: bool,
 }
 
 pub fn reth_vm_config(app_log_blowup: usize) -> ExtendedVmConfig {
-    let mut config = toml::from_str::<AppConfig<SdkVmConfig>>(include_str!(
-        "../../../bin/client-eth/openvm.toml"
-    ))
-    .unwrap()
-    .app_vm_config;
+    let mut config = SdkVmConfig::standard();
     config.system.config = config
         .system
         .config
@@ -197,11 +193,10 @@ pub const RETH_DEFAULT_LEAF_LOG_BLOWUP: usize = 1;
 const PGO_CHAIN_ID: u64 = CHAIN_ID_ETH_MAINNET;
 const APP_LOG_BLOWUP: usize = 1;
 
+/// Cached APC compilation output.
 #[derive(Serialize, Deserialize)]
 pub struct PrecomputedProverData {
     program: CompiledProgram<RiscvISA>,
-    app_pk: AppProvingKey<SpecializedConfig<RiscvISA>>,
-    agg_pk: AggProvingKey,
 }
 
 async fn get_client_input(
@@ -255,19 +250,14 @@ async fn get_client_input(
 }
 
 /// Complete the host arguments with defaults
-pub fn complete_args(mut args: HostArgs) -> HostArgs {
-    let app_log_blowup = args.benchmark.app_log_blowup.unwrap_or(RETH_DEFAULT_APP_LOG_BLOWUP);
+pub fn complete_args(args: HostArgs) -> HostArgs {
+    let app_log_blowup = args.benchmark.app_log_blowup;
     assert_eq!(app_log_blowup, APP_LOG_BLOWUP, "App log blowup must be {RETH_DEFAULT_APP_LOG_BLOWUP} because it must match the one used when compiling this benchmark");
-    args.benchmark.app_log_blowup = Some(app_log_blowup);
-    let leaf_log_blowup = args.benchmark.leaf_log_blowup.unwrap_or(RETH_DEFAULT_LEAF_LOG_BLOWUP);
-    args.benchmark.leaf_log_blowup = Some(leaf_log_blowup);
-
     args
 }
 
-/// Precompute the prover data, in particular the specialized config taking into account APCs, as
-/// well as associated proving keys. If the data is already present in the cache, deserialize it and
-/// return it.
+/// Precompute the APC-specialized program. If the data is already present in the cache, deserialize
+/// it and return it.
 pub async fn precompute_prover_data(
     args: &HostArgs,
     openvm_client_eth_elf: &[u8],
@@ -310,15 +300,17 @@ pub async fn precompute_prover_data(
         pgo_stdins.push(pgo_stdin);
     }
 
-    let app_log_blowup = args.benchmark.app_log_blowup.unwrap();
+    let app_log_blowup = args.benchmark.app_log_blowup;
+    let app_l_skip = args.benchmark.app_l_skip;
 
     let vm_config = reth_vm_config(app_log_blowup);
-    let app_config = args.benchmark.app_config(vm_config.clone());
 
-    let sdk: GenericSdk<BabyBearPoseidon2Engine, ExtendedVmConfigCpuBuilder, NativeCpuBuilder> =
-        GenericSdk::new(app_config.clone())?
-            .with_agg_config(args.benchmark.agg_config())
-            .with_agg_tree_config(args.benchmark.agg_tree_config);
+    let app_n_stack = DEFAULT_LOG_STACKED_HEIGHT - app_l_skip;
+    let system_params = default_app_params(app_log_blowup, app_l_skip, app_n_stack);
+    let app_config = AppConfig::new(vm_config.clone(), system_params);
+
+    let sdk: GenericSdk<BabyBearPoseidon2CpuEngine, ExtendedVmConfigCpuBuilder> =
+        GenericSdk::new(app_config, AggregationSystemParams::default())?;
     let elf = Elf::decode(openvm_client_eth_elf, MEM_SIZE as u32)?;
     let exe = sdk.convert_to_exe(elf.clone())?;
     let elf = powdr_riscv_elf::load_elf_from_buffer(openvm_client_eth_elf);
@@ -331,21 +323,7 @@ pub async fn precompute_prover_data(
         pgo_stdins,
     );
 
-    // Precompute proving keys
-    let specialized_sdk: GenericSdk<
-        BabyBearPoseidon2Engine,
-        SpecializedConfigCpuBuilder<RiscvISA>,
-        NativeCpuBuilder,
-    > = GenericSdk::new(args.benchmark.app_config(program.vm_config.clone()))?
-        .with_agg_config(args.benchmark.agg_config())
-        .with_agg_tree_config(args.benchmark.agg_tree_config);
-
-    tracing::info!("Run app keygen");
-    let (app_pk, _) = specialized_sdk.app_keygen();
-    tracing::info!("Run agg keygen");
-    let (agg_pk, _) = specialized_sdk.agg_keygen().unwrap();
-
-    let setup = PrecomputedProverData { program, app_pk, agg_pk };
+    let setup = PrecomputedProverData { program };
 
     tracing::info!("Saving prover data to cache at {}", cache_file_path.display());
     std::fs::create_dir_all(&args.apc_cache_dir).unwrap();
@@ -372,7 +350,7 @@ pub async fn run_reth_benchmark(
     }
 
     // Parse the command line arguments.
-    let mut args = args;
+    let args = args;
     let provider_config = args.provider.into_provider().await?;
 
     match provider_config.chain_id {
@@ -404,34 +382,31 @@ pub async fn run_reth_benchmark(
         return Ok(());
     }
 
-    let app_log_blowup = args.benchmark.app_log_blowup.unwrap();
-
-    let vm_config = reth_vm_config(app_log_blowup);
-    let app_config = args.benchmark.app_config(vm_config.clone());
+    let app_log_blowup = args.benchmark.app_log_blowup;
+    let app_l_skip = args.benchmark.app_l_skip;
+    let leaf_log_blowup = args.benchmark.leaf_log_blowup;
+    let internal_log_blowup = args.benchmark.internal_log_blowup;
 
     let elf = Elf::decode(openvm_client_eth_elf, MEM_SIZE as u32)?;
 
-    let PrecomputedProverData { program: CompiledProgram { exe, vm_config }, app_pk, agg_pk } =
-        setup;
+    let PrecomputedProverData { program: CompiledProgram { exe, vm_config } } = setup;
+
+    let app_n_stack = DEFAULT_LOG_STACKED_HEIGHT - app_l_skip;
+    let system_params = default_app_params(app_log_blowup, app_l_skip, app_n_stack);
+    let app_config = AppConfig::new(vm_config.clone(), system_params);
+    let agg_params = AggregationSystemParams {
+        leaf: default_leaf_params(leaf_log_blowup),
+        internal: default_internal_params(internal_log_blowup),
+        compression: None,
+    };
 
     // Create an SDK based on the `SpecializedConfig` we generated
     #[cfg(feature = "cuda")]
-    let generic_sdk = PowdrSdkGpu::new(args.benchmark.app_config(vm_config.clone()))?;
+    let specialized_sdk = PowdrSdkGpu::new(app_config, agg_params)?;
     #[cfg(not(feature = "cuda"))]
-    let generic_sdk = PowdrSdkCpu::new(args.benchmark.app_config(vm_config.clone()))?;
-    let specialized_sdk = generic_sdk
-        .with_agg_config(args.benchmark.agg_config())
-        .with_agg_tree_config(args.benchmark.agg_tree_config);
-
-    // Load the precomputed proving keys
-    tracing::info!("Load app pk");
-    specialized_sdk.set_app_pk(app_pk).map_err(|_| ()).unwrap();
-    tracing::info!("Load agg pk");
-    specialized_sdk.set_agg_pk(agg_pk).map_err(|_| ()).unwrap();
+    let specialized_sdk = PowdrSdkCpu::new(app_config, agg_params)?;
 
     let program_name = format!("reth.{}.block_{}", args.mode, args.block_number);
-    // NOTE: args.benchmark.app_config resets SegmentationLimits if max_segment_length is set
-    args.benchmark.max_segment_length = None;
 
     // `prover` can be called over both `elf` and `exe`.
     // We had a bug before where `prover(elf)` was called and silently didn't use any apcs.
@@ -477,142 +452,21 @@ pub async fn run_reth_benchmark(
                         println!("Compiled program with APCs");
                     }
                     BenchMode::Execute => {}
-                    BenchMode::ExecuteMetered => {
-                        let engine = DefaultStarkEngine::new(app_config.app_fri_params.fri_params);
-                        let (vm, _) = VirtualMachine::new_with_keygen(
-                            engine,
-                            #[cfg(feature = "cuda")]
-                            ExtendedVmConfigGpuBuilder,
-                            #[cfg(not(feature = "cuda"))]
-                            ExtendedVmConfigCpuBuilder,
-                            app_config.app_vm_config,
-                        )?;
-                        let executor_idx_to_air_idx = vm.executor_idx_to_air_idx();
-                        let interpreter =
-                            vm.executor().metered_instance(&exe, &executor_idx_to_air_idx)?;
-                        let metered_ctx = vm.build_metered_ctx(&exe);
-                        let (segments, _) =
-                            info_span!("interpreter.execute_metered", group = program_name)
-                                .in_scope(|| interpreter.execute_metered(stdin, metered_ctx))?;
-                        println!("Number of segments: {}", segments.len());
-                    }
-                    BenchMode::ProveMock => {
-                        // Build owned vm instance, so we can mutate it later
-                        let vm_builder = specialized_sdk.app_vm_builder().clone();
-                        let vm_pk = specialized_sdk.app_pk().app_vm_pk.clone();
-                        let exe = specialized_sdk.convert_to_exe(exe.clone())?;
-                        let mut vm_instance: VmInstance<_, _> =
-                            new_local_prover(vm_builder, &vm_pk, exe.clone())?;
-
-                        vm_instance.reset_state(stdin.clone());
-                        let metered_ctx = vm_instance.vm.build_metered_ctx(&exe);
-                        let metered_interpreter =
-                            vm_instance.vm.metered_interpreter(vm_instance.exe())?;
-                        let (segments, _) =
-                            metered_interpreter.execute_metered(stdin.clone(), metered_ctx)?;
-                        let mut state = vm_instance.state_mut().take();
-
-                        // Get reusable inputs for `debug_proving_ctx`, the mock prover API from
-                        // OVM.
-                        let vm = &mut vm_instance.vm;
-                        let air_inv = vm.config().create_airs().unwrap();
-                        #[cfg(feature = "cuda")]
-                        let pk = air_inv.keygen::<GpuBabyBearPoseidon2Engine>(&vm.engine);
-                        #[cfg(not(feature = "cuda"))]
-                        let pk = air_inv.keygen::<BabyBearPoseidon2Engine>(&vm.engine);
-
-                        for (seg_idx, segment) in segments.into_iter().enumerate() {
-                            let _segment_span =
-                                info_span!("prove_segment", segment = seg_idx).entered();
-                            // We need a separate span so the metric label includes "segment" from
-                            // _segment_span
-                            let _prove_span = info_span!("total_proof").entered();
-                            let Segment { instret_start: _, num_insns, trace_heights } = segment;
-                            let from_state = Option::take(&mut state).unwrap();
-                            vm.transport_init_memory_to_device(&from_state.memory);
-                            let PreflightExecutionOutput {
-                                system_records,
-                                record_arenas,
-                                to_state,
-                            } = vm.execute_preflight(
-                                &mut vm_instance.interpreter,
-                                from_state,
-                                Some(num_insns),
-                                &trace_heights,
-                            )?;
-                            state = Some(to_state);
-
-                            // Generate proving context for each segment
-                            let ctx = vm.generate_proving_ctx(system_records, record_arenas)?;
-
-                            // Run the mock prover for each segment
-                            debug_proving_ctx(vm, &pk, &ctx);
-                        }
-                    }
                     BenchMode::ProveApp => {
-                        let mut prover =
-                            specialized_sdk.app_prover(exe)?.with_program_name(program_name);
-                        let (_, app_vk) = specialized_sdk.app_keygen();
+                        let mut prover = specialized_sdk
+                            .app_prover(exe)?
+                            .with_program_name(program_name);
                         let proof = prover.prove(stdin)?;
-                        verify_app_proof(&app_vk, &proof)?;
+                        tracing::info!(
+                            "App proof generated with {} segments",
+                            proof.per_segment.len()
+                        );
                     }
                     BenchMode::ProveStark => {
-                        let mut prover =
-                            specialized_sdk.prover(exe)?.with_program_name(program_name);
-                        let proof = prover.prove(stdin)?;
-                        let block_hash = proof
-                            .user_public_values
-                            .iter()
-                            .map(|pv| pv.as_canonical_u32() as u8)
-                            .collect::<Vec<u8>>();
-                        println!("block_hash (prove_stark): {}", ToHexExt::encode_hex(&block_hash));
-
-                        if let Some(output_dir) = args.output_dir.as_ref() {
-                            let versioned_proof = VersionedVmStarkProof::new(proof)?;
-                            let json = serde_json::to_vec_pretty(&versioned_proof)?;
-                            fs::write(output_dir.join("proof.json"), json)?;
-                            println!("wrote proof json to {}", output_dir.display());
-                        }
-                    }
-                    #[cfg(feature = "evm-verify")]
-                    BenchMode::ProveEvm => {
-                        let mut prover =
-                            specialized_sdk.evm_prover(exe)?.with_program_name(program_name);
-                        let halo2_pk = specialized_sdk.halo2_pk();
-                        tracing::info!(
-                            "halo2_outer_k: {}",
-                            halo2_pk.verifier.pinning.metadata.config_params.k
-                        );
-                        tracing::info!(
-                            "halo2_wrapper_k: {}",
-                            halo2_pk.wrapper.pinning.metadata.config_params.k
-                        );
-                        let proof = prover.prove_evm(stdin)?;
-                        let block_hash = &proof.user_public_values;
-                        println!("block_hash (prove_evm): {}", ToHexExt::encode_hex(block_hash));
-                    }
-                    BenchMode::GenerateFixtures => {
-                        let mut prover =
-                            specialized_sdk.prover(exe)?.with_program_name(program_name);
-                        let app_proof = prover.app_prover.prove(stdin)?;
-                        let leaf_proofs = prover.agg_prover.generate_leaf_proofs(&app_proof)?;
-                        let fixture_path = args.fixtures_path.unwrap();
-
-                        let mut app_proof_path = fixture_path.clone();
-                        app_proof_path.push("app_proof.bitcode");
-                        fs::write(app_proof_path, bitcode::serialize(&app_proof)?)?;
-
-                        let mut leaf_proofs_path = fixture_path.clone();
-                        leaf_proofs_path.push("leaf_proofs.bitcode");
-                        fs::write(leaf_proofs_path, bitcode::serialize(&leaf_proofs)?)?;
-
-                        let mut app_pk_path = fixture_path.clone();
-                        app_pk_path.push("app_pk.bitcode");
-                        fs::write(app_pk_path, bitcode::serialize(specialized_sdk.app_pk())?)?;
-
-                        let mut agg_pk_path = fixture_path.clone();
-                        agg_pk_path.push("agg_pk.bitcode");
-                        fs::write(agg_pk_path, bitcode::serialize(specialized_sdk.agg_pk())?)?;
+                        let mut prover = specialized_sdk.prover(exe)?;
+                        prover.app_prover.set_program_name(program_name);
+                        let _proof = prover.prove(stdin)?;
+                        tracing::info!("STARK proof generated");
                     }
                     _ => {
                         // This case is handled earlier and should not reach here
@@ -652,11 +506,13 @@ fn try_load_input_from_cache(
 
 mod powdr {
 
-    use openvm_sdk::{
-        config::{AppConfig, DEFAULT_APP_LOG_BLOWUP},
+    use sdk_v2::{
+        config::{
+            default_app_params, AggregationSystemParams, AppConfig, DEFAULT_APP_LOG_BLOWUP,
+            DEFAULT_APP_L_SKIP,
+        },
         StdIn,
     };
-    use openvm_stark_sdk::config::FriParameters;
     use powdr_autoprecompiles::{
         empirical_constraints::EmpiricalConstraints, execution_profile::execution_profile, PgoType,
         PowdrConfig,
@@ -668,14 +524,9 @@ mod powdr {
     use powdr_openvm_riscv::{compile_exe, DegreeBound, PgoConfig, RiscvISA};
     use std::fs;
 
+    use super::DEFAULT_LOG_STACKED_HEIGHT;
+
     /// This function is used to generate the specialized program for the Powdr APC.
-    /// It takes:
-    /// - `original_program`: The original program, including the original vm config.
-    /// - `apc`: The number of apcs to generate
-    /// - `apc_skip`: The number of apcs to skip when selecting. Used for debugging.
-    /// - `pgo_type`: The PGO strategy to use when choosing the blocks to accelerate.
-    /// - `pgo_stdin`: The standard inputs to the program used for PGO data generation to choose
-    ///   which basic blocks to accelerate.
     pub fn apc(
         original_program: OriginalCompiledProgram<RiscvISA>,
         apc: usize,
@@ -684,16 +535,21 @@ mod powdr {
         pgo_stdin: Vec<StdIn>,
     ) -> CompiledProgram<RiscvISA> {
         // Set app configuration
-        let app_fri_params =
-            FriParameters::standard_with_100_bits_conjectured_security(DEFAULT_APP_LOG_BLOWUP);
-        let app_config = AppConfig::new(app_fri_params, original_program.vm_config.config.clone());
+        let app_n_stack = DEFAULT_LOG_STACKED_HEIGHT - DEFAULT_APP_L_SKIP;
+        let system_params =
+            default_app_params(DEFAULT_APP_LOG_BLOWUP, DEFAULT_APP_L_SKIP, app_n_stack);
+        let app_config = AppConfig::new(original_program.vm_config.config.clone(), system_params);
 
         // prepare for execute
-        let sdk = PowdrExecutionProfileSdkCpu::<RiscvISA>::new(app_config).unwrap();
+        let sdk = PowdrExecutionProfileSdkCpu::<RiscvISA>::new(
+            app_config,
+            AggregationSystemParams::default(),
+        )
+        .unwrap();
 
         let execute = || {
             for stdin in &pgo_stdin {
-                sdk.execute_interpreted(original_program.exe.clone(), stdin.clone()).unwrap();
+                sdk.execute(original_program.exe.clone(), stdin.clone()).unwrap();
             }
         };
 

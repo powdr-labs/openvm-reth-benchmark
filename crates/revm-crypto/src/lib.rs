@@ -14,6 +14,8 @@ use openvm_ecc_guest::{
     AffinePoint, Group,
 };
 use openvm_k256::ecdsa::{RecoveryId, Signature, VerifyingKey};
+#[cfg(not(target_os = "zkvm"))]
+use openvm_sha2::Digest;
 use openvm_keccak256::keccak256;
 use openvm_kzg::{Bytes32, Bytes48, KzgProof};
 #[allow(unused_imports, clippy::single_component_path_imports)]
@@ -52,6 +54,16 @@ const BN_SCALAR_LEN: usize = 32;
 struct OpenVmK256Provider;
 
 impl CryptoProvider for OpenVmK256Provider {
+    fn verify_and_compute_signer_unchecked(
+        &self,
+        _pubkey: &[u8; 65],
+        _sig: &[u8; 64],
+        _msg: &[u8; 32],
+    ) -> Result<Address, RecoveryError> {
+        // TODO: implement proper signature verification against known public key
+        Err(RecoveryError::new())
+    }
+
     fn recover_signer_unchecked(
         &self,
         sig: &[u8; 65],
@@ -97,7 +109,14 @@ struct OpenVmCrypto;
 impl Crypto for OpenVmCrypto {
     /// Custom SHA-256 implementation with openvm optimization
     fn sha256(&self, input: &[u8]) -> [u8; 32] {
-        openvm_sha2::sha256(input)
+        #[cfg(target_os = "zkvm")]
+        {
+            openvm_sha2::Sha256::digest(input)
+        }
+        #[cfg(not(target_os = "zkvm"))]
+        {
+            <openvm_sha2::Sha256 as Digest>::digest(input).into()
+        }
     }
 
     /// Custom BN254 G1 addition with openvm optimization
